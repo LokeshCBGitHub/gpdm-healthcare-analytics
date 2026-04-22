@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Databases (included for prod deployment)
+# *.db
+# *.sqlite
+# *.sqlite3
+
+# Certificates
+certs/
+*.pem
+*.key
+*.crt
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cache / learned data
+learned_data/
+*.pkl
+*.pickle
+*.joblib
+
+# Old versions (keep in repo but ignore new additions)
+# scripts/old_versions/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+not_needed/

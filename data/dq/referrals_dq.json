@@ -1,0 +1,149 @@
+{
+  "table_name": "referrals",
+  "file_name": "referrals.csv",
+  "total_rows": 1500,
+  "total_columns": 13,
+  "checked_at": "2026-03-31T15:16:07.542144",
+  "column_checks": {
+    "REFERRAL_ID": {
+      "field_type": "referral_id",
+      "completeness": 100.0,
+      "uniqueness": 99.93,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 99.98,
+      "issues": [
+        "Uniqueness issues: 99.93% unique"
+      ]
+    },
+    "MEMBER_ID": {
+      "field_type": "member_id",
+      "completeness": 100.0,
+      "uniqueness": 93.53,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 98.06,
+      "issues": [
+        "Uniqueness issues: 93.53% unique"
+      ]
+    },
+    "REFERRING_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 62.8,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 88.84,
+      "issues": []
+    },
+    "REFERRED_TO_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 61.33,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 88.4,
+      "issues": []
+    },
+    "REFERRAL_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "REFERRAL_REASON": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "URGENCY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "REFERRAL_TYPE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "STATUS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "APPOINTMENT_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "SPECIALTY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "AUTHORIZATION_NUMBER": {
+      "field_type": null,
+      "completeness": 69.33,
+      "uniqueness": 100.0,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 87.73,
+      "issues": [
+        "Low completeness: 69.33% non-null"
+      ]
+    },
+    "KP_REGION": {
+      "field_type": "kp_region",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "REFERRAL_ID": 99.98,
+    "MEMBER_ID": 98.06,
+    "REFERRING_NPI": 88.84,
+    "REFERRED_TO_NPI": 88.4,
+    "REFERRAL_DATE": 100.0,
+    "REFERRAL_REASON": 100.0,
+    "URGENCY": 100.0,
+    "REFERRAL_TYPE": 100.0,
+    "STATUS": 100.0,
+    "APPOINTMENT_DATE": 100.0,
+    "SPECIALTY": 100.0,
+    "AUTHORIZATION_NUMBER": 87.73,
+    "KP_REGION": 100.0
+  },
+  "dq_score": 97.15,
+  "dq_grade": "A"
+}

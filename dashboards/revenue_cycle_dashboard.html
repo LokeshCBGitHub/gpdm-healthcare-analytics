@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Revenue Cycle Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Revenue Cycle Analytics</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 10 data queries • April 21, 2026</div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For Your Organization</h3>
+    <div class="insight-item">Loss Ratio: All 6 entities performing well (avg 34.6%, benchmark good: 85%). Network-wide strong performance.</div><div class="insight-item">Not medically necessary: Avg Per Claim (7,180) is 4% lower than the network average (7,473).</div><div class="insight-item">NW: Total Claims (1,773) is 5% lower than the network average (1,875). Low volume could indicate member disengagement or access barriers.</div><div class="insight-item">NW: Paid First Pass (1,057) is 7% lower than the network average (1,133).</div><div class="insight-item">GA: Rework Count (780) is 5% higher than the network average (742).</div><div class="insight-item">PPO: Pmpm (3,780) is 3% lower than the network average (3,881).</div><div class="insight-item">18-29: Avg Chronic (3) is 3% higher than the network average (3). Members managing multiple conditions need coordinated care. Consider disease management programs and care navigators.</div><div class="insight-item">Cross-dimensional correlation: Avg Days and Leakage Pct show a strong inverse relationship (r=-0.86, n=4). As Avg Days increases, Leakage Pct tends to decrease — suggesting a trade-off or compensating effect. This relationship warrants investigation — if causal, interventions on one metric could move the other.</div>
+</div><div class="section" style="background:rgba(230,126,34,0.05);border-left:4px solid #e67e22;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#e67e22;font-size:1.1rem;margin-bottom:1rem">Cross-Dimensional Analysis & Root Causes</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Relationships discovered across multiple data dimensions. These insights connect dots that single-query analysis cannot reveal.</p>
+    <div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for DME: Avg Days is unusually low (8% from average). Contributing factors: Leakage Pct is elevated (2% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for NW: Total Claims is unusually low (5% from average). Contributing factors: Paid First Pass is below average (7% from average); Rework Count is below average (4% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for 2025-11: Denied is unusually low (31% from average). Contributing factors: Billed is below average (8% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for 2025-02: Collection Rate is unusually low (11% from average). Contributing factors: Paid is below average (17% from average); Billed is below average (7% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Segment divergence in Claims: 165% spread between high (INSTITUTIONAL, PROFESSIONAL: avg 1,141.4) and low (DME, DME: avg 108.6) segments, with overall average 625.0. The aggregate number may not represent any actual entity well — consider segment-specific strategies rather than a one-size-fits-all approach.</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $4,285,829</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_20923_0').style.display=document.getElementById('method_20923_0').style.display==='none'?'block':'none'"><strong><span style="color:#002B5C;font-weight:700">&#9632;</span> Revenue Recovery — Denial Management Program</strong><br>Recover 594 denied claims — $4,285,829 total impact<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_20923_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> 40% denial reversal rate through automated workflows and appeal processes (MGMA benchmarks). $35 admin cost per denial rework.</div></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]Denial Management Program: Recover 594 denied claims — $4,285,829 total impact</div><div class="rec-item"><strong>Initiative:</strong> Clean claim rate gap: CO (58.9%) is 3.2 percentage points below HI (62.1%). Transfer billing practices from HI to underperformers. Each 1% improvement in clean claim rate reduces rework cost by ~$25/claim and accelerates payment by 5-10 days.</div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">$112.0M</div><div class="label">Total Billed</div><div class="subtitle-text">Total charges submitted | $112.0M billed</div></div><div class="kpi"><div class="value">$38.8M</div><div class="label">Total Paid</div><div class="subtitle-text">Total reimbursements | $38.8M paid to providers</div></div><div class="kpi"><div class="value">$11.2M</div><div class="label">Total Denied</div></div><div class="kpi"><div class="value">34.6</div><div class="label">Collection Rate</div></div><div class="kpi"><div class="value">9.9</div><div class="label">Denial Rate</div><div class="subtitle-text">Industry good: <5% | Average: 10% | Needs focus</div></div><div class="kpi"><div class="value">25.9</div><div class="label">Avg Processing Days</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_42748').style.display=document.getElementById('meth_42748').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_42748" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Revenue Cycle Management</strong><br>
+            <strong>Calculation:</strong> Days in A/R (avg days from claim submission to payment), denial rate, clean claim %, collection rate.<br>
+            <strong>Standard:</strong> Best-in-class: <30 days A/R, >95% clean claim, <5% denial, >95% collection.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes registration errors, coding errors, authorization issues in cycle time</li><li>Claims tracked from submission through final payment/appeal</li><li>Automation of eligibility + coding reduces cycle time</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <30 days | <strong>average:</strong> 30-45 days | <strong>concern:</strong> >60 days<br>
+            <strong>Why It Matters:</strong> Every 5-day reduction in A/R improves cash flow by 5 days worth of revenue = $2-4M for large plans.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_367514').style.display=document.getElementById('sql_367514').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_367514" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Revenue Cycle KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL)),2) as total_billed,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),2) as total_paid,
+                        ROUND(SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN CAST(BILLED_AMOUNT AS REAL) ELSE 0 END),2) as total_denied,
+                        ROUND(100.0*SUM(CAST(PAID_AMOUNT AS REAL))/SUM(CAST(BILLED_AMOUNT AS REAL)),1) as collection_rate,
+                        ROUND(100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*),1) as denial_rate,
+                        ROUND(AVG(CAST(julianday(ADJUDICATED_DATE) - julianday(SUBMITTED_DATE) AS REAL)),1) as avg_processing_days
+                    FROM CLAIMS WHERE SUBMITTED_DATE IS NOT NULL AND ADJUDICATED_DATE IS NOT NULL</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Days in A/R</h3><div class="table-container"><table><thead><tr><th>Claim Type</th><th>Claim Status</th><th>Claims</th><th>Avg Days</th></tr></thead><tbody><tr><td>DME</td><td>DENIED</td><td>82</td><td>26.80</td></tr><tr><td>PHARMACY</td><td>VOIDED</td><td>44</td><td>26.70</td></tr><tr><td>DME</td><td>PENDING</td><td>120</td><td>26.60</td></tr><tr><td>DME</td><td>VOIDED</td><td>22</td><td>26.60</td></tr><tr><td>PHARMACY</td><td>PAID</td><td>1,382</td><td>26.50</td></tr><tr><td>INSTITUTIONAL</td><td>ADJUSTED</td><td>368</td><td>26.40</td></tr><tr><td>PROFESSIONAL</td><td>APPEALED</td><td>353</td><td>26.40</td></tr><tr><td>PHARMACY</td><td>ADJUSTED</td><td>182</td><td>26.30</td></tr><tr><td>PROFESSIONAL</td><td>PAID</td><td>4,503</td><td>26.10</td></tr><tr><td>INSTITUTIONAL</td><td>PENDING</td><td>636</td><td>26.00</td></tr><tr><td>PROFESSIONAL</td><td>PENDING</td><td>1,145</td><td>26.00</td></tr><tr><td>DME</td><td>PAID</td><td>428</td><td>25.90</td></tr><tr><td>INSTITUTIONAL</td><td>APPEALED</td><td>206</td><td>25.90</td></tr><tr><td>PHARMACY</td><td>PENDING</td><td>339</td><td>25.90</td></tr><tr><td>INSTITUTIONAL</td><td>DENIED</td><td>451</td><td>25.80</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 24 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_37134').style.display=document.getElementById('meth_37134').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_37134" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Revenue Cycle Management</strong><br>
+            <strong>Calculation:</strong> Days in A/R (avg days from claim submission to payment), denial rate, clean claim %, collection rate.<br>
+            <strong>Standard:</strong> Best-in-class: <30 days A/R, >95% clean claim, <5% denial, >95% collection.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes registration errors, coding errors, authorization issues in cycle time</li><li>Claims tracked from submission through final payment/appeal</li><li>Automation of eligibility + coding reduces cycle time</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <30 days | <strong>average:</strong> 30-45 days | <strong>concern:</strong> >60 days<br>
+            <strong>Why It Matters:</strong> Every 5-day reduction in A/R improves cash flow by 5 days worth of revenue = $2-4M for large plans.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_217455').style.display=document.getElementById('sql_217455').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_217455" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Days in A/R</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT c.CLAIM_TYPE,
+                        c.CLAIM_STATUS,
+                        COUNT(*) as claims,
+                        ROUND(AVG(CAST(julianday(c.ADJUDICATED_DATE) - julianday(c.SUBMITTED_DATE) AS REAL)),1) as avg_days
+                    FROM CLAIMS c WHERE c.SUBMITTED_DATE IS NOT NULL AND c.ADJUDICATED_DATE IS NOT NULL
+                    GROUP BY c.CLAIM_TYPE, c.CLAIM_STATUS ORDER BY avg_days DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY c.CLAIM_TYPE, c.CLAIM_STATUS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 24 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Denial Recovery Analysis</h3><div class="table-container"><table><thead><tr><th>Reason</th><th>Denied Claims</th><th>Revenue At Risk</th><th>Avg Per Claim</th></tr></thead><tbody><tr><td></td><td>679</td><td>5,209,441.69</td><td>7,672.23</td></tr><tr><td>Duplicate claim</td><td>155</td><td>1,148,666.78</td><td>7,410.75</td></tr><tr><td>Pre-auth required</td><td>135</td><td>1,018,599.37</td><td>7,545.18</td></tr><tr><td>Timely filing</td><td>136</td><td>1,016,192.53</td><td>7,472.00</td></tr><tr><td>Out of network</td><td>129</td><td>985,197.57</td><td>7,637.19</td></tr><tr><td>Coding error</td><td>126</td><td>931,814.31</td><td>7,395.35</td></tr><tr><td>Not medically necessary</td><td>127</td><td>911,885.35</td><td>7,180.20</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 7 rows of 7 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_82791').style.display=document.getElementById('meth_82791').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_82791" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Claim Denial Rate</strong><br>
+            <strong>Calculation:</strong> Denied claims ÷ total claims submitted × 100%. Includes initial denials only (excludes appeals).<br>
+            <strong>Standard:</strong> CAQH Industry benchmark: 5-10% is typical. Leading plans: <5%. Poor performers: >15%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Denials by reason tracked separately (medical necessity, authorization, eligibility, coding)</li><li>Initial vs final denial rates differ (some claims appealed/overturned)</li><li>Denial rate trends tracked monthly to detect processing issues</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <5% | <strong>average:</strong> 5-10% | <strong>concern:</strong> >15%<br>
+            <strong>Why It Matters:</strong> Every 1% reduction in denial rate recovers ~$100K annually per 10,000 members.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_309172').style.display=document.getElementById('sql_309172').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_309172" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Denial Recovery Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT COALESCE(DENIAL_REASON, 'Unknown') as reason,
+                        COUNT(*) as denied_claims,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL)),2) as revenue_at_risk,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL))/COUNT(*),2) as avg_per_claim
+                    FROM CLAIMS WHERE CLAIM_STATUS = 'DENIED'
+                    GROUP BY reason ORDER BY revenue_at_risk DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY reason<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 7 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Clean Claim Rate by Region</h3><div class="chart-container"><canvas id="chart_53366" data-chart='{"type": "bar", "data": {"labels": ["HI", "NCAL", "MAS", "MID", "SCAL", "NW", "GA", "CO"], "datasets": [{"label": "Total Claims", "data": [1896.0, 1877.0, 1868.0, 1940.0, 1893.0, 1773.0, 1918.0, 1835.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Paid First Pass", "data": [1178.0, 1147.0, 1139.0, 1181.0, 1143.0, 1057.0, 1138.0, 1080.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Clean Rate", "data": [62.1, 61.1, 61.0, 60.9, 60.4, 59.6, 59.3, 58.9], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Largest region: MID (1,940 members), smallest: NW (1,773). Regional Paid First Pass ranges from 1,057 (NW) to 1,181 (MID), a spread of 124. Investigate whether variation reflects acuity differences or operational inefficiency.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_53366').style.display=document.getElementById('meth_53366').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_53366" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Clean Claim Rate</strong><br>
+            <strong>Calculation:</strong> Claims paid on first submission ÷ total claims submitted × 100%.<br>
+            <strong>Standard:</strong> Industry best-practice: >95%. NCQA/URAC accreditation requires >95%. National average: ~90%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Clean = no rejections, no requests for additional info, paid at submitted amount</li><li>Excludes claims requiring legitimate medical necessity reviews</li><li>Tracked by payer, by claim type, and by provider to identify bottlenecks</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> >95% | <strong>average:</strong> 90-95% | <strong>concern:</strong> <85%<br>
+            <strong>Why It Matters:</strong> Each rework cycle costs $30-50 in admin + provider frustration. 95%+ reduces provider appeals by 40%.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_821252').style.display=document.getElementById('sql_821252').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_821252" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Clean Claim Rate by Region</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT KP_REGION,
+                        COUNT(*) as total_claims,
+                        SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END) as paid_first_pass,
+                        ROUND(100.0*SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(*),1) as clean_rate,
+                        COUNT(*) - SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END) as rework_count
+                    FROM CLAIMS GROUP BY KP_REGION ORDER BY clean_rate DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY KP_REGION<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Revenue Leakage</h3><div class="chart-container"><canvas id="chart_65295" data-chart='{"type": "bar", "data": {"labels": ["PROFESSIONAL", "INSTITUTIONAL", "PHARMACY", "DME"], "datasets": [{"label": "Claims", "data": [7487.0, 4501.0, 2257.0, 755.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Billed", "data": [55983737.07, 33794662.43, 16559353.21, 5650344.95], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Paid", "data": [19295028.44, 11707127.17, 5923716.34, 1877991.03], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-risk age cohort: PROFESSIONAL with Billed of $56.0M vs lowest DME at $5.7M. Largest cohort: PROFESSIONAL (7,487 members). Age drives 60-80% of total cost — deploy chronic disease management for 45+ and wellness programs for younger cohorts.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_65295').style.display=document.getElementById('meth_65295').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_65295" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Revenue Cycle Management</strong><br>
+            <strong>Calculation:</strong> Days in A/R (avg days from claim submission to payment), denial rate, clean claim %, collection rate.<br>
+            <strong>Standard:</strong> Best-in-class: <30 days A/R, >95% clean claim, <5% denial, >95% collection.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes registration errors, coding errors, authorization issues in cycle time</li><li>Claims tracked from submission through final payment/appeal</li><li>Automation of eligibility + coding reduces cycle time</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <30 days | <strong>average:</strong> 30-45 days | <strong>concern:</strong> >60 days<br>
+            <strong>Why It Matters:</strong> Every 5-day reduction in A/R improves cash flow by 5 days worth of revenue = $2-4M for large plans.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_359072').style.display=document.getElementById('sql_359072').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_359072" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Revenue Leakage</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT CLAIM_TYPE,
+                        COUNT(*) as claims,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL)),2) as billed,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),2) as paid,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL)) - SUM(CAST(PAID_AMOUNT AS REAL)),2) as leakage,
+                        ROUND(100.0*(SUM(CAST(BILLED_AMOUNT AS REAL)) - SUM(CAST(PAID_AMOUNT AS REAL)))/SUM(CAST(BILLED_AMOUNT AS REAL)),1) as leakage_pct
+                    FROM CLAIMS GROUP BY CLAIM_TYPE ORDER BY leakage DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY CLAIM_TYPE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Payer Mix Analysis</h3><div class="table-container"><table><thead><tr><th>Plan Type</th><th>Members</th><th>Claims</th><th>Total Paid</th><th>Pmpm</th><th>Loss Ratio</th></tr></thead><tbody><tr><td>EPO</td><td>1,732</td><td>2,546</td><td>6,754,596.57</td><td>3,899.88</td><td>35.30</td></tr><tr><td>HDHP</td><td>1,663</td><td>2,460</td><td>6,436,850.57</td><td>3,870.63</td><td>34.80</td></tr><tr><td>HMO</td><td>1,700</td><td>2,646</td><td>6,660,951.08</td><td>3,918.21</td><td>34.10</td></tr><tr><td>Medicaid</td><td>1,628</td><td>2,478</td><td>6,287,650.25</td><td>3,862.19</td><td>33.70</td></tr><tr><td>Medicare Advantage</td><td>1,585</td><td>2,374</td><td>6,268,397.92</td><td>3,954.83</td><td>36.00</td></tr><tr><td>PPO</td><td>1,692</td><td>2,496</td><td>6,395,416.59</td><td>3,779.80</td><td>34.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 6 rows of 6 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_99419').style.display=document.getElementById('meth_99419').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_99419" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Revenue Cycle Management</strong><br>
+            <strong>Calculation:</strong> Days in A/R (avg days from claim submission to payment), denial rate, clean claim %, collection rate.<br>
+            <strong>Standard:</strong> Best-in-class: <30 days A/R, >95% clean claim, <5% denial, >95% collection.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes registration errors, coding errors, authorization issues in cycle time</li><li>Claims tracked from submission through final payment/appeal</li><li>Automation of eligibility + coding reduces cycle time</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <30 days | <strong>average:</strong> 30-45 days | <strong>concern:</strong> >60 days<br>
+            <strong>Why It Matters:</strong> Every 5-day reduction in A/R improves cash flow by 5 days worth of revenue = $2-4M for large plans.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_492111').style.display=document.getElementById('sql_492111').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_492111" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Payer Mix Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH claim_agg AS (
+                        SELECT m.MEMBER_ID, m.PLAN_TYPE,
+                            COUNT(DISTINCT c.CLAIM_ID) as claim_count,
+                            SUM(CAST(c.PAID_AMOUNT AS REAL)) as total_paid,
+                            SUM(CAST(c.BILLED_AMOUNT AS REAL)) as total_billed
+                        FROM MEMBERS m
+                        LEFT JOIN CLAIMS c ON m.MEMBER_ID = c.MEMBER_ID
+                        GROUP BY m.MEMBER_ID, m.PLAN_TYPE
+                    )
+                    SELECT PLAN_TYPE,
+                        COUNT(DISTINCT MEMBER_ID) as members,
+                        SUM(claim_count) as claims,
+                        ROUND(SUM(total_paid),2) as total_paid,
+                        ROUND(SUM(total_paid)/COUNT(DISTINCT MEMBER_ID),2) as pmpm,
+                        ROUND(100.0*SUM(total_paid)/NULLIF(SUM(total_billed),0),1) as loss_ratio
+                    FROM claim_agg
+                    GROUP BY PLAN_TYPE</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY m.MEMBER_ID, m.PLAN_TYPE
+                    )
+                    SELECT PLAN_TYPE,
+                        CO<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Revenue Trend</h3><div class="chart-container"><canvas id="chart_65685" data-chart='{"type": "line", "data": {"labels": ["2025-12", "2025-11", "2025-10", "2025-09", "2025-08", "2025-07", "2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01"], "datasets": [{"label": "Billed", "data": [2962153.89, 2818899.43, 3041281.74, 2925506.13, 3078055.75, 3100034.11, 3216401.07, 3198568.36, 2994443.29, 3273660.34, 2846085.28, 3236803.32], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Paid", "data": [1029699.45, 1020182.06, 1067440.29, 1057426.66, 1101228.51, 1067893.42, 1133859.08, 1196420.02, 1033395.55, 1144616.04, 888081.31, 1098034.55], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Denied", "data": [285151.27, 219172.06, 375214.5, 360411.35, 296731.61, 402369.37, 307765.62, 300869.42, 283254.39, 287468.04, 353471.83, 358885.59], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Billed has decreased 8.5% over the period shown (from $3.2M to $3.0M).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_65685').style.display=document.getElementById('meth_65685').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_65685" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_704301').style.display=document.getElementById('sql_704301').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_704301" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Revenue Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL)),2) as billed,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),2) as paid,
+                        ROUND(SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN CAST(BILLED_AMOUNT AS REAL) ELSE 0 END),2) as denied,
+                        ROUND(100.0*SUM(CAST(PAID_AMOUNT AS REAL))/SUM(CAST(BILLED_AMOUNT AS REAL)),1) as collection_rate
+                    FROM CLAIMS WHERE SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month DESC LIMIT 12</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">10,000</div><div class="label">Total Members</div><div class="subtitle-text">10,000 lives covered. Mid-size plan — network adequacy standards apply.</div></div><div class="kpi"><div class="value">8</div><div class="label">Regions</div><div class="subtitle-text">Operating across 8 service areas</div></div><div class="kpi"><div class="value">6</div><div class="label">Plan Types</div></div><div class="kpi"><div class="value">2.3</div><div class="label">Avg Risk Score</div><div class="subtitle-text">1.0 = average acuity | High acuity — care management recommended</div></div><div class="kpi"><div class="value">3</div><div class="label">Avg Chronic Conditions</div><div class="subtitle-text">3.0 conditions avg — intensive care coordination required</div></div><div class="kpi"><div class="value">4,381</div><div class="label">Avg Cost Per Member</div><div class="subtitle-text">Industry avg: $4,500-6,000/year | Below average — efficient</div></div><div class="kpi"><div class="value">9,163</div><div class="label">Active Members</div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_801467').style.display=document.getElementById('sql_801467').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_801467" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Population KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost, COUNT(*) as claims
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT COUNT(*) as total_members,
+                        COUNT(DISTINCT m.KP_REGION) as regions,
+                        COUNT(DISTINCT m.PLAN_TYPE) as plan_types,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk_score,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic_conditions,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        SUM(CASE WHEN m.DISENROLLMENT_DATE = '' OR m.DISENROLLMENT_DATE IS NULL THEN 1 ELSE 0 END) as active_members
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT COUNT(*) as total_members,
+                        C<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Age Distribution with Risk & Cost</h3><div class="chart-container"><canvas id="chart_69393" data-chart='{"type": "bar", "data": {"labels": ["Under 18", "18-29", "30-44", "45-64", "65+"], "datasets": [{"label": "Members", "data": [506.0, 1181.0, 2690.0, 3301.0, 2322.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Total", "data": [5.1, 11.8, 26.9, 33.0, 23.2], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.41, 2.37, 2.33, 2.3, 2.35], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-risk age cohort: 45-64 with Pct Of Total of 33 vs lowest Under 18 at 5.1. Largest cohort: 45-64 (3,301 members). Age drives 60-80% of total cost — deploy chronic disease management for 45+ and wellness programs for younger cohorts.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_7357').style.display=document.getElementById('sql_7357').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_7357" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Age Distribution with Risk & Cost</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT m.*,
+                            CASE
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 18 THEN 'Under 18'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 30 THEN '18-29'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 45 THEN '30-44'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 65 THEN '45-64'
+                                ELSE '65+' END as age_group,
+                            (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 as age
+                        FROM MEMBERS m
+                    )
+                    SELECT a.age_group, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct_of_total,
+                        ROUND(AVG(CAST(a.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(a.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member
+                    FROM aged a LEFT JOIN member_costs mc ON a.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY a.age_group ORDER BY MIN(a.age)</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT m.*,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Gender Distribution</h3><div class="chart-container"><canvas id="chart_98379" data-chart='{"type": "doughnut", "data": {"labels": ["F", "M"], "datasets": [{"label": "Members", "data": [5023.0, 4977.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [50.2, 49.8], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.32, 2.34], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> F members lead at 5,023 (Members), while M has 4,977. Risk profile: F has the highest Pct at 50.2, M lowest at 49.8. Review gender-specific preventive care coverage (mammography, prostate screening, cardiovascular risk) to ensure equitable program design.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_915261').style.display=document.getElementById('sql_915261').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_915261" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Gender Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT GENDER, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic
+                    FROM MEMBERS GROUP BY GENDER ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY GENDER<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 2 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">What is driving our denial rate and recovery opportunity?</span><span class="followup">Show me days in A/R by claim type and payer</span><span class="followup">Which regions have the best clean claim rates?</span><span class="followup">What is our total revenue leakage and where?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

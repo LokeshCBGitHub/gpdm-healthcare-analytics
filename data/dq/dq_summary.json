@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-03-31T15:16:07.549677",
+  "total_tables": 7,
+  "average_dq_score": 93.68,
+  "grade_distribution": {
+    "A": 4,
+    "B": 0,
+    "C": 3,
+    "D": 0,
+    "F": 0
+  },
+  "table_scores": [
+    {
+      "table_name": "claims",
+      "dq_score": 88.18,
+      "grade": "C",
+      "total_rows": 15000,
+      "total_columns": 25
+    },
+    {
+      "table_name": "diagnoses",
+      "dq_score": 88.66,
+      "grade": "C",
+      "total_rows": 5000,
+      "total_columns": 13
+    },
+    {
+      "table_name": "encounters",
+      "dq_score": 87.91,
+      "grade": "C",
+      "total_rows": 15000,
+      "total_columns": 18
+    },
+    {
+      "table_name": "members",
+      "dq_score": 96.78,
+      "grade": "A",
+      "total_rows": 10000,
+      "total_columns": 22
+    },
+    {
+      "table_name": "prescriptions",
+      "dq_score": 97.05,
+      "grade": "A",
+      "total_rows": 3000,
+      "total_columns": 16
+    },
+    {
+      "table_name": "providers",
+      "dq_score": 100.0,
+      "grade": "A",
+      "total_rows": 1500,
+      "total_columns": 14
+    },
+    {
+      "table_name": "referrals",
+      "dq_score": 97.15,
+      "grade": "A",
+      "total_rows": 1500,
+      "total_columns": 13
+    }
+  ],
+  "issues_by_type": {
+    "Uniqueness issues": 11,
+    "Low completeness": 11,
+    "Validity issues": 4
+  }
+}

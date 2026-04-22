@@ -1,0 +1,69 @@
+{
+  "efb7147fd667": {
+    "question": "what is the minimum risk score",
+    "original_sql": "SELECT MAX(PAID_AMOUNT) FROM claims",
+    "corrected_sql": "SELECT MIN(CAST(members.RISK_SCORE AS REAL)) AS min_risk_score FROM members",
+    "violations": [
+      "TABLE_MISMATCH: Question asks about 'members' but SQL queries {'claims'}",
+      "AGGREGATION_MISMATCH: Question implies MIN but SQL uses MAX"
+    ],
+    "corrections": [
+      "Redirected query to members table"
+    ]
+  },
+  "840ddccf25bd": {
+    "question": "claims by status",
+    "original_sql": "SELECT SUM(PAID_AMOUNT) FROM claims",
+    "corrected_sql": "SELECT claims.CLAIM_STATUS, SUM(CAST(claims.PAID_AMOUNT AS REAL)) AS sum_paid_amount FROM claims GROUP BY claims.CLAIM_STATUS ORDER BY sum_paid_amount DESC LIMIT 100",
+    "violations": [
+      "GROUP_BY_MISSING: Question asks to group 'by status' but SQL has no GROUP BY clause"
+    ],
+    "corrections": [
+      "Added GROUP BY CLAIM_STATUS for 'by status' intent"
+    ]
+  },
+  "844ffb2ce47e": {
+    "question": "average billed amount by region",
+    "original_sql": "SELECT AVG(BILLED_AMOUNT) FROM claims",
+    "corrected_sql": "SELECT claims.KP_REGION, AVG(CAST(claims.BILLED_AMOUNT AS REAL)) AS avg_billed_amount FROM claims GROUP BY claims.KP_REGION ORDER BY avg_billed_amount DESC LIMIT 100",
+    "violations": [
+      "GROUP_BY_MISSING: Question asks to group 'by region' but SQL has no GROUP BY clause"
+    ],
+    "corrections": [
+      "Added GROUP BY KP_REGION for 'by region' intent"
+    ]
+  },
+  "e9603d5e2078": {
+    "question": "total cost by drug class",
+    "original_sql": "SELECT SUM(COST) FROM prescriptions",
+    "corrected_sql": "SELECT prescriptions.DRUG_CLASS, SUM(CAST(prescriptions.COST AS REAL)) AS sum_cost FROM prescriptions GROUP BY prescriptions.DRUG_CLASS ORDER BY sum_cost DESC LIMIT 100",
+    "violations": [
+      "GROUP_BY_MISSING: Question asks to group 'by drug class' but SQL has no GROUP BY clause"
+    ],
+    "corrections": [
+      "Added GROUP BY DRUG_CLASS for 'by drug class' intent"
+    ]
+  },
+  "4da43481163b": {
+    "question": "average length of stay by department",
+    "original_sql": "SELECT AVG(LENGTH_OF_STAY) FROM encounters",
+    "corrected_sql": "SELECT encounters.DEPARTMENT, AVG(CAST(encounters.LENGTH_OF_STAY AS REAL)) AS avg_length_of_stay FROM encounters GROUP BY encounters.DEPARTMENT ORDER BY avg_length_of_stay DESC LIMIT 100",
+    "violations": [
+      "GROUP_BY_MISSING: Question asks to group 'by department' but SQL has no GROUP BY clause"
+    ],
+    "corrections": [
+      "Added GROUP BY DEPARTMENT for 'by department' intent"
+    ]
+  },
+  "4112c819c528": {
+    "question": "encounters by status",
+    "original_sql": "SELECT COUNT(*) FROM encounters",
+    "corrected_sql": "SELECT encounters.ENCOUNTER_STATUS, COUNT(*) AS total FROM encounters GROUP BY encounters.ENCOUNTER_STATUS ORDER BY total DESC LIMIT 100",
+    "violations": [
+      "GROUP_BY_MISSING: Question asks to group 'by status' but SQL has no GROUP BY clause"
+    ],
+    "corrections": [
+      "Added GROUP BY ENCOUNTER_STATUS for 'by status' intent"
+    ]
+  }
+}

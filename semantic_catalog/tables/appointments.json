@@ -1,0 +1,58 @@
+{
+  "table_name": "appointments",
+  "description": "Patient appointment scheduling with PCP visits, specialist appointments, and follow-ups",
+  "columns": {
+    "APPOINTMENT_ID": {
+      "data_type": "string",
+      "description": "Unique appointment identifier"
+    },
+    "MEMBER_ID": {
+      "data_type": "string",
+      "description": "Member ID linking to members table"
+    },
+    "PROVIDER_NPI": {
+      "data_type": "string",
+      "description": "Provider NPI linking to providers table"
+    },
+    "APPOINTMENT_DATE": {
+      "data_type": "date",
+      "description": "Date of appointment"
+    },
+    "APPOINTMENT_TIME": {
+      "data_type": "string",
+      "description": "Time of appointment (HH:MM)"
+    },
+    "APPOINTMENT_TYPE": {
+      "data_type": "string",
+      "description": "Type: PCP_VISIT, SPECIALIST, FOLLOW_UP, ANNUAL_WELLNESS, LAB_WORK, IMAGING, TELEHEALTH, URGENT"
+    },
+    "DEPARTMENT": {
+      "data_type": "string",
+      "description": "Medical department"
+    },
+    "FACILITY": {
+      "data_type": "string",
+      "description": "Facility name"
+    },
+    "KP_REGION": {
+      "data_type": "string",
+      "description": "KP region code"
+    },
+    "STATUS": {
+      "data_type": "string",
+      "description": "Status: SCHEDULED, COMPLETED, CANCELLED, NO_SHOW, RESCHEDULED"
+    },
+    "REASON": {
+      "data_type": "string",
+      "description": "Reason for visit"
+    },
+    "DURATION_MINUTES": {
+      "data_type": "integer",
+      "description": "Appointment duration in minutes"
+    },
+    "IS_PCP_VISIT": {
+      "data_type": "string",
+      "description": "Y/N flag for PCP (primary care provider) visits"
+    }
+  }
+}

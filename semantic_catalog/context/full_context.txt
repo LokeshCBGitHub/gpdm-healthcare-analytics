@@ -1,0 +1,1313 @@
+================================================================================
+SEMANTIC CATALOG - FULL CONTEXT
+================================================================================
+Generated: 2026-04-02T01:48:52.259921
+
+TABLE INVENTORY
+--------------------------------------------------------------------------------
+
+claims
+  Purpose: Insurance claims and billing
+  Rows: 15000
+  Columns: 25
+  Contains PHI: False
+
+diagnoses
+  Purpose: Diagnosis or condition records
+  Rows: 5000
+  Columns: 13
+  Contains PHI: False
+
+encounters
+  Purpose: Patient encounters and visits
+  Rows: 15000
+  Columns: 18
+  Contains PHI: True
+
+members
+  Purpose: Member enrollment and demographics
+  Rows: 10000
+  Columns: 22
+  Contains PHI: True
+
+prescriptions
+  Purpose: Pharmacy and prescription records
+  Rows: 3000
+  Columns: 16
+  Contains PHI: True
+
+providers
+  Purpose: Provider and facility information
+  Rows: 1500
+  Columns: 14
+  Contains PHI: True
+
+referrals
+  Purpose: Referral and authorization records
+  Rows: 1500
+  Columns: 13
+  Contains PHI: False
+
+================================================================================
+COLUMN SPECIFICATIONS
+================================================================================
+
+claims
+--------------------------------------------------------------------------------
+
+  CLAIM_ID
+    Data Type: string
+    Semantic Type: claim_id
+    Healthcare Type: claim_id
+    Description: Unique identifier for an insurance claim
+    Cardinality: 14999
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: CLM67599468 (2), CLM68703624 (1), CLM12862682 (1), CLM31649233 (1), CLM38033055 (1)
+
+  MEMBER_ID
+    Data Type: string
+    Semantic Type: member_id
+    Healthcare Type: member_id
+    Description: Unique health plan member identifier used for linking enrollment, claims, and encounters
+    Cardinality: 7762
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MBR242927728 (8), MBR481920997 (8), MBR747178314 (8), MBR504378331 (7), MBR992620629 (7)
+
+  ENCOUNTER_ID
+    Data Type: string
+    Semantic Type: encounter_id
+    Healthcare Type: encounter_id
+    Description: Unique identifier for a patient-provider interaction or visit
+    Cardinality: 8290
+    Nullability: 19.86% null
+    PHI: False
+    Top Values: ENC36532330 (6), ENC65661558 (5), ENC25445084 (5), ENC60405124 (5), ENC35478341 (5)
+
+  SERVICE_DATE
+    Data Type: date
+    Semantic Type: service_date
+    Healthcare Type: service_date
+    Description: Date on which healthcare service was delivered
+    Cardinality: 1096
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2023-12-07 (29), 2024-04-01 (27), 2023-08-31 (27), 2023-10-28 (24), 2024-05-25 (24)
+
+  RENDERING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 1500
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1346682801 (21), 1858079479 (20), 1270482693 (20), 1310202123 (19), 1192027577 (19)
+
+  BILLING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 1500
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1820464802 (22), 1898398527 (20), 1937623496 (20), 1980699964 (20), 1872092888 (19)
+
+  CPT_CODE
+    Data Type: integer
+    Semantic Type: cpt
+    Healthcare Type: cpt
+    Description: Current Procedural Terminology code describing medical procedures or services
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 71046 (789), 36415 (779), 99223 (773), 93000 (772), 11102 (764)
+
+  CPT_DESCRIPTION
+    Data Type: string
+    Semantic Type: cpt
+    Healthcare Type: cpt
+    Description: Current Procedural Terminology code describing medical procedures or services
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Chest x-ray, 2 views (789), Routine venipuncture (779), Initial hospital care, high complexity (773), Electrocardiogram, complete (772), Tangential biopsy of skin (764)
+
+  ICD10_CODE
+    Data Type: string
+    Semantic Type: icd10
+    Healthcare Type: icd10
+    Description: ICD-10 diagnosis code indicating disease, condition, or health problem
+    Cardinality: 25
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: M17.11 (682), L30.9 (640), E11.9 (632), E66.01 (622), R51 (620)
+
+  ICD10_DESCRIPTION
+    Data Type: string
+    Semantic Type: icd10
+    Healthcare Type: icd10
+    Description: ICD-10 diagnosis code indicating disease, condition, or health problem
+    Cardinality: 25
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Primary osteoarthritis, right knee (682), Dermatitis, unspecified (640), Type 2 diabetes mellitus without complications (632), Morbid obesity due to excess calories (622), Headache (620)
+
+  BILLED_AMOUNT
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: BILLED_AMOUNT
+    Cardinality: 14926
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 14903.52 (2), 14086.93 (2), 6666.21 (2), 8568.29 (2), 9188.05 (2)
+
+  ALLOWED_AMOUNT
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: ALLOWED_AMOUNT
+    Cardinality: 14884
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 4929.93 (3), 3650.64 (2), 2101.64 (2), 6155.17 (2), 8299.85 (2)
+
+  PAID_AMOUNT
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: PAID_AMOUNT
+    Cardinality: 9032
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 0.0 (5937), 4591.45 (2), 4308.11 (2), 3795.64 (2), 5675.48 (2)
+
+  MEMBER_RESPONSIBILITY
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: MEMBER_RESPONSIBILITY
+    Cardinality: 9013
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 0 (5937), 2458.27 (2), 577.81 (2), 3969.55 (2), 1924.56 (2)
+
+  COPAY
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: COPAY
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 75 (1948), 0 (1909), 25 (1898), 20 (1861), 15 (1859)
+
+  COINSURANCE
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: COINSURANCE
+    Cardinality: 14267
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 757.86 (3), 281.73 (3), 230.42 (3), 232.15 (3), 33.4 (3)
+
+  DEDUCTIBLE
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: DEDUCTIBLE
+    Cardinality: 12960
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 13.05 (4), 37.96 (4), 478.38 (4), 325.87 (4), 326.64 (4)
+
+  CLAIM_STATUS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: CLAIM_STATUS
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: PAID (9063), PENDING (2240), DENIED (1487), ADJUSTED (1209), APPEALED (701)
+
+  DENIAL_REASON
+    Data Type: string
+    Semantic Type: category
+    Description: Field: DENIAL_REASON
+    Cardinality: 6
+    Nullability: 94.61% null
+    PHI: False
+    Top Values: Duplicate claim (155), Timely filing (136), Pre-auth required (135), Out of network (129), Not medically necessary (127)
+
+  KP_REGION
+    Data Type: string
+    Semantic Type: kp_region
+    Healthcare Type: kp_region
+    Description: Geographic region or service area for the health plan
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MID (1940), GA (1918), HI (1896), SCAL (1893), NCAL (1877)
+
+  FACILITY
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 26
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Mid-Atlantic Medical Center (998), Crescent Center (961), Town Center Medical Office (957), Capitol Hill Medical Center (950), Maui Lani Medical Office (950)
+
+  PLAN_TYPE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: PLAN_TYPE
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: HDHP (2594), Medicare Advantage (2522), EPO (2509), HMO (2476), PPO (2468)
+
+  CLAIM_TYPE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: CLAIM_TYPE
+    Cardinality: 4
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: PROFESSIONAL (7487), INSTITUTIONAL (4501), PHARMACY (2257), DME (755)
+
+  SUBMITTED_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: SUBMITTED_DATE
+    Cardinality: 1096
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2023-12-07 (29), 2024-04-01 (27), 2023-08-31 (27), 2023-10-28 (24), 2024-05-25 (24)
+
+  ADJUDICATED_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: ADJUDICATED_DATE
+    Cardinality: 1131
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2024-12-09 (28), 2024-10-21 (26), 2025-02-18 (26), 2024-02-01 (26), 2023-03-03 (25)
+
+diagnoses
+--------------------------------------------------------------------------------
+
+  DIAGNOSIS_ID
+    Data Type: string
+    Semantic Type: text
+    Description: Field: DIAGNOSIS_ID
+    Cardinality: 5000
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: DX6329156 (1), DX4203418 (1), DX9592462 (1), DX7881430 (1), DX6297773 (1)
+
+  MEMBER_ID
+    Data Type: string
+    Semantic Type: member_id
+    Healthcare Type: member_id
+    Description: Unique health plan member identifier used for linking enrollment, claims, and encounters
+    Cardinality: 3953
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MBR829346909 (5), MBR396249563 (4), MBR863424463 (4), MBR181670236 (4), MBR772678518 (4)
+
+  ENCOUNTER_ID
+    Data Type: string
+    Semantic Type: encounter_id
+    Healthcare Type: encounter_id
+    Description: Unique identifier for a patient-provider interaction or visit
+    Cardinality: 3101
+    Nullability: 30.16% null
+    PHI: False
+    Top Values: ENC87207876 (4), ENC16177791 (4), ENC31769322 (4), ENC90345012 (3), ENC89698344 (3)
+
+  ICD10_CODE
+    Data Type: string
+    Semantic Type: icd10
+    Healthcare Type: icd10
+    Description: ICD-10 diagnosis code indicating disease, condition, or health problem
+    Cardinality: 25
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: M54.5 (221), R51 (217), I48.91 (213), M17.11 (213), J06.9 (209)
+
+  ICD10_DESCRIPTION
+    Data Type: string
+    Semantic Type: icd10
+    Healthcare Type: icd10
+    Description: ICD-10 diagnosis code indicating disease, condition, or health problem
+    Cardinality: 25
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Low back pain (221), Headache (217), Unspecified atrial fibrillation (213), Primary osteoarthritis, right knee (213), Acute upper respiratory infection (209)
+
+  DIAGNOSIS_TYPE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: DIAGNOSIS_TYPE
+    Cardinality: 4
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: DISCHARGE (1254), ADMITTING (1252), SECONDARY (1250), PRIMARY (1244)
+
+  DIAGNOSIS_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: DIAGNOSIS_DATE
+    Cardinality: 1084
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2024-03-27 (15), 2025-01-17 (13), 2024-07-28 (12), 2023-03-25 (12), 2023-09-16 (12)
+
+  RESOLVED_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: RESOLVED_DATE
+    Cardinality: 667
+    Nullability: 61.42% null
+    PHI: False
+    Top Values: 2025-11-21 (11), 2024-08-07 (10), 2025-01-30 (8), 2024-05-08 (8), 2025-08-01 (7)
+
+  IS_CHRONIC
+    Data Type: string
+    Semantic Type: category
+    Description: Field: IS_CHRONIC
+    Cardinality: 2
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: N (3221), Y (1779)
+
+  SEVERITY
+    Data Type: string
+    Semantic Type: category
+    Description: Field: SEVERITY
+    Cardinality: 4
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MODERATE (1306), MILD (1241), CRITICAL (1234), SEVERE (1219)
+
+  DIAGNOSING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 5000
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1331945985 (1), 1870892745 (1), 1619786358 (1), 1537734745 (1), 1909495473 (1)
+
+  HCC_CODE
+    Data Type: string
+    Semantic Type: hcc
+    Healthcare Type: hcc
+    Description: Hierarchical Condition Category for risk adjustment
+    Cardinality: 189
+    Nullability: 60.44% null
+    PHI: False
+    Top Values: HCC132 (19), HCC42 (19), HCC59 (18), HCC141 (18), HCC138 (18)
+
+  HCC_CATEGORY
+    Data Type: string
+    Semantic Type: hcc
+    Healthcare Type: hcc
+    Description: Hierarchical Condition Category for risk adjustment
+    Cardinality: 7
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Mental Health (761), Cancer (724), CKD (720), Diabetes (718), COPD (715)
+
+encounters
+--------------------------------------------------------------------------------
+
+  ENCOUNTER_ID
+    Data Type: string
+    Semantic Type: encounter_id
+    Healthcare Type: encounter_id
+    Description: Unique identifier for a patient-provider interaction or visit
+    Cardinality: 14999
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: ENC36157198 (2), ENC71471932 (1), ENC58903752 (1), ENC60915933 (1), ENC88992800 (1)
+
+  MEMBER_ID
+    Data Type: string
+    Semantic Type: member_id
+    Healthcare Type: member_id
+    Description: Unique health plan member identifier used for linking enrollment, claims, and encounters
+    Cardinality: 7752
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MBR321928178 (8), MBR712584240 (7), MBR738128949 (7), MBR501240640 (7), MBR621329869 (7)
+
+  MRN
+    Data Type: string
+    Semantic Type: text
+    Description: Field: MRN
+    Cardinality: 14992
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: MRN8393139 (2), MRN4351913 (2), MRN9663804 (2), MRN2209485 (2), MRN8362990 (2)
+
+  SERVICE_DATE
+    Data Type: date
+    Semantic Type: service_date
+    Healthcare Type: service_date
+    Description: Date on which healthcare service was delivered
+    Cardinality: 1096
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2025-03-11 (29), 2025-02-05 (27), 2025-08-26 (27), 2025-03-16 (26), 2024-01-10 (25)
+
+  ADMIT_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: ADMIT_DATE
+    Cardinality: 954
+    Nullability: 84.58% null
+    PHI: False
+    Top Values: 2024-04-14 (9), 2024-09-06 (7), 2024-01-01 (7), 2025-02-05 (7), 2024-01-23 (7)
+
+  DISCHARGE_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: DISCHARGE_DATE
+    Cardinality: 962
+    Nullability: 84.58% null
+    PHI: False
+    Top Values: 2023-04-09 (7), 2025-04-07 (7), 2025-04-11 (7), 2024-04-16 (7), 2024-08-25 (7)
+
+  RENDERING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 1500
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1154267390 (23), 1788582567 (23), 1864200887 (23), 1217581770 (21), 1131746240 (20)
+
+  SUPERVISING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 1431
+    Nullability: 70.11% null
+    PHI: False
+    Top Values: 1653436830 (9), 1390562704 (9), 1274503182 (8), 1272991371 (8), 1366934257 (8)
+
+  VISIT_TYPE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: VISIT_TYPE
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: OUTPATIENT (5988), TELEHEALTH (2925), INPATIENT (2313), URGENT_CARE (1525), EMERGENCY (1483)
+
+  DEPARTMENT
+    Data Type: string
+    Semantic Type: category
+    Description: Field: DEPARTMENT
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Surgery (814), Endocrinology (811), Ophthalmology (806), OB/GYN (797), Orthopedics (772)
+
+  FACILITY
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 26
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Capitol Hill Medical Center (966), Mid-Atlantic Medical Center (964), Town Center Medical Office (953), Crescent Center (939), Moanalua Medical Center (939)
+
+  KP_REGION
+    Data Type: string
+    Semantic Type: kp_region
+    Healthcare Type: kp_region
+    Description: Geographic region or service area for the health plan
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: NW (1909), MAS (1900), GA (1892), SCAL (1891), MID (1889)
+
+  PRIMARY_DIAGNOSIS
+    Data Type: string
+    Semantic Type: icd10
+    Healthcare Type: icd10
+    Description: ICD-10 diagnosis code indicating disease, condition, or health problem
+    Cardinality: 25
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: J06.9 (645), E66.01 (642), N39.0 (631), N18.3 (628), E78.5 (628)
+
+  DIAGNOSIS_DESCRIPTION
+    Data Type: string
+    Semantic Type: category
+    Description: Field: DIAGNOSIS_DESCRIPTION
+    Cardinality: 25
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Acute upper respiratory infection (645), Morbid obesity due to excess calories (642), Urinary tract infection (631), Chronic kidney disease, stage 3 (628), Hyperlipidemia, unspecified (628)
+
+  CHIEF_COMPLAINT
+    Data Type: string
+    Semantic Type: category
+    Description: Field: CHIEF_COMPLAINT
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Fever (796), Lab review (777), Joint pain (777), Eye irritation (776), Abdominal pain (772)
+
+  DISPOSITION
+    Data Type: string
+    Semantic Type: category
+    Description: Field: DISPOSITION
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Discharged (8966), Observation (2619), Admitted (2246), Transferred (724), AMA (298)
+
+  LENGTH_OF_STAY
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: LENGTH_OF_STAY
+    Cardinality: 15
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 0 (12687), 2 (186), 14 (186), 4 (172), 6 (169)
+
+  ENCOUNTER_STATUS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: ENCOUNTER_STATUS
+    Cardinality: 3
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: COMPLETE (12814), IN_PROGRESS (1455), CANCELLED (731)
+
+members
+--------------------------------------------------------------------------------
+
+  MRN
+    Data Type: string
+    Semantic Type: text
+    Description: Field: MRN
+    Cardinality: 9996
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: MRN1853853 (2), MRN4921059 (2), MRN3479713 (2), MRN9635332 (2), MRN9874152 (1)
+
+  MEMBER_ID
+    Data Type: string
+    Semantic Type: member_id
+    Healthcare Type: member_id
+    Description: Unique health plan member identifier used for linking enrollment, claims, and encounters
+    Cardinality: 10000
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MBR108399996 (1), MBR458153605 (1), MBR958872154 (1), MBR529151399 (1), MBR813219781 (1)
+
+  FIRST_NAME
+    Data Type: string
+    Semantic Type: name
+    Description: Person name: FIRST_NAME
+    Cardinality: 96
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: Barbara (128), Michael (125), Matthew (123), Jason (122), Patricia (121)
+
+  LAST_NAME
+    Data Type: string
+    Semantic Type: name
+    Description: Person name: LAST_NAME
+    Cardinality: 64
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: Lewis (178), Edwards (178), Parker (177), Evans (171), Smith (171)
+
+  DATE_OF_BIRTH
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: DATE_OF_BIRTH
+    Cardinality: 8287
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: 1984-04-18 (5), 1996-01-12 (5), 1959-04-22 (5), 1976-10-06 (4), 1977-09-30 (4)
+
+  GENDER
+    Data Type: string
+    Semantic Type: category
+    Description: Field: GENDER
+    Cardinality: 2
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: F (5023), M (4977)
+
+  RACE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: RACE
+    Cardinality: 8
+    Nullability: 2.14% null
+    PHI: False
+    Top Values: Unknown (1280), Asian (1262), White (1260), Hispanic (1225), Other (1201)
+
+  LANGUAGE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: LANGUAGE
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: English (5979), Spanish (1541), Chinese (779), Vietnamese (516), Other (395)
+
+  ADDRESS
+    Data Type: string
+    Semantic Type: address
+    Description: Geographic address: ADDRESS
+    Cardinality: 9565
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: 2309 Park Dr (3), 7274 Park Dr (3), 3343 Park Dr (3), 6910 Oak Ave (3), 1357 Washington Ave (3)
+
+  CITY
+    Data Type: string
+    Semantic Type: address
+    Description: Geographic address: CITY
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Portland (1345), Honolulu (1294), Baltimore (1255), Oakland (1242), Tysons (1223)
+
+  STATE
+    Data Type: string
+    Semantic Type: address
+    Description: Geographic address: STATE
+    Cardinality: 9
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: WA (1167), VA (1161), DC (1147), CO (1105), HI (1103)
+
+  ZIP_CODE
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: ZIP_CODE
+    Cardinality: 9406
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 52034 (3), 80668 (3), 84725 (3), 15269 (3), 64322 (3)
+
+  PHONE
+    Data Type: string
+    Semantic Type: text
+    Description: Field: PHONE
+    Cardinality: 9706
+    Nullability: 2.94% null
+    PHI: True
+    Top Values: (470) 717-9004 (1), (240) 566-4441 (1), (433) 428-1387 (1), (318) 594-4114 (1), (378) 830-5930 (1)
+
+  EMAIL
+    Data Type: string
+    Semantic Type: email
+    Description: Email address: EMAIL
+    Cardinality: 9435
+    Nullability: 4.93% null
+    PHI: True
+    Top Values: margaret.robinson17@email.com (2), steven.williams83@email.com (2), ronald.thomas96@email.com (2), brandon.young77@email.com (2), samuel.adams7@email.com (2)
+
+  KP_REGION
+    Data Type: string
+    Semantic Type: kp_region
+    Healthcare Type: kp_region
+    Description: Geographic region or service area for the health plan
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: NW (1335), SCAL (1274), MID (1271), CO (1250), HI (1222)
+
+  FACILITY
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 26
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Mid-Atlantic Medical Center (658), Moanalua Medical Center (632), Capitol Hill Medical Center (625), Burke Medical Center (613), Town Center Medical Office (612)
+
+  PLAN_TYPE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: PLAN_TYPE
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: EPO (1732), HMO (1700), PPO (1692), HDHP (1663), Medicaid (1628)
+
+  ENROLLMENT_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: ENROLLMENT_DATE
+    Cardinality: 2507
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2021-04-08 (14), 2020-07-12 (13), 2022-04-16 (12), 2021-07-20 (11), 2019-06-29 (11)
+
+  DISENROLLMENT_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: DISENROLLMENT_DATE
+    Cardinality: 482
+    Nullability: 91.63% null
+    PHI: False
+    Top Values: 2025-12-25 (5), 2025-12-19 (5), 2024-10-16 (5), 2024-05-03 (5), 2024-08-05 (5)
+
+  PCP_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 500
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1432311310 (36), 1618702544 (35), 1721218382 (32), 1119540831 (32), 1406919288 (31)
+
+  RISK_SCORE
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: RISK_SCORE
+    Cardinality: 431
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1.93 (39), 0.31 (37), 3.33 (36), 1.74 (35), 2.86 (35)
+
+  CHRONIC_CONDITIONS
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: CHRONIC_CONDITIONS
+    Cardinality: 7
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 6 (1474), 5 (1464), 3 (1443), 2 (1433), 1 (1424)
+
+prescriptions
+--------------------------------------------------------------------------------
+
+  RX_ID
+    Data Type: string
+    Semantic Type: rx_id
+    Healthcare Type: rx_id
+    Description: Unique identifier for a prescription
+    Cardinality: 2998
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: RX1956785 (2), RX4116608 (2), RX7342525 (1), RX5092385 (1), RX4203534 (1)
+
+  MEMBER_ID
+    Data Type: string
+    Semantic Type: member_id
+    Healthcare Type: member_id
+    Description: Unique health plan member identifier used for linking enrollment, claims, and encounters
+    Cardinality: 2599
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MBR957827139 (4), MBR583295693 (4), MBR311986050 (4), MBR114223091 (3), MBR780749793 (3)
+
+  PRESCRIBING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 1293
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1295477796 (7), 1207622474 (7), 1963167620 (7), 1451985669 (7), 1932988445 (7)
+
+  MEDICATION_NAME
+    Data Type: string
+    Semantic Type: category
+    Description: Field: MEDICATION_NAME
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: Azithromycin 250mg (174), Metoprolol 50mg (170), Lisinopril 10mg (167), Tramadol 50mg (158), Amoxicillin 500mg (158)
+
+  MEDICATION_CLASS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: MEDICATION_CLASS
+    Cardinality: 12
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Hypertension (766), Infection (332), Pain (311), Depression (300), GERD (278)
+
+  NDC_CODE
+    Data Type: string
+    Semantic Type: ndc
+    Healthcare Type: ndc
+    Description: National Drug Code for pharmaceutical products
+    Cardinality: 3000
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: NDC50763441958 (1), NDC80182311011 (1), NDC30987155583 (1), NDC44043976161 (1), NDC16470849986 (1)
+
+  QUANTITY
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: QUANTITY
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 7 (534), 120 (514), 90 (499), 14 (489), 60 (484)
+
+  DAYS_SUPPLY
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: DAYS_SUPPLY
+    Cardinality: 5
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 90 (629), 60 (627), 30 (624), 14 (566), 7 (554)
+
+  REFILLS_AUTHORIZED
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: REFILLS_AUTHORIZED
+    Cardinality: 12
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 7 (278), 11 (270), 2 (262), 10 (260), 9 (256)
+
+  REFILLS_USED
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: REFILLS_USED
+    Cardinality: 12
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 0 (744), 1 (537), 2 (428), 3 (309), 4 (243)
+
+  PRESCRIPTION_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: PRESCRIPTION_DATE
+    Cardinality: 1027
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2023-07-11 (9), 2024-03-10 (8), 2025-11-28 (8), 2024-08-28 (8), 2023-05-16 (7)
+
+  FILL_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: FILL_DATE
+    Cardinality: 999
+    Nullability: 15.4% null
+    PHI: False
+    Top Values: 2024-09-14 (7), 2025-04-26 (7), 2023-09-11 (7), 2023-05-30 (7), 2025-01-08 (7)
+
+  PHARMACY
+    Data Type: string
+    Semantic Type: category
+    Description: Field: PHARMACY
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: KP Pharmacy LA (520), KP Mail Order (516), Walgreens (513), CVS (502), Rite Aid (485)
+
+  COST
+    Data Type: float
+    Semantic Type: currency
+    Description: Monetary amount: COST
+    Cardinality: 2955
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 319.14 (2), 445.95 (2), 695.41 (2), 79.44 (2), 110.04 (2)
+
+  COPAY
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: COPAY
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 30 (419), 5 (388), 25 (384), 15 (380), 0 (372)
+
+  STATUS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: STATUS
+    Cardinality: 5
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: FILLED (2091), PENDING (317), EXPIRED (291), TRANSFERRED (152), CANCELLED (149)
+
+providers
+--------------------------------------------------------------------------------
+
+  NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 1500
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1697045956 (1), 1031876983 (1), 1296376852 (1), 1308482110 (1), 1248576536 (1)
+
+  PROVIDER_FIRST_NAME
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 96
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: Katherine (27), Stephanie (26), Melissa (25), James (22), Kenneth (22)
+
+  PROVIDER_LAST_NAME
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 64
+    Nullability: 0.0% null
+    PHI: True
+    Top Values: Murphy (32), Garcia (30), Allen (30), Hill (29), Ramirez (29)
+
+  SPECIALTY
+    Data Type: string
+    Semantic Type: category
+    Description: Field: SPECIALTY
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Cardiology (92), ENT (84), Emergency Medicine (84), Radiology (83), Rheumatology (81)
+
+  DEPARTMENT
+    Data Type: string
+    Semantic Type: category
+    Description: Field: DEPARTMENT
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Cardiology (92), ENT (84), Emergency Medicine (84), Radiology (83), Rheumatology (81)
+
+  KP_REGION
+    Data Type: string
+    Semantic Type: kp_region
+    Healthcare Type: kp_region
+    Description: Geographic region or service area for the health plan
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: GA (209), SCAL (208), MID (202), HI (196), NW (181)
+
+  FACILITY
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 26
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Crescent Center (106), Burke Medical Center (104), Town Center Medical Office (103), Moanalua Medical Center (102), Mid-Atlantic Medical Center (98)
+
+  PROVIDER_TYPE
+    Data Type: string
+    Semantic Type: facility
+    Healthcare Type: facility
+    Description: Healthcare facility where service was rendered
+    Cardinality: 7
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MD (621), NP (217), RN (201), DO (153), PA (141)
+
+  DEA_NUMBER
+    Data Type: string
+    Semantic Type: text
+    Description: Field: DEA_NUMBER
+    Cardinality: 1500
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: DEA3694342 (1), DEA8831223 (1), DEA8453748 (1), DEA7378108 (1), DEA9112357 (1)
+
+  LICENSE_STATE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: LICENSE_STATE
+    Cardinality: 9
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: CA (183), VA (181), WA (179), GA (176), DC (169)
+
+  HIRE_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: HIRE_DATE
+    Cardinality: 1344
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2019-01-28 (4), 2016-06-12 (4), 2019-11-25 (3), 2015-05-01 (3), 2023-01-19 (3)
+
+  STATUS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: STATUS
+    Cardinality: 3
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: ACTIVE (1297), INACTIVE (139), ON_LEAVE (64)
+
+  PANEL_SIZE
+    Data Type: integer
+    Semantic Type: code
+    Description: Coded value: PANEL_SIZE
+    Cardinality: 1115
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 457 (4), 494 (4), 682 (4), 1646 (4), 777 (4)
+
+  ACCEPTS_NEW_PATIENTS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: ACCEPTS_NEW_PATIENTS
+    Cardinality: 2
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Y (1058), N (442)
+
+referrals
+--------------------------------------------------------------------------------
+
+  REFERRAL_ID
+    Data Type: string
+    Semantic Type: referral_id
+    Healthcare Type: referral_id
+    Description: Unique identifier for a provider referral
+    Cardinality: 1499
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: REF576787 (2), REF323690 (1), REF156911 (1), REF720862 (1), REF611088 (1)
+
+  MEMBER_ID
+    Data Type: string
+    Semantic Type: member_id
+    Healthcare Type: member_id
+    Description: Unique health plan member identifier used for linking enrollment, claims, and encounters
+    Cardinality: 1403
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: MBR799329581 (3), MBR323125273 (3), MBR776447126 (3), MBR364239159 (2), MBR759143768 (2)
+
+  REFERRING_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 942
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1584815019 (6), 1868786080 (6), 1515464457 (5), 1430238522 (5), 1116889705 (4)
+
+  REFERRED_TO_NPI
+    Data Type: integer
+    Semantic Type: npi
+    Healthcare Type: npi
+    Description: National Provider Identifier - unique 10-digit code for healthcare providers
+    Cardinality: 920
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 1156400809 (6), 1646133746 (6), 1019036662 (5), 1104000908 (5), 1943183523 (5)
+
+  REFERRAL_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: REFERRAL_DATE
+    Cardinality: 795
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2024-08-04 (7), 2023-08-12 (6), 2023-08-20 (6), 2024-11-02 (5), 2025-03-04 (5)
+
+  REFERRAL_REASON
+    Data Type: string
+    Semantic Type: category
+    Description: Field: REFERRAL_REASON
+    Cardinality: 11
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Specialist evaluation (154), Cancer screening (144), Post-op follow-up (144), Cardiac evaluation (141), Pain management (140)
+
+  URGENCY
+    Data Type: string
+    Semantic Type: category
+    Description: Field: URGENCY
+    Cardinality: 4
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: ROUTINE (750), URGENT (391), ELECTIVE (280), STAT (79)
+
+  REFERRAL_TYPE
+    Data Type: string
+    Semantic Type: category
+    Description: Field: REFERRAL_TYPE
+    Cardinality: 3
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: INTERNAL (921), EXTERNAL (433), SELF_REFERRAL (146)
+
+  STATUS
+    Data Type: string
+    Semantic Type: category
+    Description: Field: STATUS
+    Cardinality: 6
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: APPROVED (512), COMPLETED (442), PENDING (334), CANCELLED (76), DENIED (71)
+
+  APPOINTMENT_DATE
+    Data Type: date
+    Semantic Type: date
+    Description: Date field: APPOINTMENT_DATE
+    Cardinality: 829
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: 2023-05-20 (6), 2025-03-25 (5), 2024-06-14 (5), 2024-03-18 (5), 2024-11-27 (5)
+
+  SPECIALTY
+    Data Type: string
+    Semantic Type: category
+    Description: Field: SPECIALTY
+    Cardinality: 20
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: Urology (92), Pulmonology (90), Surgery (87), Cardiology (86), Nephrology (82)
+
+  AUTHORIZATION_NUMBER
+    Data Type: string
+    Semantic Type: text
+    Description: Field: AUTHORIZATION_NUMBER
+    Cardinality: 1040
+    Nullability: 30.67% null
+    PHI: False
+    Top Values: AUTH457212 (1), AUTH185275 (1), AUTH977655 (1), AUTH249040 (1), AUTH886645 (1)
+
+  KP_REGION
+    Data Type: string
+    Semantic Type: kp_region
+    Healthcare Type: kp_region
+    Description: Geographic region or service area for the health plan
+    Cardinality: 8
+    Nullability: 0.0% null
+    PHI: False
+    Top Values: CO (209), MAS (206), GA (191), NCAL (190), MID (183)
+
+================================================================================
+DETECTED RELATIONSHIPS
+================================================================================
+
+  claims -> diagnoses
+    Join Column: member_id
+    Type: many_to_many
+
+  claims -> encounters
+    Join Column: member_id
+    Type: many_to_many
+
+  claims -> members
+    Join Column: member_id
+    Type: many_to_one
+
+  claims -> prescriptions
+    Join Column: member_id
+    Type: many_to_many
+
+  claims -> referrals
+    Join Column: member_id
+    Type: many_to_many
+
+  diagnoses -> encounters
+    Join Column: member_id
+    Type: many_to_many
+
+  diagnoses -> members
+    Join Column: member_id
+    Type: many_to_one
+
+  diagnoses -> prescriptions
+    Join Column: member_id
+    Type: many_to_many
+
+  diagnoses -> referrals
+    Join Column: member_id
+    Type: many_to_many
+
+  encounters -> members
+    Join Column: member_id
+    Type: many_to_one
+
+  encounters -> prescriptions
+    Join Column: member_id
+    Type: many_to_many
+
+  encounters -> referrals
+    Join Column: member_id
+    Type: many_to_many
+
+  members -> prescriptions
+    Join Column: member_id
+    Type: one_to_many
+
+  members -> referrals
+    Join Column: member_id
+    Type: one_to_many
+
+  prescriptions -> referrals
+    Join Column: member_id
+    Type: many_to_many
+
+  claims -> diagnoses
+    Join Column: encounter_id
+    Type: many_to_many
+
+  claims -> encounters
+    Join Column: encounter_id
+    Type: many_to_one
+
+  diagnoses -> encounters
+    Join Column: encounter_id
+    Type: many_to_one
+
+  claims -> encounters
+    Join Column: rendering_npi
+    Type: many_to_many
+
+  encounters -> members
+    Join Column: mrn
+    Type: many_to_many
+
+  claims -> providers
+    Join Column: rendering_npi=npi
+    Type: many_to_one
+
+  encounters -> providers
+    Join Column: rendering_npi=npi
+    Type: many_to_one
+
+  prescriptions -> providers
+    Join Column: prescribing_npi=npi
+    Type: many_to_one
+
+  referrals -> providers
+    Join Column: referring_npi=npi
+    Type: many_to_one
+
+  diagnoses -> providers
+    Join Column: diagnosing_npi=npi
+    Type: many_to_one

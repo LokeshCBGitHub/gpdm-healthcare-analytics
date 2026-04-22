@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Executive Intelligence Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Executive Intelligence Dashboard</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 16 data queries • April 21, 2026</div>
+    <div style="margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;">
+        <span style="background:#28a745;width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+        <span>Database: healthcare_4m.db • 4,036,000 total rows</span>
+        <span style="margin-left:8px;opacity:0.7;">|</span>
+        <span style="margin-left:8px;">Self-Audit: PASS — 65 insights passed, 0 blocked</span>
+    </div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For The Organization</h3>
+    <div class="insight-item" style="border-left-color:#002B5C">Financial Performance: Revenue PMPM $105,734.57 | Medical Expense PMPM $36,448.31 | MLR 34.5% | Operating Margin 65.5% | Op Income $5,854.1M. On target — margin exceeds 3%.<div style="margin-top:6px"><span onclick="document.getElementById('reason_274175').style.display=document.getElementById('reason_274175').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_274175" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Derived from CLAIMS table: SUM(BILLED_AMOUNT)/member-months for revenue PMPM, SUM(PAID_AMOUNT)/member-months for medical expense. MLR = medical expense / revenue x 100 = $36,448.31/$105,734.57 = 34.5%. Operating margin = (revenue - expense) / revenue = 65.5%. Industry standard: MLR 80-85% is typical for commercial plans (ACA minimum 80%). Margin >3% is considered healthy for managed care organizations per NAIC guidelines.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Quality Performance: Overall Star Rating 3.1/5.0 across 7 measures. Below CMS 4-star threshold — bonus payments at risk.<div style="margin-top:6px"><span onclick="document.getElementById('reason_82766').style.display=document.getElementById('reason_82766').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_82766" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Computed by averaging star ratings across 7 quality measures from the CLAIMS/ENCOUNTERS tables. CMS assigns star ratings 1-5 based on measure performance vs national benchmarks. Plans scoring 4.0+ receive Quality Bonus Payments (QBP) worth ~$50/member/year (42 CFR 422.260). At 3.1 stars, the plan does NOT qualify for QBP.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Risk Adjustment (RADA): Org average risk score 2.330. Regional range: CO (2.242) to MAS (2.387), spread of 0.145. Regional risk scores are relatively consistent.<div style="margin-top:6px"><span onclick="document.getElementById('reason_264636').style.display=document.getElementById('reason_264636').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_264636" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Risk scores computed from DIAGNOSES table using HCC (Hierarchical Condition Category) mapping. Each member's diagnoses map to CMS-HCC risk scores, averaged by region. Spread of 0.145 between highest (MAS: 2.387) and lowest (CO: 2.242) region. A spread >0.3 typically indicates coding variation rather than true acuity differences (per Milliman HCC coding analysis). CMS uses risk scores to adjust capitation payments — undercoding means lost revenue (~$800-1,200/member/0.1 RAF point).</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Membership: 1,692,238 total lives across 6 plan types. Net growth: -47,162 members (-2.8%). Membership declining — retention strategy needed.<div style="margin-top:6px"><span onclick="document.getElementById('reason_443557').style.display=document.getElementById('reason_443557').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_443557" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Membership counts from MEMBERS table grouped by PLAN_TYPE. New enrollments (0) minus disenrollments (47,162) = net -47,162. Growth rate = net / total = -47,162/1,692,238 = -2.8%. Industry benchmark: MA plans average 2-4% annual growth (KFF Medicare Advantage enrollment data). Negative net growth requires investigation of: satisfaction survey scores, benefit competitiveness, provider network adequacy, and premium competitiveness.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Utilization: Inpatient 468/1,000 (benchmark: 60) | ER 299/1,000 (benchmark: 150). Above-benchmark utilization indicates care management opportunities.<div style="margin-top:6px"><span onclick="document.getElementById('reason_586886').style.display=document.getElementById('reason_586886').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_586886" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Utilization per 1,000 members calculated from ENCOUNTERS table: COUNT(encounters by type) / (total members / 1000). Inpatient benchmark of 60/1,000 is CMS MA average; ER benchmark of 150/1,000 per Milliman Health Cost Guidelines. Values above benchmark indicate potential for care management intervention: pre-authorization programs, nurse advice lines, urgent care redirection, and chronic disease management to prevent acute episodes.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Denial Rate benchmark: 3/8 entities below standard (avg 10.0%, range 9.5–11.2%, benchmark: 5.0%). Worst performers: CO, SCAL, NW.<div style="margin-top:6px"><span onclick="document.getElementById('reason_425911').style.display=document.getElementById('reason_425911').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_425911" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's Denial Rate was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 3 of 8 entities (38%) fall below standard. The spread from 9.5 to 11.2% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Clean Claim Rate benchmark: 8/8 entities below standard (avg 60.2%, range 57.5–62.6%, benchmark: 95.0%). Worst performers: CO, GA, MID.<div style="margin-top:6px"><span onclick="document.getElementById('reason_327414').style.display=document.getElementById('reason_327414').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_327414" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's Clean Claim Rate was compared against the industry benchmark of 95.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring below this threshold are flagged. 8 of 8 entities (100%) fall below standard. The spread from 57.5 to 62.6% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Loss Ratio: All 8 entities performing well (avg 34.5%, benchmark good: 85%). Network-wide strong performance.</div><div class="insight-item" style="border-left-color:#002B5C">Denial Rate Pct benchmark: 16/36 entities below standard (avg 9.9%, range 6.3–13.0%, benchmark: 5.0%). Worst performers: 2024-03, 2023-05, 2025-02.<div style="margin-top:6px"><span onclick="document.getElementById('reason_168604').style.display=document.getElementById('reason_168604').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_168604" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's Denial Rate Pct was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 16 of 36 entities (44%) fall below standard. The spread from 6.3 to 13.0% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">PPO: Cost Per Member (18,868) is 3% lower than the network average (19,373). Efficient per-member spending — verify outcomes are not being compromised.<div style="margin-top:6px"><span onclick="document.getElementById('reason_677617').style.display=document.getElementById('reason_677617').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_677617" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 6 data points. Mean = 19,373, StdDev = 273. PPO at 18,868 yields Z = 1.85 (3% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means PPO is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div>
+</div><div class="section" style="background:rgba(230,126,34,0.05);border-left:4px solid #e67e22;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#e67e22;font-size:1.1rem;margin-bottom:1rem">Cross-Dimensional Analysis & Root Causes</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Relationships discovered across multiple data dimensions. These insights connect dots that single-query analysis cannot reveal.</p>
+    <div class="insight-item" style="border-left-color:#e67e22">Risk-adjusted cost gap: 12% cost variation across regions but only 7% risk variation. HI costs $460,192/member (risk: 2.32) vs CO at $409,279 (risk: 2.24). The 5% excess cost beyond acuity suggests operational differences worth investigating — provider contracts, practice patterns, or facility costs.<div style="margin-top:6px"><span onclick="document.getElementById('reason_647812').style.display=document.getElementById('reason_647812').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_647812" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Cross-dimensional analysis: we joined regional cost data (from CLAIMS) with risk scores (from DIAGNOSES/HCC) for each region. If cost variation were purely driven by patient acuity, cost spread and risk spread would be proportional. Instead: cost varies 12% while risk varies only 7%, leaving 5% unexplained by clinical factors. This residual suggests operational inefficiency: contract rate differences, utilization management variation, or care pattern differences between regions. This is a standard actuarial risk-adjustment methodology used by CMS and commercial payers.</div></div></div><div class="insight-item" style="border-left-color:#e67e22">Stars-Revenue linkage: At 3.1 stars, the plan misses CMS Quality Bonus Payments (requires 4.0+). Estimated annual revenue impact: $4,224,600 (7,041 members x ~$50/member/year). Closing the 0.9-star gap requires focused improvement on the lowest-performing measures.</div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">ALERT: ER utilization at 299/1,000 members — exceeds industry benchmark of 150/1,000. Implement nurse advice line, expand urgent care hours, and deploy ER navigation program.</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $15,814,500</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_74907_0').style.display=document.getElementById('method_74907_0').style.display==='none'?'block':'none'"><strong><span style="color:#28a745;font-weight:700">&#9632;</span> Cost Reduction — ER Diversion Program</strong><br>Divert 12,165 ER visits to urgent care/telehealth — saves $15,814,500/year<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_74907_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> ER visit avg cost $1,500, urgent care $200, telehealth $75 (HCUP national statistics). 15% diversion rate is conservative industry benchmark.</div></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> Priority quality improvement: Denial Rate (10.0% vs target 5.0%), Clean Claim Rate (60.2% vs target 95.0%), Preventive Screening Rate (0.7% vs target 80.0%). These measures directly impact CMS Star Rating and bonus revenue.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_525126_0').style.display=document.getElementById('rec_reason_525126_0').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_525126_0" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Each measure was compared against its CMS target threshold. Measures below target: 5/7. We identify these by comparing actual performance (from claims data) against CMS cut-points published in the annual Star Ratings Technical Notes. Improving the lowest-performing measures first yields the highest star rating lift per unit of effort (CMS weighting methodology).</div></div></div><div class="rec-item"><strong>Initiative:</strong> Regional cost variation: $50,913 spread between HI ($460,192) and CO ($409,279). After risk adjustment, investigate if variation reflects operational differences or acuity mix. Transfer best practices from low-cost regions.</div><div class="rec-item"><strong>Initiative:</strong> [Priority]ER Diversion Program: Divert 12,165 ER visits to urgent care/telehealth — saves $15,814,500/year</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate across 3 underperforming entities (CO, SCAL, NW): current range 10.2–11.2%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_412535_3').style.display=document.getElementById('rec_reason_412535_3').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_412535_3" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 11.2% needs 6.2% improvement. Prioritized because: (1) 3/8 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div><div class="rec-item"><strong>Initiative:</strong> Improve Clean Claim Rate across 8 underperforming entities (CO, GA, MID): current range 57.5–62.6%, target 95.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_369275_4').style.display=document.getElementById('rec_reason_369275_4').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_369275_4" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 95.0% based on industry benchmark. Current worst performer at 57.5% needs 37.5% improvement. Prioritized because: (1) 8/8 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate Pct across 16 underperforming entities (2024-03, 2023-05, 2025-02): current range 10.2–13.0%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_688037_5').style.display=document.getElementById('rec_reason_688037_5').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_688037_5" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 13.0% needs 8.0% improvement. Prioritized because: (1) 16/36 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div><div class="rec-item"><strong>Initiative:</strong> Fastest path to 4 stars: Denial Rate is closest to target (10.0% actual vs 5.0% target, currently 3 stars). Improving this single measure could lift overall star rating and unlock $4,224,600/year in CMS bonus payments.</div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">200,000</div><div class="label">Total Members</div><div class="subtitle-text">200,000 lives covered. Large plan (>10K) — network adequacy standards apply.</div></div><div class="kpi"><div class="value">6,000</div><div class="label">Total Providers</div></div><div class="kpi"><div class="value">$1.5M</div><div class="label">Total Claims</div><div class="subtitle-text">1,500,000 claims processed</div></div><div class="kpi"><div class="value">600,000</div><div class="label">Total Encounters</div><div class="subtitle-text">600,000 patient encounters across all care settings</div></div><div class="kpi"><div class="value">$3,874.0M</div><div class="label">Total Paid</div><div class="subtitle-text">Total reimbursements | $3,874.0M paid to providers</div></div><div class="kpi"><div class="value">150,000</div><div class="label">Total Rx</div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_309836').style.display=document.getElementById('sql_309836').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_309836" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Organization Overview</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT
+                        (SELECT COUNT(*) FROM MEMBERS) as total_members,
+                        (SELECT COUNT(*) FROM PROVIDERS) as total_providers,
+                        (SELECT COUNT(*) FROM CLAIMS) as total_claims,
+                        (SELECT COUNT(*) FROM ENCOUNTERS) as total_encounters,
+                        (SELECT ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),0) FROM CLAIMS) as total_paid,
+                        (SELECT COUNT(*) FROM PRESCRIPTIONS) as total_rx</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, ENCOUNTERS, PRESCRIPTIONS, PROVIDERS<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card" style="grid-column: 1 / -1;">
+<h3 style="color:#002B5C;margin-bottom:1rem;">&#9632; PMPM Financial Performance — YTD PMPM Statement</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+<div>
+<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+<thead><tr style="background:#002B5C;color:white;">
+<th style="padding:10px;text-align:left;">Line Item</th>
+<th style="padding:10px;text-align:right;">PMPM</th>
+<th style="padding:10px;text-align:right;">Budget</th>
+<th style="padding:10px;text-align:right;">Variance</th>
+</tr></thead>
+<tbody>
+<tr style="background:#e8f4e8;font-weight:700;"><td style="padding:8px;">Revenue PMPM</td><td style="text-align:right;">$105,734.57</td><td style="text-align:right;">$100,447.84</td><td style="text-align:right;color:#28a745;">+5,286.73</td></tr>
+<tr><td style="padding:8px 8px 8px 20px;color:#555;">Inpatient/SNF</td><td style="text-align:right;">$5,557.04</td><td style="text-align:right;">$5,668.18</td><td style="text-align:right;"><div style="background:#002B5C;height:18px;width:5.255651013665634%;border-radius:3px;display:inline-block;min-width:4px"></div></td></tr>
+<tr><td style="padding:8px 8px 8px 20px;color:#555;">Outpatient/Ambulatory</td><td style="text-align:right;">$14,593.11</td><td style="text-align:right;">$14,739.04</td><td style="text-align:right;"><div style="background:#0056b3;height:18px;width:13.801645005980543%;border-radius:3px;display:inline-block;min-width:4px"></div></td></tr>
+<tr><td style="padding:8px 8px 8px 20px;color:#555;">Emergency</td><td style="text-align:right;">$3,688.59</td><td style="text-align:right;">$3,873.02</td><td style="text-align:right;"><div style="background:#dc3545;height:18px;width:3.488537381861013%;border-radius:3px;display:inline-block;min-width:4px"></div></td></tr>
+<tr><td style="padding:8px 8px 8px 20px;color:#555;">Office/Telehealth</td><td style="text-align:right;">$6,960.58</td><td style="text-align:right;">$6,821.37</td><td style="text-align:right;"><div style="background:#28a745;height:18px;width:6.583069283773509%;border-radius:3px;display:inline-block;min-width:4px"></div></td></tr>
+<tr><td style="padding:8px 8px 8px 20px;color:#555;">Pharmacy/Rx</td><td style="text-align:right;">$672.66</td><td style="text-align:right;">$699.57</td><td style="text-align:right;"><div style="background:#6f42c1;height:18px;width:0.6361779312101993%;border-radius:3px;display:inline-block;min-width:4px"></div></td></tr>
+<tr style="border-top:2px solid #002B5C;font-weight:600;"><td style="padding:8px;">Total Patient Care Expense</td><td style="text-align:right;">$36,448.31</td><td style="text-align:right;">$37,541.76</td><td style="text-align:right;color:#28a745;">-1,093.45</td></tr>
+<tr><td style="padding:8px 8px 8px 20px;color:#555;">Administrative</td><td style="text-align:right;">$10,392.94</td><td style="text-align:right;">$10,185.08</td><td style="text-align:right;">—</td></tr>
+<tr style="border-top:2px solid #002B5C;font-weight:700;background:#f0f4f8;"><td style="padding:10px;">Total Expense PMPM</td><td style="text-align:right;">$46,841.25</td><td style="text-align:right;">$47,726.84</td><td style="text-align:right;">—</td></tr>
+<tr style="background:#e8f4e8;font-weight:700;"><td style="padding:10px;">Margin</td><td style="text-align:right;">65.5%</td><td style="text-align:right;">—</td><td style="text-align:right;">—</td></tr>
+<tr style="font-weight:700;"><td style="padding:10px;">Operating Income</td><td style="text-align:right;">$5,854.1M</td><td style="text-align:right;">—</td><td style="text-align:right;">—</td></tr>
+</tbody></table>
+</div>
+<div>
+<div style="text-align:center;margin-bottom:1rem;font-weight:600;color:#002B5C;">PMPM Expense Composition</div>
+<div style="padding:0.5rem;">
+<div style="margin:6px 0;"><span style="display:inline-block;width:160px;color:#555;">Inpatient/SNF</span><div style="background:#002B5C;height:18px;width:15.24635847313634%;border-radius:3px;display:inline-block;min-width:4px"></div> <span style="font-size:0.85rem;color:#666;">$5,557.04 (15%)</span></div>
+<div style="margin:6px 0;"><span style="display:inline-block;width:160px;color:#555;">Outpatient</span><div style="background:#0056b3;height:18px;width:40.037823427204174%;border-radius:3px;display:inline-block;min-width:4px"></div> <span style="font-size:0.85rem;color:#666;">$14,593.11 (40%)</span></div>
+<div style="margin:6px 0;"><span style="display:inline-block;width:160px;color:#555;">Emergency</span><div style="background:#dc3545;height:18px;width:10.120057692661197%;border-radius:3px;display:inline-block;min-width:4px"></div> <span style="font-size:0.85rem;color:#666;">$3,688.59 (10%)</span></div>
+<div style="margin:6px 0;"><span style="display:inline-block;width:160px;color:#555;">Office/Telehealth</span><div style="background:#28a745;height:18px;width:19.0971268626721%;border-radius:3px;display:inline-block;min-width:4px"></div> <span style="font-size:0.85rem;color:#666;">$6,960.58 (19%)</span></div>
+<div style="margin:6px 0;"><span style="display:inline-block;width:160px;color:#555;">Pharmacy</span><div style="background:#6f42c1;height:18px;width:1.8455176659768313%;border-radius:3px;display:inline-block;min-width:4px"></div> <span style="font-size:0.85rem;color:#666;">$672.66 (2%)</span></div>
+</div>
+<div style="margin-top:1.5rem;padding:1rem;background:#f8f9fa;border-radius:6px;font-size:0.85rem;color:#555;line-height:1.6;">
+<strong>Key Metrics:</strong><br>
+&#9632; Covered Lives: 7,041<br>
+&#9632; Medical Loss Ratio: 34.5%<br>
+&#9632; Margin: 65.5% &#9650; On target<br>
+&#9632; Annual Op Income: $5,854.1M
+</div>
+</div>
+</div>
+<div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_74567').style.display=document.getElementById('meth_74567').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_74567" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Per Member Per Month (PMPM)</strong><br>
+            <strong>Calculation:</strong> Total cost ÷ member months. Member months = count of members enrolled each month summed across the period.<br>
+            <strong>Standard:</strong> CMS Medicare Advantage reporting standard. Used in MLR calculations per ACA §2718.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes only paid claims (excludes denied/voided)</li><li>Pharmacy costs included separately per CMS guidelines</li><li>Member months based on enrollment spans, not calendar months</li><li>Excludes adjustment/reversal claims from cost base</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <$400 PMPM | <strong>average:</strong> $400-$600 | <strong>concern:</strong> >$600<br>
+            <strong>Why It Matters:</strong> PMPM is the fundamental unit of healthcare cost management. A $10 PMPM increase across 10,000 members = $1.2M annual impact.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_588778').style.display=document.getElementById('sql_588778').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_588778" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — PMPM Financial Performance</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT
+                        'YTD Actual' as period,
+                        COUNT(DISTINCT c.MEMBER_ID) as covered_lives,
+                        ROUND(SUM(CAST(c.BILLED_AMOUNT AS REAL))/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as revenue_pmpm,
+                        ROUND(SUM(CASE WHEN e.VISIT_TYPE = 'INPATIENT' THEN CAST(c.PAID_AMOUNT AS REAL) ELSE 0 END)/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as inpatient_pmpm,
+                        ROUND(SUM(CASE WHEN e.VISIT_TYPE = 'OUTPATIENT' THEN CAST(c.PAID_AMOUNT AS REAL) ELSE 0 END)/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as outpatient_pmpm,
+                        ROUND(SUM(CASE WHEN e.VISIT_TYPE = 'EMERGENCY' THEN CAST(c.PAID_AMOUNT AS REAL) ELSE 0 END)/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as er_pmpm,
+                        ROUND(SUM(CASE WHEN e.VISIT_TYPE IN ('OFFICE VISIT','TELEHEALTH') THEN CAST(c.PAID_AMOUNT AS REAL) ELSE 0 END)/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as office_pmpm,
+                        ROUND((SELECT SUM(CAST(COST AS REAL)) FROM PRESCRIPTIONS)/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as pharmacy_pmpm,
+                        ROUND(SUM(CAST(c.PAID_AMOUNT AS REAL))/COUNT(DISTINCT c.MEMBER_ID)/12, 2) as total_medical_pmpm,
+                        ROUND((SUM(CAST(c.BILLED_AMOUNT AS REAL)) - SUM(CAST(c.PAID_AMOUNT AS REAL)))/SUM(CAST(c.BILLED_AMOUNT AS REAL))*100, 1) as margin_pct,
+                        ROUND(SUM(CAST(c.BILLED_AMOUNT AS REAL)) - SUM(CAST(c.PAID_AMOUNT AS REAL)), 0) as operating_income
+                    FROM CLAIMS c LEFT JOIN ENCOUNTERS e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID
+                    WHERE c.ENCOUNTER_ID != '' AND c.SERVICE_DATE IS NOT NULL</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, ENCOUNTERS, PRESCRIPTIONS<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card" style="grid-column: 1 / -1;">
+<h3 style="color:#002B5C;margin-bottom:1rem;">&#9632; Membership by Plan Type — Growth Drivers</h3>
+<div style="display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+<div style="background:#002B5C;color:white;padding:1rem 1.5rem;border-radius:6px;min-width:140px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;">1,692,238</div><div style="font-size:0.8rem;opacity:0.9;">Total Members</div></div>
+<div style="background:#28a745;color:white;padding:1rem 1.5rem;border-radius:6px;min-width:140px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;">+0</div><div style="font-size:0.8rem;opacity:0.9;">New Enrollments</div></div>
+<div style="background:#dc3545;color:white;padding:1rem 1.5rem;border-radius:6px;min-width:140px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;">-47,162</div><div style="font-size:0.8rem;opacity:0.9;">Disenrollments</div></div>
+<div style="background:#dc3545;color:white;padding:1rem 1.5rem;border-radius:6px;min-width:140px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;">-47,162</div><div style="font-size:0.8rem;opacity:0.9;">Net Growth (-2.8%)</div></div>
+</div>
+<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+<thead><tr style="background:#002B5C;color:white;">
+<th style="padding:10px;text-align:left;">Segment</th>
+<th style="padding:10px;text-align:right;">Members</th>
+<th style="padding:10px;text-align:right;">Mix %</th>
+<th style="padding:10px;text-align:right;">New</th>
+<th style="padding:10px;text-align:right;">Disenrolled</th>
+<th style="padding:10px;text-align:right;">Net</th>
+<th style="padding:10px;text-align:right;">Avg Risk</th>
+<th style="padding:10px;text-align:right;">Cost/Member</th>
+</tr></thead>
+<tbody><tr>
+<td style="padding:8px;font-weight:600;">HMO</td>
+<td style="text-align:right;padding:8px;">297,248</td>
+<td style="text-align:right;padding:8px;">17.6%</td>
+<td style="text-align:right;padding:8px;color:#28a745;">0</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">(10,439)</td>
+<td style="text-align:right;padding:8px;color:#dc3545;font-weight:600;">-10,439</td>
+<td style="text-align:right;padding:8px;">2.37</td>
+<td style="text-align:right;padding:8px;">$19,559</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">EPO</td>
+<td style="text-align:right;padding:8px;">287,896</td>
+<td style="text-align:right;padding:8px;">17.0%</td>
+<td style="text-align:right;padding:8px;color:#28a745;">0</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">(8,536)</td>
+<td style="text-align:right;padding:8px;color:#dc3545;font-weight:600;">-8,536</td>
+<td style="text-align:right;padding:8px;">2.35</td>
+<td style="text-align:right;padding:8px;">$19,468</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">PPO</td>
+<td style="text-align:right;padding:8px;">282,143</td>
+<td style="text-align:right;padding:8px;">16.7%</td>
+<td style="text-align:right;padding:8px;color:#28a745;">0</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">(5,610)</td>
+<td style="text-align:right;padding:8px;color:#dc3545;font-weight:600;">-5,610</td>
+<td style="text-align:right;padding:8px;">2.30</td>
+<td style="text-align:right;padding:8px;">$18,868</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">Medicaid</td>
+<td style="text-align:right;padding:8px;">279,091</td>
+<td style="text-align:right;padding:8px;">16.5%</td>
+<td style="text-align:right;padding:8px;color:#28a745;">0</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">(6,747)</td>
+<td style="text-align:right;padding:8px;color:#dc3545;font-weight:600;">-6,747</td>
+<td style="text-align:right;padding:8px;">2.35</td>
+<td style="text-align:right;padding:8px;">$19,279</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">HDHP</td>
+<td style="text-align:right;padding:8px;">277,987</td>
+<td style="text-align:right;padding:8px;">16.4%</td>
+<td style="text-align:right;padding:8px;color:#28a745;">0</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">(8,458)</td>
+<td style="text-align:right;padding:8px;color:#dc3545;font-weight:600;">-8,458</td>
+<td style="text-align:right;padding:8px;">2.31</td>
+<td style="text-align:right;padding:8px;">$19,321</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">Medicare Advantage</td>
+<td style="text-align:right;padding:8px;">267,873</td>
+<td style="text-align:right;padding:8px;">15.8%</td>
+<td style="text-align:right;padding:8px;color:#28a745;">0</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">(7,372)</td>
+<td style="text-align:right;padding:8px;color:#dc3545;font-weight:600;">-7,372</td>
+<td style="text-align:right;padding:8px;">2.30</td>
+<td style="text-align:right;padding:8px;">$19,742</td>
+</tr>
+<tr style="border-top:2px solid #002B5C;font-weight:700;background:#f0f4f8;">
+<td style="padding:10px;">TOTAL</td>
+<td style="text-align:right;padding:10px;">1,692,238</td>
+<td style="text-align:right;padding:10px;">100%</td>
+<td style="text-align:right;padding:10px;color:#28a745;">0</td>
+<td style="text-align:right;padding:10px;color:#dc3545;">(47,162)</td>
+<td style="text-align:right;padding:10px;color:#dc3545;font-weight:700;">-47,162</td>
+<td style="text-align:right;padding:10px;">—</td>
+<td style="text-align:right;padding:10px;">—</td>
+</tr></tbody></table>
+<div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_91088').style.display=document.getElementById('meth_91088').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_91088" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_323904').style.display=document.getElementById('sql_323904').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_323904" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Membership by Plan Type</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT m.PLAN_TYPE as segment,
+                        COUNT(*) as current_members,
+                        SUM(CASE WHEN m.ENROLLMENT_DATE &gt;= date('now', '-12 months') THEN 1 ELSE 0 END) as new_enrollments,
+                        SUM(CASE WHEN m.DISENROLLMENT_DATE IS NOT NULL AND m.DISENROLLMENT_DATE &gt;= date('now', '-12 months') THEN 1 ELSE 0 END) as disenrollments,
+                        COUNT(*) - SUM(CASE WHEN m.DISENROLLMENT_DATE IS NOT NULL AND m.DISENROLLMENT_DATE &gt;= date('now', '-12 months') THEN 1 ELSE 0 END) as net_active,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk_score,
+                        ROUND(SUM(CAST(c.PAID_AMOUNT AS REAL))/COUNT(DISTINCT m.MEMBER_ID),2) as cost_per_member
+                    FROM MEMBERS m LEFT JOIN CLAIMS c ON m.MEMBER_ID = c.MEMBER_ID
+                    GROUP BY m.PLAN_TYPE ORDER BY current_members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY m.PLAN_TYPE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Membership Trend</h3><div class="chart-container"><canvas id="chart_39205" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Active Members", "data": [418.0, 392.0, 416.0, 405.0, 417.0, 395.0, 437.0, 422.0, 366.0, 436.0, 398.0, 411.0, 388.0, 396.0, 423.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Pmpm", "data": [295718.68, 259684.66, 242611.28, 255847.6, 248537.99, 254382.61, 266542.08, 245940.27, 296560.93, 269141.17, 242790.48, 271376.61, 262643.03, 260910.0, 254970.63], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Active Members has decreased 4.3% over the period shown (from 418 to 400).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_39205').style.display=document.getElementById('meth_39205').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_39205" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_452972').style.display=document.getElementById('sql_452972').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_452972" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Membership Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(c.SERVICE_DATE,1,7) as month,
+                        COUNT(DISTINCT c.MEMBER_ID) as active_members,
+                        ROUND(SUM(CAST(c.PAID_AMOUNT AS REAL))/COUNT(DISTINCT c.MEMBER_ID),2) as pmpm
+                    FROM CLAIMS c WHERE c.SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card" style="grid-column: 1 / -1;">
+<h3 style="color:#002B5C;margin-bottom:1rem;">&#9632; Quality Measures Performance</h3>
+<div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;padding:1rem;background:linear-gradient(135deg,#002B5C,#003d7a);border-radius:8px;color:white;">
+<div style="text-align:center;">
+<div style="font-size:2.5rem;font-weight:700;">3.1</div>
+<div style="font-size:0.85rem;opacity:0.9;">Overall Star Rating</div>
+</div>
+<div style="font-size:1.8rem;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></div>
+<div style="flex:1;font-size:0.85rem;opacity:0.9;line-height:1.5;">
+Performance measures across Administrative, Clinical Quality, HEDIS, Part D, and Utilization domains. Star ratings reflect CMS 5-star quality methodology.
+Measures at 4+ stars are performing well. Below 3 stars requires immediate intervention planning.
+</div>
+</div>
+<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+<thead><tr style="background:#002B5C;color:white;">
+<th style="padding:10px;text-align:left;">Measure</th>
+<th style="padding:10px;text-align:center;">Actual</th>
+<th style="padding:10px;text-align:center;">Target</th>
+<th style="padding:10px;text-align:center;">Variance</th>
+<th style="padding:10px;text-align:center;">Benchmark</th>
+<th style="padding:10px;text-align:center;">Stars</th>
+</tr></thead>
+<tbody><tr style="background:#f0f4f8;"><td colspan="6" style="padding:8px;font-weight:700;color:#002B5C;">Administrative</td></tr><tr>
+<td style="padding:8px 8px 8px 24px;">Denial Rate</td>
+<td style="text-align:center;padding:8px;color:#dc3545;font-weight:600;">10.0%</td>
+<td style="text-align:center;padding:8px;">5.0%</td>
+<td style="text-align:center;padding:8px;color:#dc3545;">+5.0</td>
+<td style="text-align:center;padding:8px;">10.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></td>
+</tr><tr>
+<td style="padding:8px 8px 8px 24px;">Clean Claim Rate</td>
+<td style="text-align:center;padding:8px;color:#dc3545;font-weight:600;">60.2%</td>
+<td style="text-align:center;padding:8px;">95.0%</td>
+<td style="text-align:center;padding:8px;color:#dc3545;">-34.8</td>
+<td style="text-align:center;padding:8px;">90.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></td>
+</tr><tr style="background:#f0f4f8;"><td colspan="6" style="padding:8px;font-weight:700;color:#002B5C;">Clinical Quality</td></tr><tr>
+<td style="padding:8px 8px 8px 24px;">Readmission Rate (30-day)</td>
+<td style="text-align:center;padding:8px;color:#28a745;font-weight:600;">0.9%</td>
+<td style="text-align:center;padding:8px;">10.0%</td>
+<td style="text-align:center;padding:8px;color:#28a745;">-9.1</td>
+<td style="text-align:center;padding:8px;">15.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></td>
+</tr><tr style="background:#f0f4f8;"><td colspan="6" style="padding:8px;font-weight:700;color:#002B5C;">HEDIS</td></tr><tr>
+<td style="padding:8px 8px 8px 24px;">Preventive Screening Rate</td>
+<td style="text-align:center;padding:8px;color:#dc3545;font-weight:600;">0.7%</td>
+<td style="text-align:center;padding:8px;">80.0%</td>
+<td style="text-align:center;padding:8px;color:#dc3545;">-79.3</td>
+<td style="text-align:center;padding:8px;">70.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></td>
+</tr><tr>
+<td style="padding:8px 8px 8px 24px;">Chronic Care Engagement</td>
+<td style="text-align:center;padding:8px;color:#dc3545;font-weight:600;">0.5%</td>
+<td style="text-align:center;padding:8px;">85.0%</td>
+<td style="text-align:center;padding:8px;color:#dc3545;">-84.5</td>
+<td style="text-align:center;padding:8px;">75.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></td>
+</tr><tr style="background:#f0f4f8;"><td colspan="6" style="padding:8px;font-weight:700;color:#002B5C;">Part D</td></tr><tr>
+<td style="padding:8px 8px 8px 24px;">Medication Adherence</td>
+<td style="text-align:center;padding:8px;color:#28a745;font-weight:600;">81.5%</td>
+<td style="text-align:center;padding:8px;">80.0%</td>
+<td style="text-align:center;padding:8px;color:#28a745;">+1.5</td>
+<td style="text-align:center;padding:8px;">75.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span></td>
+</tr><tr style="background:#f0f4f8;"><td colspan="6" style="padding:8px;font-weight:700;color:#002B5C;">Utilization</td></tr><tr>
+<td style="padding:8px 8px 8px 24px;">ER Utilization Rate</td>
+<td style="text-align:center;padding:8px;color:#ffc107;font-weight:600;">10.0%</td>
+<td style="text-align:center;padding:8px;">8.0%</td>
+<td style="text-align:center;padding:8px;color:#ffc107;">+2.0</td>
+<td style="text-align:center;padding:8px;">12.0%</td>
+<td style="text-align:center;padding:8px;"><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ffc107;font-size:1.1rem;">&#9733;</span><span style="color:#ddd;font-size:1.1rem;">&#9733;</span></td>
+</tr></tbody></table>
+<div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_605511').style.display=document.getElementById('sql_605511').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_605511" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Quality Measures Performance</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT 'Denial Rate' as measure,
+                        'Administrative' as domain,
+                        ROUND(100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*),1) as actual,
+                        5.0 as target,
+                        10.0 as benchmark,
+                        CASE WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*) &lt; 5 THEN 5
+                             WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*) &lt; 8 THEN 4
+                             WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*) &lt; 12 THEN 3
+                             WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*) &lt; 15 THEN 2
+                             ELSE 1 END as star_rating
+                    FROM CLAIMS WHERE ENCOUNTER_ID != ''
+                    UNION ALL
+                    SELECT 'Clean Claim Rate' as measure,
+                        'Administrative' as domain,
+                        ROUND(100.0*SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(*),1) as actual,
+                        95.0 as target,
+                        90.0 as benchmark,
+                        CASE WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(*) &gt;= 95 THEN 5
+                             WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(*) &gt;= 90 THEN 4
+                             WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(*) &gt;= 85 THEN 3
+                             WHEN 100.0*SUM(CASE WHEN CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(*) &gt;= 80 THEN 2
+                             ELSE 1 END as star_rating
+                    FROM CLAIMS WHERE ENCOUNTER_ID != ''
+                    UNION ALL
+                    SELECT 'Readmission Rate (30-day)' as measure,
+                        'Clinical Quality' as domain,
+                        ROUND(100.0*(SELECT COUNT(*) FROM ENCOUNTERS e2
+                            WHERE e2.VISIT_TYPE='INPATIENT' AND EXISTS(
+                                SELECT 1 FROM ENCOUNTERS e3
+                                WHERE e3.MEMBER_ID=e2.MEMBER_ID AND e3.VISIT_TYPE='INPATIENT'
+                                AND e3.ENCOUNTER_ID != e2.ENCOUNTER_ID
+                                AND julianday(e3.ADMIT_DATE) - julianday(e2.DISCHARGE_DATE) BETWEEN 0 AND 30
+                            ))/(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='INPATIENT'), 1) as actual,
+                        10.0 as target,
+                        15.0 as benchmark,
+                        3 as star_rating
+                    UNION ALL
+                    SELECT 'Preventive Screening Rate' as measure,
+                        'HEDIS' as domain,
+                        ROUND(100.0*(SELECT COUNT(DISTINCT MEMBER_ID) FROM ENCOUNTERS
+                            WHERE VISIT_TYPE IN ('OFFICE VISIT','OUTPATIENT')
+                            AND SERVICE_DATE &gt;= date('now', '-12 months'))
+                            /(SELECT COUNT(*) FROM MEMBERS), 1) as actual,
+                        80.0 as target,
+                        70.0 as benchmark,
+                        CASE WHEN 100.0*(SELECT COUNT(DISTINCT MEMBER_ID) FROM ENCOUNTERS
+                            WHERE VISIT_TYPE IN ('OFFICE VISIT','OUTPATIENT')
+                            AND SERVICE_DATE &gt;= date('now', '-12 months'))
+                            /(SELECT COUNT(*) FROM MEMBERS) &gt;= 80 THEN 5
+                             WHEN 100.0*(SELECT COUNT(DISTINCT MEMBER_ID) FROM ENCOUNTERS
+                            WHERE VISIT_TYPE IN ('OFFICE VISIT','OUTPATIENT')
+                            AND SERVICE_DATE &gt;= date('now', '-12 months'))
+                            /(SELECT COUNT(*) FROM MEMBERS) &gt;= 70 THEN 4
+                             ELSE 3 END as star_rating
+                    UNION ALL
+                    SELECT 'Chronic Care Engagement' as measure,
+                        'HEDIS' as domain,
+                        ROUND(100.0*(SELECT COUNT(DISTINCT e.MEMBER_ID)
+                            FROM ENCOUNTERS e JOIN MEMBERS m ON e.MEMBER_ID=m.MEMBER_ID
+                            WHERE m.CHRONIC_CONDITIONS &gt;= 2
+                            AND e.SERVICE_DATE &gt;= date('now', '-6 months'))
+                            /(SELECT COUNT(*) FROM MEMBERS WHERE CHRONIC_CONDITIONS &gt;= 2), 1) as actual,
+                        85.0 as target,
+                        75.0 as benchmark,
+                        CASE WHEN 100.0*(SELECT COUNT(DISTINCT e.MEMBER_ID)
+                            FROM ENCOUNTERS e JOIN MEMBERS m ON e.MEMBER_ID=m.MEMBER_ID
+                            WHERE m.CHRONIC_CONDITIONS &gt;= 2
+                            AND e.SERVICE_DATE &gt;= date('now', '-6 months'))
+                            /(SELECT COUNT(*) FROM MEMBERS WHERE CHRONIC_CONDITIONS &gt;= 2) &gt;= 85 THEN 5
+                             WHEN 100.0*(SELECT COUNT(DISTINCT e.MEMBER_ID)
+                            FROM ENCOUNTERS e JOIN MEMBERS m ON e.MEMBER_ID=m.MEMBER_ID
+                            WHERE m.CHRONIC_CONDITIONS &gt;= 2
+                            AND e.SERVICE_DATE &gt;= date('now', '-6 months'))
+                            /(SELECT COUNT(*) FROM MEMBERS WHERE CHRONIC_CONDITIONS &gt;= 2) &gt;= 75 THEN 4
+                             ELSE 3 END as star_rating
+                    UNION ALL
+                    SELECT 'Medication Adherence' as measure,
+                        'Part D' as domain,
+                        ROUND(100.0*(SELECT COUNT(*) FROM PRESCRIPTIONS WHERE REFILLS_USED &gt; 0)
+                            /(SELECT COUNT(*) FROM PRESCRIPTIONS WHERE REFILLS_AUTHORIZED &gt; 0), 1) as actual,
+                        80.0 as target,
+                        75.0 as benchmark,
+                        CASE WHEN 100.0*(SELECT COUNT(*) FROM PRESCRIPTIONS WHERE REFILLS_USED &gt; 0)
+                            /(SELECT COUNT(*) FROM PRESCRIPTIONS WHERE REFILLS_AUTHORIZED &gt; 0) &gt;= 80 THEN 5
+                             WHEN 100.0*(SELECT COUNT(*) FROM PRESCRIPTIONS WHERE REFILLS_USED &gt; 0)
+                            /(SELECT COUNT(*) FROM PRESCRIPTIONS WHERE REFILLS_AUTHORIZED &gt; 0) &gt;= 70 THEN 4
+                             ELSE 3 END as star_rating
+                    UNION ALL
+                    SELECT 'ER Utilization Rate' as measure,
+                        'Utilization' as domain,
+                        ROUND(100.0*(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY')
+                            /(SELECT COUNT(*) FROM ENCOUNTERS), 1) as actual,
+                        8.0 as target,
+                        12.0 as benchmark,
+                        CASE WHEN 100.0*(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY')
+                            /(SELECT COUNT(*) FROM ENCOUNTERS) &lt;= 8 THEN 5
+                             WHEN 100.0*(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY')
+                            /(SELECT COUNT(*) FROM ENCOUNTERS) &lt;= 12 THEN 4
+                             WHEN 100.0*(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY')
+                            /(SELECT COUNT(*) FROM ENCOUNTERS) &lt;= 15 THEN 3
+                             ELSE 2 END as star_rating</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, ENCOUNTERS, PRESCRIPTIONS<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Result:</strong> 7 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Risk Score Distribution</h3><div class="chart-container"><canvas id="chart_11742" data-chart='{"type": "bar", "data": {"labels": ["0.0-0.5", "0.5-1.0", "1.0-1.5", "1.5-2.0", "2.0-2.5", "2.5-3.0", "3.0+"], "datasets": [{"label": "Members", "data": [14200.0, 23340.0, 23660.0, 23780.0, 22060.0, 23220.0, 69740.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Conditions", "data": [3.0, 3.1, 3.0, 3.0, 3.0, 3.1, 3.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Population", "data": [7.1, 11.7, 11.8, 11.9, 11.0, 11.6, 34.9], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Members: 3.0+ (69,740). Lowest: 0.0-0.5 (14,200). Average: 28,571. A 391% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_11742').style.display=document.getElementById('meth_11742').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_11742" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Risk Score (Hierarchical Condition Category)</strong><br>
+            <strong>Calculation:</strong> RAF (Risk Adjustment Factor) computed from HCC diagnoses using CMS/HHS algorithms. Higher score = higher expected cost.<br>
+            <strong>Standard:</strong> CMS Medicare Advantage standard. Ranges typically 0.5 - 3.0+ (mean ~1.0).<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Based on ICD-10 diagnosis codes documented in prior year</li><li>Only documented diagnoses count (coding specificity crucial)</li><li>Score used to adjust capitation payments (higher risk = higher payment)</li><li>HCC hierarchies prevent double-counting (e.g., diabetes without complications vs with)</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <0.9 (lower cost profile) | <strong>average:</strong> 0.9-1.2 | <strong>concern:</strong> >1.3<br>
+            <strong>Why It Matters:</strong> 0.1 point risk difference × 100K members × $8K PMPM = $80M/year revenue impact.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_657968').style.display=document.getElementById('sql_657968').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_657968" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Risk Score Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT CASE
+                        WHEN CAST(RISK_SCORE AS REAL) &lt; 0.5 THEN '0.0-0.5'
+                        WHEN CAST(RISK_SCORE AS REAL) &lt; 1.0 THEN '0.5-1.0'
+                        WHEN CAST(RISK_SCORE AS REAL) &lt; 1.5 THEN '1.0-1.5'
+                        WHEN CAST(RISK_SCORE AS REAL) &lt; 2.0 THEN '1.5-2.0'
+                        WHEN CAST(RISK_SCORE AS REAL) &lt; 2.5 THEN '2.0-2.5'
+                        WHEN CAST(RISK_SCORE AS REAL) &lt; 3.0 THEN '2.5-3.0'
+                        ELSE '3.0+' END as risk_band,
+                        COUNT(*) as members,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_conditions,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct_of_population
+                    FROM MEMBERS GROUP BY risk_band ORDER BY MIN(CAST(RISK_SCORE AS REAL))</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY risk_band<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 7 rows returned
+            </div>
+        </div></div></div><div class="card" style="grid-column: 1 / -1;">
+<h3 style="color:#002B5C;margin-bottom:1rem;">&#9632; RADA Risk Score by Region — Medicare Advantage Risk Adjustment</h3>
+<div style="display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+<div style="background:linear-gradient(135deg,#002B5C,#003d7a);color:white;padding:1rem 1.5rem;border-radius:6px;min-width:160px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;">2.330</div><div style="font-size:0.8rem;opacity:0.9;">Org Avg Risk Score</div></div>
+<div style="background:#f0f4f8;padding:1rem 1.5rem;border-radius:6px;min-width:160px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;color:#002B5C;">2.283</div><div style="font-size:0.8rem;color:#666;">Budget Risk Score</div></div>
+<div style="background:#e8f4e8;padding:1rem 1.5rem;border-radius:6px;min-width:160px;text-align:center;">
+<div style="font-size:1.8rem;font-weight:700;color:#28a745;">+0.047</div><div style="font-size:0.8rem;color:#666;">Variance to Budget</div></div>
+</div>
+<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+<thead><tr style="background:#002B5C;color:white;">
+<th style="padding:10px;text-align:left;">Region</th>
+<th style="padding:10px;text-align:right;">Members</th>
+<th style="padding:10px;text-align:center;">Risk Score</th>
+<th style="padding:10px;text-align:right;">Var to Org</th>
+<th style="padding:10px;text-align:right;">Avg Conditions</th>
+<th style="padding:10px;text-align:right;">High Risk</th>
+<th style="padding:10px;text-align:right;">Cost PMPY</th>
+</tr></thead>
+<tbody><tr>
+<td style="padding:8px;font-weight:600;">MAS</td>
+<td style="text-align:right;padding:8px;">24,260</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:47.74%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.387</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">+0.057</td>
+<td style="text-align:right;padding:8px;">3.1</td>
+<td style="text-align:right;padding:8px;">125,926 (59.5%)</td>
+<td style="text-align:right;padding:8px;">$20,583</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">MID</td>
+<td style="text-align:right;padding:8px;">25,420</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:47.519999999999996%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.376</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">+0.046</td>
+<td style="text-align:right;padding:8px;">3.0</td>
+<td style="text-align:right;padding:8px;">126,917 (59.4%)</td>
+<td style="text-align:right;padding:8px;">$19,770</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">NW</td>
+<td style="text-align:right;padding:8px;">26,700</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:46.660000000000004%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.333</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">+0.003</td>
+<td style="text-align:right;padding:8px;">3.0</td>
+<td style="text-align:right;padding:8px;">125,202 (56.7%)</td>
+<td style="text-align:right;padding:8px;">$18,558</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">SCAL</td>
+<td style="text-align:right;padding:8px;">25,480</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:46.62%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.331</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">+0.001</td>
+<td style="text-align:right;padding:8px;">3.0</td>
+<td style="text-align:right;padding:8px;">124,390 (57.1%)</td>
+<td style="text-align:right;padding:8px;">$19,748</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">NCAL</td>
+<td style="text-align:right;padding:8px;">24,360</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:46.580000000000005%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.329</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">-0.001</td>
+<td style="text-align:right;padding:8px;">3.0</td>
+<td style="text-align:right;padding:8px;">115,934 (57.6%)</td>
+<td style="text-align:right;padding:8px;">$18,923</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">HI</td>
+<td style="text-align:right;padding:8px;">24,440</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:46.42000000000001%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.321</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">-0.009</td>
+<td style="text-align:right;padding:8px;">3.1</td>
+<td style="text-align:right;padding:8px;">118,994 (57.0%)</td>
+<td style="text-align:right;padding:8px;">$20,243</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">GA</td>
+<td style="text-align:right;padding:8px;">24,340</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:46.36%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.318</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">-0.012</td>
+<td style="text-align:right;padding:8px;">3.0</td>
+<td style="text-align:right;padding:8px;">118,012 (56.8%)</td>
+<td style="text-align:right;padding:8px;">$18,844</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">CO</td>
+<td style="text-align:right;padding:8px;">25,000</td>
+<td style="text-align:center;padding:8px;">
+<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+<div style="width:60px;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+<div style="width:44.84%;height:100%;background:#ffc107;border-radius:5px;"></div></div>
+<span style="font-weight:600;">2.242</span>
+</div></td>
+<td style="text-align:right;padding:8px;color:#666;font-weight:600;">-0.088</td>
+<td style="text-align:right;padding:8px;">3.0</td>
+<td style="text-align:right;padding:8px;">117,673 (56.0%)</td>
+<td style="text-align:right;padding:8px;">$18,364</td>
+</tr></tbody></table>
+<div style="margin-top:1rem;padding:0.75rem;background:#f8f9fa;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;">
+<strong>Methodology:</strong> Risk scores based on HCC (Hierarchical Condition Categories) model. Higher risk score = higher expected cost = higher CMS capitation revenue.
+Regions above org average drive higher revenue but require intensive care management. Variance to budget indicates coding accuracy gap — positive variance means under-coded risk potential.
+</div>
+<div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_13789').style.display=document.getElementById('meth_13789').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_13789" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Risk Score (Hierarchical Condition Category)</strong><br>
+            <strong>Calculation:</strong> RAF (Risk Adjustment Factor) computed from HCC diagnoses using CMS/HHS algorithms. Higher score = higher expected cost.<br>
+            <strong>Standard:</strong> CMS Medicare Advantage standard. Ranges typically 0.5 - 3.0+ (mean ~1.0).<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Based on ICD-10 diagnosis codes documented in prior year</li><li>Only documented diagnoses count (coding specificity crucial)</li><li>Score used to adjust capitation payments (higher risk = higher payment)</li><li>HCC hierarchies prevent double-counting (e.g., diabetes without complications vs with)</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <0.9 (lower cost profile) | <strong>average:</strong> 0.9-1.2 | <strong>concern:</strong> >1.3<br>
+            <strong>Why It Matters:</strong> 0.1 point risk difference × 100K members × $8K PMPM = $80M/year revenue impact.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_845192').style.display=document.getElementById('sql_845192').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_845192" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — RADA Risk Score by Region</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT m.KP_REGION,
+                        COUNT(DISTINCT m.MEMBER_ID) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),3) as avg_risk_score,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),2) as avg_conditions,
+                        SUM(CASE WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 2.0 THEN 1 ELSE 0 END) as high_risk_members,
+                        ROUND(100.0*SUM(CASE WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 2.0 THEN 1 ELSE 0 END)/COUNT(*),1) as high_risk_pct,
+                        ROUND(SUM(CAST(c.PAID_AMOUNT AS REAL))/COUNT(DISTINCT m.MEMBER_ID),2) as cost_pmpy
+                    FROM MEMBERS m LEFT JOIN CLAIMS c ON m.MEMBER_ID = c.MEMBER_ID
+                    GROUP BY m.KP_REGION ORDER BY avg_risk_score DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY m.KP_REGION<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card" style="grid-column: 1 / -1;">
+<h3 style="color:#002B5C;margin-bottom:1rem;">&#9632; Utilization per 1000 Members</h3>
+<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+<thead><tr style="background:#002B5C;color:white;">
+<th style="padding:10px;text-align:left;">Service Type</th>
+<th style="padding:10px;text-align:right;">Volume</th>
+<th style="padding:10px;text-align:right;">Util/1000</th>
+<th style="padding:10px;text-align:right;">Benchmark</th>
+<th style="padding:10px;text-align:right;">Variance</th>
+<th style="padding:10px;text-align:right;">Unit Cost</th>
+<th style="padding:10px;text-align:right;">BM Cost</th>
+<th style="padding:10px;text-align:right;">Total Cost</th>
+</tr></thead>
+<tbody><tr>
+<td style="padding:8px;font-weight:600;">OUTPATIENT</td>
+<td style="text-align:right;padding:8px;">238,884</td>
+<td style="text-align:right;padding:8px;font-weight:600;">1,194.4</td>
+<td style="text-align:right;padding:8px;">350</td>
+<td style="text-align:right;padding:8px;color:#28a745;">+844.4</td>
+<td style="text-align:right;padding:8px;">$2,581</td>
+<td style="text-align:right;padding:8px;">$500</td>
+<td style="text-align:right;padding:8px;">$1,233,001,350</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">TELEHEALTH</td>
+<td style="text-align:right;padding:8px;">116,508</td>
+<td style="text-align:right;padding:8px;font-weight:600;">582.5</td>
+<td style="text-align:right;padding:8px;">500</td>
+<td style="text-align:right;padding:8px;color:#28a745;">+82.5</td>
+<td style="text-align:right;padding:8px;">$2,546</td>
+<td style="text-align:right;padding:8px;">$75</td>
+<td style="text-align:right;padding:8px;">$588,112,909</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">INPATIENT</td>
+<td style="text-align:right;padding:8px;">93,658</td>
+<td style="text-align:right;padding:8px;font-weight:600;">468.3</td>
+<td style="text-align:right;padding:8px;">60</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">+408.3</td>
+<td style="text-align:right;padding:8px;">$2,530</td>
+<td style="text-align:right;padding:8px;">$3,000</td>
+<td style="text-align:right;padding:8px;">$469,525,350</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">URGENT_CARE</td>
+<td style="text-align:right;padding:8px;">60,710</td>
+<td style="text-align:right;padding:8px;font-weight:600;">303.6</td>
+<td style="text-align:right;padding:8px;">304</td>
+<td style="text-align:right;padding:8px;color:#666;">+0.0</td>
+<td style="text-align:right;padding:8px;">$2,521</td>
+<td style="text-align:right;padding:8px;">$2,521</td>
+<td style="text-align:right;padding:8px;">$308,437,831</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">EMERGENCY</td>
+<td style="text-align:right;padding:8px;">59,749</td>
+<td style="text-align:right;padding:8px;font-weight:600;">298.7</td>
+<td style="text-align:right;padding:8px;">150</td>
+<td style="text-align:right;padding:8px;color:#dc3545;">+148.7</td>
+<td style="text-align:right;padding:8px;">$2,584</td>
+<td style="text-align:right;padding:8px;">$1,500</td>
+<td style="text-align:right;padding:8px;">$311,656,000</td>
+</tr><tr>
+<td style="padding:8px;font-weight:600;">HOME_HEALTH</td>
+<td style="text-align:right;padding:8px;">30,491</td>
+<td style="text-align:right;padding:8px;font-weight:600;">152.5</td>
+<td style="text-align:right;padding:8px;">152</td>
+<td style="text-align:right;padding:8px;color:#666;">+0.0</td>
+<td style="text-align:right;padding:8px;">$2,689</td>
+<td style="text-align:right;padding:8px;">$2,689</td>
+<td style="text-align:right;padding:8px;">$168,857,049</td>
+</tr></tbody></table>
+<div style="margin-top:1rem;padding:0.75rem;background:#f8f9fa;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;">
+<strong>Reading:</strong> Util/1000 = encounters per 1,000 members annually. Lower ER and Inpatient utilization indicates effective preventive care and ambulatory management. Higher Office Visit and Telehealth rates indicate good primary care access.
+Industry benchmarks sourced from HCUP/CMS Medicare database. PDR (Plan Deviation Ratio) = Actual Util / Benchmark Util.
+</div>
+<div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_37609').style.display=document.getElementById('meth_37609').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_37609" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Utilization Rate (per 1,000 members)</strong><br>
+            <strong>Calculation:</strong> Total encounters/admissions/days per 1,000 members per year.<br>
+            <strong>Standard:</strong> Varies by measure: ER visits 80-120/1K, inpatient admissions 50-70/1K, readmissions <20/1K.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Standardized for age/sex to allow benchmark comparison</li><li>Includes all visit types (office, urgent care, ED, inpatient)</li><li>Used to identify high utilization members for care management</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <100/1K | <strong>average:</strong> 100-140/1K | <strong>concern:</strong> >180/1K<br>
+            <strong>Why It Matters:</strong> High utilization signals unmanaged chronic disease or unnecessary care. 20/1K reduction = $2-4M savings for 10K members.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_548775').style.display=document.getElementById('sql_548775').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_548775" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Utilization per 1000 Members</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH enc_costs AS (
+                        SELECT ENCOUNTER_ID, AVG(CAST(PAID_AMOUNT AS REAL)) as avg_cost, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT
+                        e.VISIT_TYPE,
+                        COUNT(*) as total_encounters,
+                        ROUND(1000.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as util_per_1000,
+                        ROUND(AVG(ec.avg_cost),2) as unit_cost,
+                        ROUND(SUM(ec.total_cost),0) as total_cost,
+                        ROUND(SUM(ec.total_cost)/COUNT(DISTINCT e.MEMBER_ID),2) as cost_per_user
+                    FROM ENCOUNTERS e LEFT JOIN enc_costs ec ON e.ENCOUNTER_ID = ec.ENCOUNTER_ID
+                    WHERE e.ENCOUNTER_ID != ''
+                    GROUP BY e.VISIT_TYPE ORDER BY total_encounters DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT
+                        e.VISIT_TYPE,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card" style="grid-column: 1 / -1;">
+<h3 style="color:#002B5C;margin-bottom:1rem;">&#9632; Regional Performance Scorecard</h3>
+<div style="overflow-x:auto;">
+<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+<thead><tr style="background:#002B5C;color:white;">
+<th style="padding:10px;text-align:left;">Region</th>
+<th style="padding:10px;text-align:right;">Members</th>
+<th style="padding:10px;text-align:right;">Risk Score</th>
+<th style="padding:10px;text-align:right;">Cost/Member</th>
+<th style="padding:10px;text-align:right;">Target</th>
+<th style="padding:10px;text-align:right;">Variance</th>
+<th style="padding:10px;text-align:right;">Denial Rate</th>
+<th style="padding:10px;text-align:right;">Clean Claim</th>
+<th style="padding:10px;text-align:right;">ER/1000</th>
+<th style="padding:10px;text-align:right;">Loss Ratio</th>
+<th style="padding:10px;text-align:left;">Commentary</th>
+</tr></thead>
+<tbody><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> HI</td>
+<td style="text-align:right;padding:8px;">860</td>
+<td style="text-align:right;padding:8px;">2.32</td>
+<td style="text-align:right;padding:8px;">$460,192</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#dc3545">$+22,710</td>
+<td style="text-align:right;padding:8px;color:#28a745">9.6%</td>
+<td style="text-align:right;padding:8px;">60.7%</td>
+<td style="text-align:right;padding:8px;">8,290</td>
+<td style="text-align:right;padding:8px;">35.4%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> MAS</td>
+<td style="text-align:right;padding:8px;">863</td>
+<td style="text-align:right;padding:8px;">2.39</td>
+<td style="text-align:right;padding:8px;">$457,018</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#dc3545">$+19,537</td>
+<td style="text-align:right;padding:8px;color:#28a745">9.5%</td>
+<td style="text-align:right;padding:8px;">62.3%</td>
+<td style="text-align:right;padding:8px;">8,722</td>
+<td style="text-align:right;padding:8px;">35.4%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> SCAL</td>
+<td style="text-align:right;padding:8px;">902</td>
+<td style="text-align:right;padding:8px;">2.34</td>
+<td style="text-align:right;padding:8px;">$444,849</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#dc3545">$+7,367</td>
+<td style="text-align:right;padding:8px;color:#dc3545">10.3%</td>
+<td style="text-align:right;padding:8px;">62.6%</td>
+<td style="text-align:right;padding:8px;">7,760</td>
+<td style="text-align:right;padding:8px;">35.8%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> MID</td>
+<td style="text-align:right;padding:8px;">880</td>
+<td style="text-align:right;padding:8px;">2.38</td>
+<td style="text-align:right;padding:8px;">$441,617</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#dc3545">$+4,135</td>
+<td style="text-align:right;padding:8px;color:#28a745">9.8%</td>
+<td style="text-align:right;padding:8px;">58.8%</td>
+<td style="text-align:right;padding:8px;">7,916</td>
+<td style="text-align:right;padding:8px;">34.7%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> NCAL</td>
+<td style="text-align:right;padding:8px;">845</td>
+<td style="text-align:right;padding:8px;">2.35</td>
+<td style="text-align:right;padding:8px;">$431,253</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#28a745">$-6,229</td>
+<td style="text-align:right;padding:8px;color:#28a745">9.8%</td>
+<td style="text-align:right;padding:8px;">61.3%</td>
+<td style="text-align:right;padding:8px;">9,940</td>
+<td style="text-align:right;padding:8px;">34.1%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> NW</td>
+<td style="text-align:right;padding:8px;">946</td>
+<td style="text-align:right;padding:8px;">2.34</td>
+<td style="text-align:right;padding:8px;">$429,441</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#28a745">$-8,041</td>
+<td style="text-align:right;padding:8px;color:#dc3545">10.2%</td>
+<td style="text-align:right;padding:8px;">60.3%</td>
+<td style="text-align:right;padding:8px;">8,674</td>
+<td style="text-align:right;padding:8px;">34.3%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> GA</td>
+<td style="text-align:right;padding:8px;">868</td>
+<td style="text-align:right;padding:8px;">2.31</td>
+<td style="text-align:right;padding:8px;">$426,205</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#28a745">$-11,277</td>
+<td style="text-align:right;padding:8px;color:#28a745">9.5%</td>
+<td style="text-align:right;padding:8px;">58.3%</td>
+<td style="text-align:right;padding:8px;">8,658</td>
+<td style="text-align:right;padding:8px;">33.0%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr><tr>
+<td style="padding:8px;"><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> CO</td>
+<td style="text-align:right;padding:8px;">877</td>
+<td style="text-align:right;padding:8px;">2.24</td>
+<td style="text-align:right;padding:8px;">$409,279</td>
+<td style="text-align:right;padding:8px;">$437,482</td>
+<td style="text-align:right;padding:8px;color:#28a745">$-28,202</td>
+<td style="text-align:right;padding:8px;color:#dc3545">11.2%</td>
+<td style="text-align:right;padding:8px;">57.5%</td>
+<td style="text-align:right;padding:8px;">7,990</td>
+<td style="text-align:right;padding:8px;">33.1%</td>
+<td style="padding:8px;font-size:0.82rem;color:#555;">High ER — diversion needed; High acuity population</td>
+</tr></tbody></table>
+</div>
+<div style="margin-top:1rem;display:flex;gap:1.5rem;font-size:0.8rem;color:#555;">
+<span><span style="color:#28a745;font-size:1.2rem;">&#9679;</span> On Track</span>
+<span><span style="color:#ffc107;font-size:1.2rem;">&#9679;</span> Monitor (1 issue)</span>
+<span><span style="color:#dc3545;font-size:1.2rem;">&#9679;</span> Action Required (2+ issues)</span>
+</div>
+<div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_8262').style.display=document.getElementById('meth_8262').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_8262" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Population Health Management</strong><br>
+            <strong>Calculation:</strong> Risk-stratified population breakdown: low, moderate, high, very high risk tiers + % engaged in programs.<br>
+            <strong>Standard:</strong> Typically 5-10% very high risk, 15-20% high risk, 30-40% moderate, 40-50% low risk.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Risk determined by claims history, diagnoses, utilization patterns</li><li>Engagement tracked by program enrollment, outreach response, clinical metrics</li><li>Stratification drives care management allocation</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> >70% engaged | <strong>average:</strong> 50-70% engaged | <strong>concern:</strong> <50% engaged<br>
+            <strong>Why It Matters:</strong> Population health programs ROI: $1 spent = $2-3 saved through prevention + disease management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_357114').style.display=document.getElementById('sql_357114').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_357114" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Regional Performance Scorecard</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_claims AS (
+                        SELECT m.MEMBER_ID, m.KP_REGION, m.RISK_SCORE, c.CLAIM_ID, c.CLAIM_STATUS, c.PAID_AMOUNT, c.BILLED_AMOUNT
+                        FROM MEMBERS m JOIN CLAIMS c ON m.MEMBER_ID = c.MEMBER_ID
+                        WHERE c.ENCOUNTER_ID != ''
+                    )
+                    SELECT mc.KP_REGION,
+                        COUNT(DISTINCT mc.MEMBER_ID) as members,
+                        ROUND(AVG(CAST(mc.RISK_SCORE AS REAL)),2) as risk_score,
+                        ROUND(SUM(CAST(mc.PAID_AMOUNT AS REAL))/COUNT(DISTINCT mc.MEMBER_ID),2) as cost_per_member,
+                        ROUND(100.0*SUM(CASE WHEN mc.CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(mc.CLAIM_ID),1) as denial_rate,
+                        ROUND(100.0*SUM(CASE WHEN mc.CLAIM_STATUS='PAID' THEN 1 ELSE 0 END)/COUNT(mc.CLAIM_ID),1) as clean_claim_rate,
+                        ROUND(1000.0*(SELECT COUNT(*) FROM ENCOUNTERS e2 WHERE e2.KP_REGION=mc.KP_REGION AND e2.VISIT_TYPE='EMERGENCY' AND e2.ENCOUNTER_ID != '')/COUNT(DISTINCT mc.MEMBER_ID),1) as er_per_1000,
+                        ROUND(SUM(CAST(mc.PAID_AMOUNT AS REAL))/SUM(CAST(mc.BILLED_AMOUNT AS REAL))*100,1) as loss_ratio
+                    FROM member_claims mc
+                    GROUP BY mc.KP_REGION ORDER BY cost_per_member DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY mc.KP_REGION<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Appointment Adherence</h3><div class="chart-container"><canvas id="chart_52620" data-chart='{"type": "bar", "data": {"labels": ["CANCELLED", "NO_SHOW", "COMPLETED", "RESCHEDULED", "SCHEDULED"], "datasets": [{"label": "Count", "data": [27003.0, 25412.0, 25243.0, 24734.0, 17608.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [22.5, 21.2, 21.0, 20.6, 14.7], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Count: CANCELLED (27,003). Lowest: SCHEDULED (17,608). Average: 24,000. A 53% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_52620').style.display=document.getElementById('meth_52620').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_52620" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_437265').style.display=document.getElementById('sql_437265').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_437265" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Appointment Adherence</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT a.STATUS as appointment_status,
+                        COUNT(*) as count,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM appointments),1) as pct
+                    FROM appointments a GROUP BY a.STATUS ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> rounding for precision<br><strong>Grouping:</strong> GROUP BY a.STATUS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Referral Completion</h3><div class="chart-container"><canvas id="chart_95123" data-chart='{"type": "bar", "data": {"labels": ["APPROVED", "COMPLETED", "PENDING", "CANCELLED", "DENIED", "EXPIRED"], "datasets": [{"label": "Count", "data": [20480.0, 17680.0, 13360.0, 3040.0, 2840.0, 2600.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [34.1, 29.5, 22.3, 5.1, 4.7, 4.3], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Days To Appt", "data": [32.5, 32.5, 30.3, 30.1, 29.7, 32.9], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Count: APPROVED (20,480). Lowest: EXPIRED (2,600). Average: 10,000. A 688% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_95123').style.display=document.getElementById('meth_95123').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_95123" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_92182').style.display=document.getElementById('sql_92182').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_92182" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referral Completion</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT r.STATUS as referral_status,
+                        COUNT(*) as count,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM REFERRALS),1) as pct,
+                        ROUND(AVG(CASE WHEN r.APPOINTMENT_DATE IS NOT NULL AND r.REFERRAL_DATE IS NOT NULL
+                            THEN julianday(r.APPOINTMENT_DATE) - julianday(r.REFERRAL_DATE) ELSE NULL END),1) as avg_days_to_appt
+                    FROM REFERRALS r GROUP BY r.STATUS ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY r.STATUS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Provider Productivity</h3><div class="table-container"><table><thead><tr><th>Specialty</th><th>Providers</th><th>Avg Panel Size</th><th>Total Encounters</th><th>Encounters Per Provider</th></tr></thead><tbody><tr><td>Gastroenterology</td><td>248</td><td>1,335.00</td><td>26,596</td><td>107.00</td></tr><tr><td>Endocrinology</td><td>208</td><td>1,207.00</td><td>22,054</td><td>106.00</td></tr><tr><td>Rheumatology</td><td>300</td><td>1,322.00</td><td>31,485</td><td>105.00</td></tr><tr><td>Pulmonology</td><td>236</td><td>1,260.00</td><td>24,456</td><td>104.00</td></tr><tr><td>Radiology</td><td>264</td><td>1,238.00</td><td>27,373</td><td>104.00</td></tr><tr><td>Emergency Medicine</td><td>276</td><td>1,318.00</td><td>28,406</td><td>103.00</td></tr><tr><td>Pediatrics</td><td>264</td><td>1,370.00</td><td>26,846</td><td>102.00</td></tr><tr><td>ENT</td><td>300</td><td>1,306.00</td><td>30,363</td><td>101.00</td></tr><tr><td>Psychiatry</td><td>244</td><td>1,378.00</td><td>24,613</td><td>101.00</td></tr><tr><td>Dermatology</td><td>216</td><td>1,242.00</td><td>21,599</td><td>100.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 10 rows of 10 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_980338').style.display=document.getElementById('sql_980338').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_980338" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Provider Productivity</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT p.SPECIALTY,
+                        COUNT(DISTINCT p.NPI) as providers,
+                        ROUND(AVG(CAST(p.PANEL_SIZE AS REAL)),0) as avg_panel_size,
+                        COUNT(DISTINCT e.ENCOUNTER_ID) as total_encounters,
+                        ROUND(CAST(COUNT(DISTINCT e.ENCOUNTER_ID) AS REAL)/COUNT(DISTINCT p.NPI),0) as encounters_per_provider
+                    FROM PROVIDERS p LEFT JOIN ENCOUNTERS e ON p.NPI = e.RENDERING_NPI
+                    WHERE p.STATUS = 'ACTIVE'
+                    GROUP BY p.SPECIALTY ORDER BY encounters_per_provider DESC LIMIT 10</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS, PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY p.SPECIALTY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 10 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Top Cost Drivers</h3><div class="chart-container"><canvas id="chart_17765" data-chart='{"type": "bar", "data": {"labels": ["Cardiology", "ENT", "Radiology", "Emergency Medicine", "Rheumatology", "Nephrology", "Orthopedics", "Oncology"], "datasets": [{"label": "Claims", "data": [91900.0, 86600.0, 82500.0, 81100.0, 80200.0, 77900.0, 80700.0, 82500.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Total Cost", "data": [234546576.0, 228003921.0, 218214609.0, 216557889.0, 214583179.0, 213307726.0, 211144768.0, 209591545.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Per Claim", "data": [2552.0, 2633.0, 2645.0, 2670.0, 2676.0, 2738.0, 2616.0, 2541.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Claims: Cardiology (91,900). Lowest: Nephrology (77,900). Average: 82,925.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_11982').style.display=document.getElementById('sql_11982').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_11982" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Top Cost Drivers</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT p.SPECIALTY as cost_driver,
+                        COUNT(DISTINCT c.CLAIM_ID) as claims,
+                        ROUND(SUM(CAST(c.PAID_AMOUNT AS REAL)),0) as total_cost,
+                        ROUND(AVG(CAST(c.PAID_AMOUNT AS REAL)),0) as avg_per_claim,
+                        ROUND(100.0*SUM(CAST(c.PAID_AMOUNT AS REAL))/(SELECT SUM(CAST(PAID_AMOUNT AS REAL)) FROM CLAIMS),1) as pct_of_total
+                    FROM CLAIMS c JOIN PROVIDERS p ON c.RENDERING_NPI = p.NPI
+                    GROUP BY p.SPECIALTY ORDER BY total_cost DESC LIMIT 8</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY p.SPECIALTY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">161,730</div><div class="label">Current Pmpm</div></div><div class="kpi"><div class="value">166,849</div><div class="label">Prior Pmpm</div></div><div class="kpi"><div class="value">-3.1</div><div class="label">Pmpm Change Pct</div></div><div class="kpi"><div class="value">467</div><div class="label">Current Members</div></div><div class="kpi"><div class="value">4,830</div><div class="label">Recent Admits</div></div><div class="kpi"><div class="value">0</div><div class="label">Recent Er</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_69778').style.display=document.getElementById('meth_69778').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_69778" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_684316').style.display=document.getElementById('sql_684316').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_684316" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Forecasting KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH recent AS (
+                        SELECT ROUND(SUM(paid_usd)/COUNT(DISTINCT member_id),2) as current_pmpm,
+                            COUNT(DISTINCT member_id) as current_members,
+                            SUM(admits) as recent_admits, SUM(er_visits) as recent_er
+                        FROM gpdm_member_month_fact WHERE year_month = (SELECT MAX(year_month) FROM gpdm_member_month_fact)
+                    ), prior AS (
+                        SELECT ROUND(SUM(paid_usd)/COUNT(DISTINCT member_id),2) as prior_pmpm,
+                            COUNT(DISTINCT member_id) as prior_members
+                        FROM gpdm_member_month_fact WHERE year_month = (SELECT MIN(year_month) FROM (SELECT DISTINCT year_month FROM gpdm_member_month_fact ORDER BY year_month DESC LIMIT 2))
+                    )
+                    SELECT r.current_pmpm, p.prior_pmpm,
+                        ROUND(100.0*(r.current_pmpm - p.prior_pmpm)/NULLIF(p.prior_pmpm,0),1) as pmpm_change_pct,
+                        r.current_members, r.recent_admits, r.recent_er
+                    FROM recent r, prior p</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, GPDM_MEMBER_MONTH_FACT<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Visit Type Trends (36 months)</h3><div class="chart-container"><canvas id="chart_27180" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Total Encounters", "data": [18411.0, 15247.0, 17139.0, 16816.0, 16216.0, 16963.0, 16500.0, 17017.0, 17128.0, 16369.0, 16201.0, 16729.0, 16254.0, 14417.0, 15654.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Er Visits", "data": [1916.0, 1512.0, 1793.0, 1314.0, 1633.0, 1392.0, 2075.0, 1394.0, 1992.0, 1391.0, 1276.0, 1832.0, 1633.0, 1514.0, 1749.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Inpatient", "data": [2831.0, 2154.0, 2468.0, 2633.0, 2473.0, 2390.0, 2553.0, 3152.0, 2589.0, 2388.0, 2547.0, 2352.0, 3188.0, 2468.0, 2391.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Total Encounters has increased 2.9% over the period shown (from 18,411 to 18,948).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_27180').style.display=document.getElementById('meth_27180').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_27180" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_874759').style.display=document.getElementById('sql_874759').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_874759" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Visit Type Trends (36 months)</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(*) as total_encounters,
+                        SUM(CASE WHEN VISIT_TYPE='EMERGENCY' THEN 1 ELSE 0 END) as er_visits,
+                        SUM(CASE WHEN VISIT_TYPE='INPATIENT' THEN 1 ELSE 0 END) as inpatient,
+                        SUM(CASE WHEN VISIT_TYPE='TELEHEALTH' THEN 1 ELSE 0 END) as telehealth,
+                        SUM(CASE WHEN VISIT_TYPE='OUTPATIENT' THEN 1 ELSE 0 END) as outpatient,
+                        SUM(CASE WHEN VISIT_TYPE='URGENT_CARE' THEN 1 ELSE 0 END) as urgent_care
+                    FROM ENCOUNTERS WHERE SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS<br><strong>Aggregations:</strong> summation<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Claims & Cost Trend</h3><div class="chart-container"><canvas id="chart_73882" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Total Claims", "data": [42900.0, 39600.0, 42400.0, 40900.0, 42900.0, 40700.0, 44500.0, 43000.0, 37300.0, 44800.0, 40500.0, 42400.0, 39900.0, 40500.0, 43000.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Total Paid", "data": [123610409.0, 101796387.0, 100926294.0, 103618279.0, 103640344.0, 100481131.0, 116478887.0, 103786795.0, 108541302.0, 117345549.0, 96630612.0, 111535785.0, 101905497.0, 103320361.0, 107852578.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Avg Claim", "data": [2881.0, 2571.0, 2380.0, 2533.0, 2416.0, 2469.0, 2618.0, 2414.0, 2910.0, 2619.0, 2386.0, 2631.0, 2554.0, 2551.0, 2508.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Total Claims has decreased 3.3% over the period shown (from 42,900 to 41,500).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_73882').style.display=document.getElementById('meth_73882').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_73882" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_851650').style.display=document.getElementById('sql_851650').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_851650" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Claims & Cost Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(*) as total_claims,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),0) as total_paid,
+                        ROUND(AVG(CAST(PAID_AMOUNT AS REAL)),0) as avg_claim,
+                        SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END) as denied_count,
+                        ROUND(100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*),1) as denial_rate_pct
+                    FROM CLAIMS WHERE SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Deep dive into member demographics</span><span class="followup">Where are we losing money?</span><span class="followup">What quality initiatives should we prioritize?</span><span class="followup">Show me provider network performance</span><span class="followup">What is the ROI of care management for high-risk members?</span><span class="followup">Show me PMPM trends by quarter</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

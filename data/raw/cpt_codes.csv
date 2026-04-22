@@ -1,0 +1,82 @@
+CPT_CODE,DESCRIPTION,CATEGORY,RVU
+99213,"Office visit, established patient, low complexity",Evaluation & Management,17.14
+99214,"Office visit, established patient, moderate complexity",Evaluation & Management,4.98
+99215,"Office visit, established patient, high complexity",Evaluation & Management,15.48
+99203,"Office visit, new patient, low complexity",Evaluation & Management,12.69
+99281,"Emergency department visit, minimal",Evaluation & Management,9.07
+99283,"Emergency department visit, moderate",Evaluation & Management,4.06
+99285,"Emergency department visit, high",Evaluation & Management,23.49
+99386,"Preventive visit, 40-64 years",Evaluation & Management,20.78
+36415,Routine venipuncture,Laboratory,11.08
+85025,Complete blood count,Laboratory,10.28
+80053,Comprehensive metabolic panel,Laboratory,7.18
+71046,"Chest x-ray, 2 views",Radiology,18.88
+93000,"Electrocardiogram, complete",Cardiology,12.64
+90837,"Psychotherapy, 60 minutes",Psychiatry,19.41
+97110,Therapeutic exercises,Physical Therapy,15.94
+99232,Subsequent hospital care,Evaluation & Management,21.53
+99223,"Initial hospital care, high complexity",Evaluation & Management,18.63
+90471,Immunization administration,Other,6.16
+11102,Tangential biopsy of skin,Surgery,5.72
+43239,Upper GI endoscopy with biopsy,Surgery,3.4
+99201,"Office visit, new patient, straightforward",Evaluation & Management,8.82
+99204,"Office visit, new patient, moderate complexity",Evaluation & Management,19.36
+99205,"Office visit, new patient, high complexity",Evaluation & Management,9.24
+99221,"Initial hospital care, low complexity",Evaluation & Management,20.82
+99222,"Initial hospital care, moderate complexity",Evaluation & Management,9.34
+99231,"Subsequent hospital care, low complexity",Evaluation & Management,5.81
+99233,"Subsequent hospital care, high complexity",Evaluation & Management,18.57
+99282,"Emergency department visit, low",Evaluation & Management,4.31
+99284,"Emergency department visit, moderately high",Evaluation & Management,11.34
+99291,"Critical care, first 30-74 minutes",Evaluation & Management,23.42
+99395,"Preventive visit, 18-39 years",Evaluation & Management,20.25
+99396,"Preventive visit, 40-64 years",Evaluation & Management,5.94
+99397,"Preventive visit, 65+ years",Evaluation & Management,19.15
+70553,MRI brain without/with contrast,Radiology,20.18
+73721,MRI knee without contrast,Radiology,19.48
+74177,CT abdomen/pelvis with contrast,Radiology,12.89
+77067,"Screening mammography, bilateral",Radiology,18.52
+81001,"Urinalysis, automated with microscopy",Laboratory,21.41
+82947,"Glucose, quantitative",Laboratory,12.38
+83036,Hemoglobin A1c,Laboratory,20.81
+84443,Thyroid stimulating hormone,Laboratory,11.26
+87880,Strep A rapid test,Laboratory,12.07
+90651,"HPV vaccine, 9-valent",Vaccines,14.68
+90658,Influenza virus vaccine,Vaccines,24.74
+90686,"Flu vaccine, quadrivalent",Vaccines,12.06
+90715,Tdap vaccine,Vaccines,18.87
+96372,"Therapeutic injection, SC/IM",Injection,8.18
+97140,Manual therapy techniques,Physical Therapy,3.33
+99211,"Office visit, established, minimal",Evaluation & Management,23.41
+99212,"Office visit, established, straightforward",Evaluation & Management,14.98
+99241,"Office consultation, straightforward",Evaluation & Management,1.42
+99243,"Office consultation, moderate complexity",Evaluation & Management,10.26
+10060,Incision and drainage of abscess,Surgery,1.73
+20610,"Arthrocentesis, major joint",Surgery,24.18
+27447,Total knee arthroplasty,Surgery,6.52
+29881,"Arthroscopy, knee, meniscectomy",Surgery,5.83
+45380,Colonoscopy with biopsy,Surgery,12.26
+47562,Laparoscopic cholecystectomy,Surgery,24.09
+49505,Inguinal hernia repair,Surgery,14.37
+50590,Lithotripsy,Surgery,5.7
+55700,Prostate biopsy,Surgery,22.37
+58661,"Laparoscopy, surgical; with removal of adnexal structures",Surgery,12.26
+59400,"Routine obstetric care, vaginal delivery",Surgery,24.07
+62322,Lumbar epidural injection,Surgery,8.03
+64483,Transforaminal epidural injection,Surgery,10.31
+66984,Cataract surgery with IOL,Surgery,2.66
+76830,Transvaginal ultrasound,Radiology,3.86
+76856,"Pelvic ultrasound, complete",Radiology,9.55
+78452,Myocardial perfusion imaging,Radiology,13.31
+80048,Basic metabolic panel,Laboratory,9.12
+85027,"Complete blood count, automated",Laboratory,23.95
+86580,Tuberculin skin test,Laboratory,12.26
+88305,"Surgical pathology, level IV",Laboratory,23.59
+90834,"Psychotherapy, 45 minutes",Psychiatry,0.99
+90847,Family psychotherapy with patient,Psychiatry,20.58
+92014,"Comprehensive eye exam, established",Ophthalmology,0.97
+93306,"Echocardiography, complete",Cardiology,8.36
+95810,"Polysomnography, sleep study",Sleep Medicine,15.15
+96127,Brief emotional/behavioral assessment,Behavioral Health,1.42
+97530,Therapeutic activities,Physical Therapy,24.51
+99024,Postoperative follow-up visit,Evaluation & Management,3.28

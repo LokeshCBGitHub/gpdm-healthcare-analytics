@@ -1,0 +1,805 @@
+{
+  "table_name": "providers",
+  "file_name": "providers.csv",
+  "total_rows": 1500,
+  "total_columns": 14,
+  "table_purpose": "Provider and facility information",
+  "columns": {
+    "NPI": {
+      "column_name": "NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 1500,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1000231520.0,
+      "max_value": 1998930676.0,
+      "mean": 1501507723.9746666,
+      "top_values": [
+        {
+          "value": "1697045956",
+          "count": 1
+        },
+        {
+          "value": "1031876983",
+          "count": 1
+        },
+        {
+          "value": "1296376852",
+          "count": 1
+        },
+        {
+          "value": "1308482110",
+          "count": 1
+        },
+        {
+          "value": "1248576536",
+          "count": 1
+        },
+        {
+          "value": "1541038513",
+          "count": 1
+        },
+        {
+          "value": "1889656116",
+          "count": 1
+        },
+        {
+          "value": "1532965268",
+          "count": 1
+        },
+        {
+          "value": "1856653138",
+          "count": 1
+        },
+        {
+          "value": "1394674260",
+          "count": 1
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1522103315",
+        "1239833689",
+        "1203083757",
+        "1174159821",
+        "1753524444"
+      ]
+    },
+    "PROVIDER_FIRST_NAME": {
+      "column_name": "PROVIDER_FIRST_NAME",
+      "data_type": "string",
+      "semantic_type": "facility",
+      "healthcare_type": "facility",
+      "is_phi": true,
+      "cardinality": 96,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Katherine",
+          "count": 27
+        },
+        {
+          "value": "Stephanie",
+          "count": 26
+        },
+        {
+          "value": "Melissa",
+          "count": 25
+        },
+        {
+          "value": "James",
+          "count": 22
+        },
+        {
+          "value": "Kenneth",
+          "count": 22
+        },
+        {
+          "value": "Frank",
+          "count": 22
+        },
+        {
+          "value": "Samuel",
+          "count": 21
+        },
+        {
+          "value": "Sandra",
+          "count": 21
+        },
+        {
+          "value": "Charles",
+          "count": 21
+        },
+        {
+          "value": "Gregory",
+          "count": 21
+        }
+      ],
+      "description": "Healthcare facility where service was rendered",
+      "sample_values": [
+        "Pamela",
+        "Ryan",
+        "William",
+        "Charles",
+        "Katherine"
+      ]
+    },
+    "PROVIDER_LAST_NAME": {
+      "column_name": "PROVIDER_LAST_NAME",
+      "data_type": "string",
+      "semantic_type": "facility",
+      "healthcare_type": "facility",
+      "is_phi": true,
+      "cardinality": 64,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Murphy",
+          "count": 32
+        },
+        {
+          "value": "Garcia",
+          "count": 30
+        },
+        {
+          "value": "Allen",
+          "count": 30
+        },
+        {
+          "value": "Hill",
+          "count": 29
+        },
+        {
+          "value": "Ramirez",
+          "count": 29
+        },
+        {
+          "value": "Collins",
+          "count": 28
+        },
+        {
+          "value": "Martinez",
+          "count": 28
+        },
+        {
+          "value": "Carter",
+          "count": 28
+        },
+        {
+          "value": "Walker",
+          "count": 28
+        },
+        {
+          "value": "Lewis",
+          "count": 28
+        }
+      ],
+      "description": "Healthcare facility where service was rendered",
+      "sample_values": [
+        "Carter",
+        "Nguyen",
+        "Williams",
+        "Moore",
+        "Young"
+      ]
+    },
+    "SPECIALTY": {
+      "column_name": "SPECIALTY",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 20,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Cardiology",
+          "count": 92
+        },
+        {
+          "value": "ENT",
+          "count": 84
+        },
+        {
+          "value": "Emergency Medicine",
+          "count": 84
+        },
+        {
+          "value": "Radiology",
+          "count": 83
+        },
+        {
+          "value": "Rheumatology",
+          "count": 81
+        },
+        {
+          "value": "Orthopedics",
+          "count": 80
+        },
+        {
+          "value": "Oncology",
+          "count": 79
+        },
+        {
+          "value": "OB/GYN",
+          "count": 79
+        },
+        {
+          "value": "Pediatrics",
+          "count": 78
+        },
+        {
+          "value": "Surgery",
+          "count": 77
+        }
+      ],
+      "description": "Field: SPECIALTY",
+      "sample_values": [
+        "Rheumatology",
+        "Gastroenterology",
+        "Nephrology",
+        "Endocrinology",
+        "Oncology"
+      ]
+    },
+    "DEPARTMENT": {
+      "column_name": "DEPARTMENT",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 20,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Cardiology",
+          "count": 92
+        },
+        {
+          "value": "ENT",
+          "count": 84
+        },
+        {
+          "value": "Emergency Medicine",
+          "count": 84
+        },
+        {
+          "value": "Radiology",
+          "count": 83
+        },
+        {
+          "value": "Rheumatology",
+          "count": 81
+        },
+        {
+          "value": "Orthopedics",
+          "count": 80
+        },
+        {
+          "value": "Oncology",
+          "count": 79
+        },
+        {
+          "value": "OB/GYN",
+          "count": 79
+        },
+        {
+          "value": "Pediatrics",
+          "count": 78
+        },
+        {
+          "value": "Surgery",
+          "count": 77
+        }
+      ],
+      "description": "Field: DEPARTMENT",
+      "sample_values": [
+        "Nephrology",
+        "Pediatrics",
+        "Nephrology",
+        "OB/GYN",
+        "Emergency Medicine"
+      ]
+    },
+    "KP_REGION": {
+      "column_name": "KP_REGION",
+      "data_type": "string",
+      "semantic_type": "kp_region",
+      "healthcare_type": "kp_region",
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "GA",
+          "count": 209
+        },
+        {
+          "value": "SCAL",
+          "count": 208
+        },
+        {
+          "value": "MID",
+          "count": 202
+        },
+        {
+          "value": "HI",
+          "count": 196
+        },
+        {
+          "value": "NW",
+          "count": 181
+        },
+        {
+          "value": "NCAL",
+          "count": 175
+        },
+        {
+          "value": "MAS",
+          "count": 166
+        },
+        {
+          "value": "CO",
+          "count": 163
+        }
+      ],
+      "description": "Geographic region or service area for the health plan",
+      "sample_values": [
+        "HI",
+        "GA",
+        "GA",
+        "NW",
+        "MAS"
+      ]
+    },
+    "FACILITY": {
+      "column_name": "FACILITY",
+      "data_type": "string",
+      "semantic_type": "facility",
+      "healthcare_type": "facility",
+      "is_phi": false,
+      "cardinality": 26,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Crescent Center",
+          "count": 106
+        },
+        {
+          "value": "Burke Medical Center",
+          "count": 104
+        },
+        {
+          "value": "Town Center Medical Office",
+          "count": 103
+        },
+        {
+          "value": "Moanalua Medical Center",
+          "count": 102
+        },
+        {
+          "value": "Mid-Atlantic Medical Center",
+          "count": 98
+        },
+        {
+          "value": "Maui Lani Medical Office",
+          "count": 94
+        },
+        {
+          "value": "Tysons Corner Medical Center",
+          "count": 87
+        },
+        {
+          "value": "Capitol Hill Medical Center",
+          "count": 79
+        },
+        {
+          "value": "Interstate Medical Office",
+          "count": 69
+        },
+        {
+          "value": "Skyline Medical Center",
+          "count": 62
+        }
+      ],
+      "description": "Healthcare facility where service was rendered",
+      "sample_values": [
+        "Rock Creek Medical Office",
+        "Burke Medical Center",
+        "Moanalua Medical Center",
+        "Westside Medical Center",
+        "Rock Creek Medical Office"
+      ]
+    },
+    "PROVIDER_TYPE": {
+      "column_name": "PROVIDER_TYPE",
+      "data_type": "string",
+      "semantic_type": "facility",
+      "healthcare_type": "facility",
+      "is_phi": false,
+      "cardinality": 7,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MD",
+          "count": 621
+        },
+        {
+          "value": "NP",
+          "count": 217
+        },
+        {
+          "value": "RN",
+          "count": 201
+        },
+        {
+          "value": "DO",
+          "count": 153
+        },
+        {
+          "value": "PA",
+          "count": 141
+        },
+        {
+          "value": "LCSW",
+          "count": 87
+        },
+        {
+          "value": "PhD",
+          "count": 80
+        }
+      ],
+      "description": "Healthcare facility where service was rendered",
+      "sample_values": [
+        "NP",
+        "MD",
+        "MD",
+        "PhD",
+        "DO"
+      ]
+    },
+    "DEA_NUMBER": {
+      "column_name": "DEA_NUMBER",
+      "data_type": "string",
+      "semantic_type": "text",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 1500,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "DEA3694342",
+          "count": 1
+        },
+        {
+          "value": "DEA8831223",
+          "count": 1
+        },
+        {
+          "value": "DEA8453748",
+          "count": 1
+        },
+        {
+          "value": "DEA7378108",
+          "count": 1
+        },
+        {
+          "value": "DEA9112357",
+          "count": 1
+        },
+        {
+          "value": "DEA7896663",
+          "count": 1
+        },
+        {
+          "value": "DEA8542039",
+          "count": 1
+        },
+        {
+          "value": "DEA7941443",
+          "count": 1
+        },
+        {
+          "value": "DEA3761035",
+          "count": 1
+        },
+        {
+          "value": "DEA6626214",
+          "count": 1
+        }
+      ],
+      "description": "Field: DEA_NUMBER",
+      "sample_values": [
+        "DEA5885039",
+        "DEA2751450",
+        "DEA7812284",
+        "DEA1528339",
+        "DEA8256499"
+      ]
+    },
+    "LICENSE_STATE": {
+      "column_name": "LICENSE_STATE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 9,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "CA",
+          "count": 183
+        },
+        {
+          "value": "VA",
+          "count": 181
+        },
+        {
+          "value": "WA",
+          "count": 179
+        },
+        {
+          "value": "GA",
+          "count": 176
+        },
+        {
+          "value": "DC",
+          "count": 169
+        },
+        {
+          "value": "MD",
+          "count": 167
+        },
+        {
+          "value": "HI",
+          "count": 155
+        },
+        {
+          "value": "CO",
+          "count": 149
+        },
+        {
+          "value": "OR",
+          "count": 141
+        }
+      ],
+      "description": "Field: LICENSE_STATE",
+      "sample_values": [
+        "MD",
+        "GA",
+        "VA",
+        "CO",
+        "OR"
+      ]
+    },
+    "HIRE_DATE": {
+      "column_name": "HIRE_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 1344,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2019-01-28",
+          "count": 4
+        },
+        {
+          "value": "2016-06-12",
+          "count": 4
+        },
+        {
+          "value": "2019-11-25",
+          "count": 3
+        },
+        {
+          "value": "2015-05-01",
+          "count": 3
+        },
+        {
+          "value": "2023-01-19",
+          "count": 3
+        },
+        {
+          "value": "2016-01-25",
+          "count": 3
+        },
+        {
+          "value": "2016-11-05",
+          "count": 3
+        },
+        {
+          "value": "2019-08-29",
+          "count": 3
+        },
+        {
+          "value": "2006-05-08",
+          "count": 3
+        },
+        {
+          "value": "2014-04-25",
+          "count": 3
+        }
+      ],
+      "description": "Date field: HIRE_DATE",
+      "sample_values": [
+        "2016-08-06",
+        "2010-01-01",
+        "2018-06-29",
+        "2021-10-21",
+        "2018-12-04"
+      ]
+    },
+    "STATUS": {
+      "column_name": "STATUS",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 3,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "ACTIVE",
+          "count": 1297
+        },
+        {
+          "value": "INACTIVE",
+          "count": 139
+        },
+        {
+          "value": "ON_LEAVE",
+          "count": 64
+        }
+      ],
+      "description": "Field: STATUS",
+      "sample_values": [
+        "ACTIVE",
+        "ACTIVE",
+        "ACTIVE"
+      ]
+    },
+    "PANEL_SIZE": {
+      "column_name": "PANEL_SIZE",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 1115,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 101.0,
+      "max_value": 2498.0,
+      "mean": 1308.7253333333333,
+      "top_values": [
+        {
+          "value": "457",
+          "count": 4
+        },
+        {
+          "value": "494",
+          "count": 4
+        },
+        {
+          "value": "682",
+          "count": 4
+        },
+        {
+          "value": "1646",
+          "count": 4
+        },
+        {
+          "value": "777",
+          "count": 4
+        },
+        {
+          "value": "2038",
+          "count": 4
+        },
+        {
+          "value": "2297",
+          "count": 4
+        },
+        {
+          "value": "1392",
+          "count": 3
+        },
+        {
+          "value": "1640",
+          "count": 3
+        },
+        {
+          "value": "1221",
+          "count": 3
+        }
+      ],
+      "description": "Coded value: PANEL_SIZE",
+      "sample_values": [
+        "1341",
+        "322",
+        "1537",
+        "1912",
+        "2470"
+      ]
+    },
+    "ACCEPTS_NEW_PATIENTS": {
+      "column_name": "ACCEPTS_NEW_PATIENTS",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 2,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Y",
+          "count": 1058
+        },
+        {
+          "value": "N",
+          "count": 442
+        }
+      ],
+      "description": "Field: ACCEPTS_NEW_PATIENTS",
+      "sample_values": [
+        "Y",
+        "Y"
+      ]
+    }
+  },
+  "dq_score": 85,
+  "profiled_at": "2026-04-02T01:48:52.226952",
+  "has_phi": true
+}

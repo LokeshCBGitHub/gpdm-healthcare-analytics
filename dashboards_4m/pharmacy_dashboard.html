@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Pharmacy & Medication Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Pharmacy & Medication Intelligence</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 8 data queries • April 21, 2026</div>
+    <div style="margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;">
+        <span style="background:#28a745;width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+        <span>Database: healthcare_4m.db • 4,036,000 total rows</span>
+        <span style="margin-left:8px;opacity:0.7;">|</span>
+        <span style="margin-left:8px;">Self-Audit: PASS — 40 insights passed, 0 blocked</span>
+    </div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For The Organization</h3>
+    <div class="insight-item" style="border-left-color:#002B5C">Azithromycin 250mg: Scripts (8,700) is 9% higher than the network average (7,995).<div style="margin-top:6px"><span onclick="document.getElementById('reason_368123').style.display=document.getElementById('reason_368123').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_368123" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 7,995, StdDev = 362. Azithromycin 250mg at 8,700 yields Z = 1.95 (9% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Azithromycin 250mg is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Lisinopril 10mg: Avg Cost (351) is 7% lower than the network average (377).<div style="margin-top:6px"><span onclick="document.getElementById('reason_922456').style.display=document.getElementById('reason_922456').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_922456" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 377, StdDev = 11. Lisinopril 10mg at 351 yields Z = 2.22 (7% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Lisinopril 10mg is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Metoprolol 50mg: Total Cost ($3.3M) is 9% higher than the network average ($3.0M).<div style="margin-top:6px"><span onclick="document.getElementById('reason_289091').style.display=document.getElementById('reason_289091').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_289091" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = $3.0M, StdDev = 114,450. Metoprolol 50mg at $3.3M yields Z = 2.44 (9% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Metoprolol 50mg is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Hypertension: Scripts (38,300) is 180% higher than the network average (13,685).<div style="margin-top:6px"><span onclick="document.getElementById('reason_212906').style.display=document.getElementById('reason_212906').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_212906" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 13,685, StdDev = 9,008. Hypertension at 38,300 yields Z = 2.73 (180% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Hypertension is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Hypertension: Patients (744) is 176% higher than the network average (269).<div style="margin-top:6px"><span onclick="document.getElementById('reason_322761').style.display=document.getElementById('reason_322761').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_322761" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 269, StdDev = 174. Hypertension at 744 yields Z = 2.73 (176% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Hypertension is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Hypertension: Total Cost ($14.4M) is 177% higher than the network average ($5.2M).<div style="margin-top:6px"><span onclick="document.getElementById('reason_805100').style.display=document.getElementById('reason_805100').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_805100" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = $5.2M, StdDev = 3,376,441. Hypertension at $14.4M yields Z = 2.73 (177% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Hypertension is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Hypertension: Scripts (35,250) is 206% higher than the network average (11,533).<div style="margin-top:6px"><span onclick="document.getElementById('reason_678274').style.display=document.getElementById('reason_678274').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_678274" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 11,533, StdDev = 7,952. Hypertension at 35,250 yields Z = 2.98 (206% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Hypertension is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Neuropathy: Avg Refills Used (3) is 13% lower than the network average (3).<div style="margin-top:6px"><span onclick="document.getElementById('reason_697218').style.display=document.getElementById('reason_697218').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_697218" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 3, StdDev = 0. Neuropathy at 3 yields Z = 2.53 (13% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Neuropathy is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Depression: Avg Refills Used (3) is 10% higher than the network average (3).<div style="margin-top:6px"><span onclick="document.getElementById('reason_689576').style.display=document.getElementById('reason_689576').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_689576" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 3, StdDev = 0. Depression at 3 yields Z = 1.90 (10% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Depression is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cholesterol: Adherence Rate (55) is 10% higher than the network average (50).<div style="margin-top:6px"><span onclick="document.getElementById('reason_915359').style.display=document.getElementById('reason_915359').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_915359" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 50, StdDev = 2. Cholesterol at 55 yields Z = 2.55 (10% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cholesterol is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">Hypertension: Scripts (38,300) is 180% higher than average — requires attention. [WHY: Z = 2.73, p < 0.012. Across 10 entities, this deviation is statistically significant.]</div><div class="alert-item">Hypertension: Patients (744) is 176% higher than average — requires attention. [WHY: Z = 2.73, p < 0.012. Across 10 entities, this deviation is statistically significant.]</div><div class="alert-item">Hypertension: Total Cost ($14.4M) is 177% higher than average — requires attention. [WHY: Z = 2.73, p < 0.012. Across 10 entities, this deviation is statistically significant.]</div><div class="alert-item">Hypertension: Scripts (35,250) is 206% higher than average — requires attention. [WHY: Z = 2.98, p < 0.012. Across 12 entities, this deviation is statistically significant.]</div><div class="alert-item">Neuropathy: Avg Refills Used (3) is 13% lower than average — requires attention. [WHY: Z = 2.53, p < 0.012. Across 12 entities, this deviation is statistically significant.]</div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">150,000</div><div class="label">Total Rx</div></div><div class="kpi"><div class="value">2,599</div><div class="label">Unique Patients</div><div class="subtitle-text">2,599 distinct patients utilizing services</div></div><div class="kpi"><div class="value">20</div><div class="label">Unique Meds</div></div><div class="kpi"><div class="value">378.9</div><div class="label">Avg Cost</div></div><div class="kpi"><div class="value">$56.8M</div><div class="label">Total Spend</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_15867').style.display=document.getElementById('meth_15867').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_15867" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_716867').style.display=document.getElementById('sql_716867').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_716867" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Pharmacy KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT COUNT(*) as total_rx,
+                        COUNT(DISTINCT MEMBER_ID) as unique_patients,
+                        COUNT(DISTINCT MEDICATION_NAME) as unique_meds,
+                        ROUND(AVG(CAST(COST AS REAL)),2) as avg_cost,
+                        ROUND(SUM(CAST(COST AS REAL)),2) as total_spend
+                    FROM PRESCRIPTIONS</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Top Medications by Cost</h3><div class="chart-container"><canvas id="chart_38452" data-chart='{"type": "bar", "data": {"labels": ["Metoprolol 50mg", "Azithromycin 250mg", "Duloxetine 60mg", "Tramadol 50mg", "Amoxicillin 500mg", "Levothyroxine 50mcg", "Lisinopril 10mg", "Albuterol Inhaler", "Ibuprofen 800mg", "Escitalopram 10mg"], "datasets": [{"label": "Scripts", "data": [8500.0, 8700.0, 7850.0, 7900.0, 7900.0, 7650.0, 8350.0, 7800.0, 7650.0, 7650.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Cost", "data": [386.93, 360.09, 387.67, 380.04, 379.73, 387.37, 351.49, 374.39, 381.47, 378.78], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Total Cost", "data": [3288869.67, 3132745.95, 3043233.41, 3002337.36, 2999902.54, 2963392.13, 2934963.89, 2920262.32, 2918259.71, 2897681.38], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Scripts: Azithromycin 250mg (8,700). Lowest: Levothyroxine 50mcg (7,650). Average: 7,995.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_38452').style.display=document.getElementById('meth_38452').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_38452" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_652661').style.display=document.getElementById('sql_652661').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_652661" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Top Medications by Cost</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT MEDICATION_NAME, COUNT(*) as scripts,
+                        ROUND(AVG(CAST(COST AS REAL)),2) as avg_cost,
+                        ROUND(SUM(CAST(COST AS REAL)),2) as total_cost
+                    FROM PRESCRIPTIONS GROUP BY MEDICATION_NAME ORDER BY total_cost DESC LIMIT 10</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY MEDICATION_NAME<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 10 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Medication Class Analysis</h3><div class="chart-container"><canvas id="chart_92922" data-chart='{"type": "bar", "data": {"labels": ["Hypertension", "Infection", "Pain", "Depression", "GERD", "Hypothyroid", "Asthma", "Anxiety", "Cholesterol", "Diabetes"], "datasets": [{"label": "Scripts", "data": [38300.0, 16600.0, 15550.0, 15000.0, 13900.0, 7650.0, 7800.0, 7650.0, 7500.0, 6900.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Patients", "data": [744.0, 327.0, 304.0, 298.0, 274.0, 153.0, 153.0, 153.0, 148.0, 138.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Cost", "data": [376.23, 369.44, 380.75, 393.06, 386.31, 387.37, 374.39, 378.78, 381.74, 389.2], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Scripts: Hypertension (38,300). Lowest: Diabetes (6,900). Average: 13,685. A 455% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_92922').style.display=document.getElementById('meth_92922').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_92922" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_217092').style.display=document.getElementById('sql_217092').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_217092" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Medication Class Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT MEDICATION_CLASS, COUNT(*) as scripts,
+                        COUNT(DISTINCT MEMBER_ID) as patients,
+                        ROUND(AVG(CAST(COST AS REAL)),2) as avg_cost,
+                        ROUND(SUM(CAST(COST AS REAL)),2) as total_cost
+                    FROM PRESCRIPTIONS GROUP BY MEDICATION_CLASS ORDER BY total_cost DESC LIMIT 10</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY MEDICATION_CLASS<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 10 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Adherence by Medication Class</h3><div class="chart-container"><canvas id="chart_84044" data-chart='{"type": "bar", "data": {"labels": ["Inflammation", "GERD", "Anxiety", "Neuropathy", "Hypertension", "Diabetes", "Depression", "Infection", "Asthma", "Hypothyroid", "Pain", "Cholesterol"], "datasets": [{"label": "Scripts", "data": [6050.0, 13000.0, 7050.0, 6350.0, 35250.0, 6000.0, 13800.0, 15200.0, 7000.0, 7250.0, 14450.0, 7000.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Refills Used", "data": [3.1, 2.9, 3.0, 2.6, 3.0, 3.0, 3.3, 3.0, 3.1, 2.9, 3.1, 3.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Refills Auth", "data": [6.5, 6.1, 6.4, 5.4, 6.1, 6.1, 6.6, 5.9, 6.2, 5.7, 6.0, 5.5], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Scripts: Hypertension (35,250). Lowest: Diabetes (6,000). Average: 11,533. A 488% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_84044').style.display=document.getElementById('meth_84044').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_84044" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_859201').style.display=document.getElementById('sql_859201').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_859201" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Adherence by Medication Class</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT MEDICATION_CLASS,
+                        COUNT(*) as scripts,
+                        ROUND(AVG(CAST(REFILLS_USED AS REAL)),1) as avg_refills_used,
+                        ROUND(AVG(CAST(REFILLS_AUTHORIZED AS REAL)),1) as avg_refills_auth,
+                        ROUND(100.0*AVG(CAST(REFILLS_USED AS REAL))/NULLIF(AVG(CAST(REFILLS_AUTHORIZED AS REAL)),0),1) as adherence_rate
+                    FROM PRESCRIPTIONS WHERE CAST(REFILLS_AUTHORIZED AS INTEGER) &gt; 0
+                    GROUP BY MEDICATION_CLASS ORDER BY adherence_rate ASC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY MEDICATION_CLASS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Pharmacy Channel Mix</h3><div class="chart-container"><canvas id="chart_63847" data-chart='{"type": "bar", "data": {"labels": ["KP Pharmacy LA", "KP Mail Order", "Walgreens", "CVS", "Rite Aid", "KP Pharmacy Oakland"], "datasets": [{"label": "Rx Count", "data": [26000.0, 25800.0, 25650.0, 25100.0, 24250.0, 23200.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Patient Count", "data": [508.0, 506.0, 490.0, 496.0, 472.0, 451.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Total Spend", "data": [10085783.49, 10021663.53, 9658194.08, 9348784.32, 9169323.65, 8550321.48], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Rx Count: KP Pharmacy LA (26,000). Lowest: KP Pharmacy Oakland (23,200). Average: 25,000.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_63847').style.display=document.getElementById('meth_63847').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_63847" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_860203').style.display=document.getElementById('sql_860203').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_860203" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Pharmacy Channel Mix</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT PHARMACY,
+                        COUNT(*) as rx_count,
+                        COUNT(DISTINCT MEMBER_ID) as patient_count,
+                        ROUND(SUM(CAST(COST AS REAL)),2) as total_spend,
+                        ROUND(AVG(CAST(COST AS REAL)),2) as avg_rx_cost
+                    FROM PRESCRIPTIONS GROUP BY PHARMACY ORDER BY rx_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY PHARMACY<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Polypharmacy Risk Analysis</h3><div class="table-container"><table><thead><tr><th>Risk Tier</th><th>Member Count</th><th>Pct</th><th>Avg Annual Rx Cost</th></tr></thead><tbody><tr><td>1-4 medications</td><td>2,599</td><td>100.00</td><td>21,867.67</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 1 rows of 1 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_48203').style.display=document.getElementById('meth_48203').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_48203" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_538529').style.display=document.getElementById('sql_538529').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_538529" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Polypharmacy Risk Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH med_counts AS (
+                        SELECT MEMBER_ID, COUNT(DISTINCT MEDICATION_NAME) as med_count
+                        FROM PRESCRIPTIONS
+                        GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN med_count &gt;= 10 THEN '10+ medications'
+                        WHEN med_count &gt;= 5 THEN '5-9 medications'
+                        ELSE '1-4 medications' END as risk_tier,
+                        COUNT(DISTINCT MEMBER_ID) as member_count,
+                        ROUND(100.0*COUNT(DISTINCT MEMBER_ID)/(SELECT COUNT(DISTINCT MEMBER_ID) FROM PRESCRIPTIONS),1) as pct,
+                        ROUND(AVG(CAST((SELECT SUM(CAST(COST AS REAL)) FROM PRESCRIPTIONS p2 WHERE p2.MEMBER_ID=mc.MEMBER_ID) AS REAL)),2) as avg_annual_rx_cost
+                    FROM med_counts mc
+                    GROUP BY risk_tier ORDER BY med_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN med_count >= 10 TH<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Prescription Status Distribution</h3><div class="chart-container"><canvas id="chart_5490" data-chart='{"type": "doughnut", "data": {"labels": ["FILLED", "PENDING", "EXPIRED", "TRANSFERRED", "CANCELLED"], "datasets": [{"label": "Count", "data": [104550.0, 15850.0, 14550.0, 7600.0, 7450.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [69.7, 10.6, 9.7, 5.1, 5.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Count: FILLED (104,550). Lowest: CANCELLED (7,450). Average: 30,000. A 1303% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_5490').style.display=document.getElementById('meth_5490').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_5490" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_41987').style.display=document.getElementById('sql_41987').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_41987" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Prescription Status Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT STATUS, COUNT(*) as count,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM PRESCRIPTIONS),1) as pct
+                    FROM PRESCRIPTIONS GROUP BY STATUS ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> rounding for precision<br><strong>Grouping:</strong> GROUP BY STATUS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Rx Spend Trend</h3><div class="chart-container"><canvas id="chart_89182" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Scripts", "data": [3700.0, 3900.0, 3550.0, 3950.0, 4950.0, 4050.0, 4800.0, 3900.0, 4350.0, 4650.0, 4400.0, 4150.0, 3700.0, 3950.0, 4450.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Total Spend", "data": [1467272.29, 1486056.19, 1467655.75, 1563065.69, 1733992.26, 1636055.84, 1755789.33, 1348547.01, 1718721.56, 1722341.74, 1663730.83, 1532526.78, 1679553.96, 1411473.44, 1666943.78], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Avg Cost", "data": [396.56, 381.04, 413.42, 395.71, 350.3, 403.96, 365.79, 345.78, 395.11, 370.4, 378.12, 369.28, 453.93, 357.34, 374.59], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Scripts has increased 25.7% over the period shown (from 3,700 to 4,650).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_89182').style.display=document.getElementById('meth_89182').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_89182" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Pharmacy & Medication Analytics</strong><br>
+            <strong>Calculation:</strong> Scripts count, total Rx spend (SUM of COST), avg cost per script, adherence ratio (REFILLS_USED/REFILLS_AUTHORIZED). Polypharmacy = members with 5+ distinct medications.<br>
+            <strong>Standard:</strong> CMS Part D Star Ratings, NCQA Medication Adherence (PDC ≥ 80%), PBM industry benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Adherence measured as refills used vs authorized</li><li>Polypharmacy risk threshold: 5+ concurrent medications</li><li>Channel analysis compares KP Pharmacy vs external (CVS, Walgreens, Rite Aid)</li><li>Cost analysis includes member copay and plan cost separately</li></ul>
+            <strong>Thresholds:</strong> <strong>Adherence target:</strong> ≥80% PDC | <strong>Polypharmacy alert:</strong> 5+ meds | <strong>Generic dispensing target:</strong> ≥85%<br>
+            <strong>Why It Matters:</strong> Medication adherence directly impacts clinical outcomes and total cost of care. Non-adherent members have 2-3x higher hospitalization risk. Polypharmacy increases adverse drug event risk.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_886512').style.display=document.getElementById('sql_886512').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_886512" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Rx Spend Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(PRESCRIPTION_DATE,1,7) as month,
+                        COUNT(*) as scripts,
+                        ROUND(SUM(CAST(COST AS REAL)),2) as total_spend,
+                        ROUND(AVG(CAST(COST AS REAL)),2) as avg_cost
+                    FROM PRESCRIPTIONS WHERE PRESCRIPTION_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PRESCRIPTIONS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which members are at highest polypharmacy risk?</span><span class="followup">What generic alternatives could save us money?</span><span class="followup">Show me medication adherence gaps by class</span><span class="followup">Which medications have declining adherence?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

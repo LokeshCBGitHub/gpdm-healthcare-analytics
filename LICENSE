@@ -1,0 +1,127 @@
+PROPRIETARY SOFTWARE LICENSE
+=============================
+
+Copyright (c) 2024-2026 Ivan Holden. All Rights Reserved.
+
+NOTICE OF SOLE OWNERSHIP AND INTELLECTUAL PROPERTY RIGHTS
+----------------------------------------------------------
+
+This software, including but not limited to all source code, algorithms,
+architecture, database schemas, data models, analytical engines, query
+pipelines, dashboard generators, forecasting models, visualization
+components, and all related documentation (collectively, the "Software"),
+is the exclusive intellectual property of Ivan Holden (the "Author").
+
+1. SOLE AUTHORSHIP AND OWNERSHIP
+
+   This Software was conceived, designed, architected, and developed
+   entirely by the Author as a personal passion project during the
+   Author's own personal time. The Author is the sole creator, author,
+   and owner of all intellectual property rights in the Software,
+   including but not limited to copyrights, trade secrets, and any
+   patent rights.
+
+2. NO ORGANIZATIONAL OWNERSHIP OR CLAIM
+
+   No employer, organization, institution, contractor, or third party
+   has any ownership interest, license, right, title, or claim to
+   this Software or any part thereof, regardless of:
+
+   (a) Whether the Software was accessed, downloaded, compiled, tested,
+       demonstrated, or executed on computing resources, servers, networks,
+       or infrastructure owned, leased, or operated by any organization;
+
+   (b) Whether the Software was stored on, transferred through, or
+       backed up to any organizational storage systems, cloud services,
+       repositories, or computing environments;
+
+   (c) Whether the Author was employed by, contracted with, or otherwise
+       affiliated with any organization at the time of development;
+
+   (d) Whether the Software relates to, touches upon, or operates within
+       a domain or industry in which any organization operates;
+
+   (e) Whether organizational data, schemas, or data structures were
+       used as reference, inspiration, or test inputs during development;
+
+   (f) Whether the Software was demonstrated to, reviewed by, or discussed
+       with any colleagues, managers, or organizational personnel.
+
+   The use of any computing resources for incidental purposes such as
+   accessing, downloading, testing, or demonstrating this Software does
+   NOT constitute a contribution to its development and does NOT create
+   any ownership rights, implied licenses, or intellectual property
+   claims for the owner or operator of such computing resources.
+
+3. PROHIBITED ACTIONS
+
+   Without the prior express written consent of the Author, no person
+   or entity may:
+
+   (a) Copy, reproduce, distribute, publish, or display the Software
+       or any portion thereof;
+
+   (b) Create derivative works based on the Software;
+
+   (c) Reverse engineer, decompile, or disassemble the Software;
+
+   (d) Use the Software for any commercial purpose;
+
+   (e) Sublicense, sell, rent, lease, or lend the Software;
+
+   (f) Claim authorship, ownership, or co-ownership of the Software;
+
+   (g) Remove, alter, or obscure this license notice or any copyright
+       notices contained in the Software;
+
+   (h) Use the Software to train, fine-tune, or otherwise develop any
+       machine learning model, artificial intelligence system, or
+       automated code generation tool.
+
+4. NO IMPLIED LICENSES
+
+   Nothing in any employment agreement, contractor agreement, consulting
+   agreement, non-disclosure agreement, or any other agreement between
+   the Author and any organization shall be construed to grant any
+   organization any rights to this Software, unless such agreement
+   explicitly references this Software by name and is signed by the
+   Author with specific intent to transfer rights.
+
+5. WORK-FOR-HIRE DISCLAIMER
+
+   This Software is NOT a "work made for hire" as defined under 17 U.S.C.
+   Section 101. This Software was not prepared by the Author as an
+   employee within the scope of employment, nor was it specially ordered
+   or commissioned by any party. The Author developed this Software
+   independently, on personal time, using personal intellectual effort,
+   as a personal passion project.
+
+6. SEVERABILITY
+
+   If any provision of this License is held to be unenforceable or invalid,
+   such provision shall be modified to the minimum extent necessary to make
+   it enforceable, and the remaining provisions shall continue in full
+   force and effect.
+
+7. GOVERNING LAW
+
+   This License shall be governed by and construed in accordance with the
+   laws of the United States of America and the state in which the Author
+   resides, without regard to conflict of law principles.
+
+8. ENTIRE AGREEMENT
+
+   This License constitutes the entire agreement regarding the ownership
+   and use of this Software and supersedes all prior or contemporaneous
+   understandings, agreements, or representations regarding the Software.
+
+---
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING
+FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE.
+
+For inquiries regarding licensing, permissions, or collaboration:
+Contact: Ivan Holden (ivanholdencafeary@gmail.com)

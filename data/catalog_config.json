@@ -1,0 +1,220 @@
+{
+  "environments": [
+    {
+      "name": "prod",
+      "description": "Production environment — KP Healthcare Databricks",
+      "is_active": true,
+      "connection": {
+        "type": "databricks",
+        "config_file": "paramset/databricks.cfg"
+      },
+      "catalogs": [
+        {
+          "name": "enriched_catalog",
+          "description": "Enriched and validated production data",
+          "source_system": "DSW",
+          "is_default": true,
+          "schemas": [
+            {
+              "name": "claims",
+              "description": "Healthcare claims data",
+              "tables": [
+                {
+                  "name": "inpatient_institutional_claims",
+                  "description": "Inpatient hospital/institutional claims (UB-04 format)",
+                  "parent_concept": "claims",
+                  "tags": ["inpatient", "institutional", "hospital", "ub04"]
+                },
+                {
+                  "name": "outpatient_professional_claims",
+                  "description": "Outpatient and professional claims (CMS-1500 format)",
+                  "parent_concept": "claims",
+                  "tags": ["outpatient", "professional", "physician", "office"]
+                },
+                {
+                  "name": "pharmacy_claims",
+                  "description": "Pharmacy and medication claims",
+                  "parent_concept": "claims",
+                  "tags": ["pharmacy", "drug", "rx", "medication", "ndc"]
+                },
+                {
+                  "name": "dental_claims",
+                  "description": "Dental service claims",
+                  "parent_concept": "claims",
+                  "tags": ["dental", "oral"]
+                },
+                {
+                  "name": "behavioral_health_claims",
+                  "description": "Behavioral and mental health claims",
+                  "parent_concept": "claims",
+                  "tags": ["behavioral", "mental", "psychiatric"]
+                }
+              ]
+            },
+            {
+              "name": "members",
+              "description": "Member demographics and enrollment",
+              "tables": [
+                {
+                  "name": "member_enrollment",
+                  "description": "Current and historical member enrollment records",
+                  "parent_concept": "members",
+                  "tags": ["enrollment", "eligibility", "coverage"]
+                },
+                {
+                  "name": "member_demographics",
+                  "description": "Member demographic and contact information",
+                  "parent_concept": "members",
+                  "tags": ["demographics", "personal", "contact"]
+                },
+                {
+                  "name": "member_risk_scores",
+                  "description": "HCC risk scores and stratification data",
+                  "parent_concept": "members",
+                  "tags": ["risk", "hcc", "raf", "acuity"]
+                }
+              ]
+            },
+            {
+              "name": "clinical",
+              "description": "Clinical encounters and diagnoses",
+              "tables": [
+                {
+                  "name": "encounters",
+                  "description": "Clinical encounter records",
+                  "parent_concept": "encounters",
+                  "tags": ["encounter", "visit", "admission"]
+                },
+                {
+                  "name": "diagnoses",
+                  "description": "Diagnosis codes and conditions",
+                  "parent_concept": "diagnoses",
+                  "tags": ["diagnosis", "icd10", "hcc", "condition"]
+                },
+                {
+                  "name": "prescriptions",
+                  "description": "Prescription and medication data",
+                  "parent_concept": "prescriptions",
+                  "tags": ["prescription", "medication", "rx", "drug"]
+                }
+              ]
+            },
+            {
+              "name": "providers",
+              "description": "Provider network and performance",
+              "tables": [
+                {
+                  "name": "provider_directory",
+                  "description": "Provider demographics and network status",
+                  "parent_concept": "providers",
+                  "tags": ["provider", "npi", "specialty", "network"]
+                },
+                {
+                  "name": "referrals",
+                  "description": "Care referrals and authorizations",
+                  "parent_concept": "referrals",
+                  "tags": ["referral", "authorization", "auth"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging_catalog",
+          "description": "Pre-production staging data (QA validated)",
+          "source_system": "DSW",
+          "schemas": [
+            {
+              "name": "claims",
+              "description": "Staging claims data",
+              "tables": [
+                {
+                  "name": "inpatient_institutional_claims",
+                  "description": "Staging inpatient claims",
+                  "parent_concept": "claims",
+                  "tags": ["inpatient", "institutional", "staging"]
+                },
+                {
+                  "name": "outpatient_professional_claims",
+                  "description": "Staging outpatient claims",
+                  "parent_concept": "claims",
+                  "tags": ["outpatient", "professional", "staging"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "clarity_catalog",
+          "description": "Epic Clarity EHR data",
+          "source_system": "Clarity",
+          "schemas": [
+            {
+              "name": "clinical",
+              "description": "Clarity clinical data",
+              "tables": [
+                {
+                  "name": "pat_enc",
+                  "description": "Patient encounters from Epic Clarity",
+                  "parent_concept": "encounters",
+                  "tags": ["encounter", "epic", "clarity"]
+                },
+                {
+                  "name": "order_proc",
+                  "description": "Procedure orders from Epic Clarity",
+                  "parent_concept": "encounters",
+                  "tags": ["orders", "procedures", "epic"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "apixio_catalog",
+          "description": "Apixio HCC risk coding data",
+          "source_system": "Apixio",
+          "schemas": [
+            {
+              "name": "risk",
+              "description": "Apixio NLP-extracted risk data",
+              "tables": [
+                {
+                  "name": "nlp_diagnoses",
+                  "description": "NLP-extracted diagnosis codes from clinical notes",
+                  "parent_concept": "diagnoses",
+                  "tags": ["nlp", "apixio", "hcc", "risk"]
+                },
+                {
+                  "name": "chart_reviews",
+                  "description": "Chart review results and coding opportunities",
+                  "parent_concept": "diagnoses",
+                  "tags": ["chart", "review", "coding", "apixio"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging",
+      "description": "Staging/QA environment",
+      "is_active": true,
+      "connection": {
+        "type": "databricks",
+        "config_file": "paramset/databricks_staging.cfg"
+      },
+      "catalogs": []
+    },
+    {
+      "name": "dev",
+      "description": "Development environment",
+      "is_active": true,
+      "connection": {
+        "type": "databricks",
+        "config_file": "paramset/databricks_dev.cfg"
+      },
+      "catalogs": []
+    }
+  ]
+}

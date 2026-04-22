@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KP Medicare Advantage — Executive Summary</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #F5F7FA;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%);
+            color: #FFFFFF;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 43, 92, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo-placeholder {
+            width: 50px;
+            height: 50px;
+            background: #FFFFFF;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #002B5C;
+            font-size: 24px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-6 {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .card {
+            background: #FFFFFF;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-full {
+            grid-column: 1 / -1;
+        }
+
+        .metric-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #002B5C;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-change {
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .metric-change.positive {
+            color: #28a745;
+        }
+
+        .metric-change.negative {
+            color: #dc3545;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-container-large {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #002B5C;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        thead {
+            background-color: #F5F7FA;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            font-weight: 600;
+            color: #002B5C;
+            border-bottom: 2px solid #002B5C;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background-color: #F5F7FA;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.green {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .status-badge.yellow {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+
+        .status-badge.red {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.green {
+            background-color: #28a745;
+        }
+
+        .status-dot.yellow {
+            background-color: #ffc107;
+        }
+
+        .status-dot.red {
+            background-color: #dc3545;
+        }
+
+        .stars {
+            font-size: 2rem;
+            color: #ffc107;
+            margin: 1rem 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #002B5C;
+            margin: 2rem 0 1rem 0;
+            border-bottom: 3px solid #002B5C;
+            padding-bottom: 0.75rem;
+        }
+
+        .heatmap-table {
+            width: 100%;
+        }
+
+        .heatmap-cell {
+            text-align: center;
+            font-weight: 500;
+            padding: 1rem;
+            border-radius: 4px;
+            color: #FFFFFF;
+        }
+
+        .heatmap-cell.high {
+            background-color: #28a745;
+        }
+
+        .heatmap-cell.medium {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .heatmap-cell.low {
+            background-color: #dc3545;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #002B5C, #0066E6);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .action-item {
+            background-color: #F5F7FA;
+            border-left: 4px solid #002B5C;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .action-item-title {
+            font-weight: 600;
+            color: #002B5C;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-item-desc {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        /* Clickable elements */
+        .clickable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .clickable::after {
+            content: '🔍 Click for deep insights';
+            position: absolute;
+            bottom: -4px;
+            right: 8px;
+            font-size: 0.65rem;
+            color: #999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .clickable:hover::after {
+            opacity: 1;
+        }
+
+        .clickable:hover {
+            box-shadow: 0 4px 16px rgba(0, 43, 92, 0.2) !important;
+            transform: translateY(-3px) !important;
+        }
+
+        /* Insight Modal */
+        .insight-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 43, 92, 0.6);
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 2rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .insight-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .insight-modal {
+            background: #FFFFFF;
+            border-radius: 12px;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .insight-header {
+            background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%);
+            color: #FFFFFF;
+            padding: 1.5rem 2rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .insight-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .insight-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .insight-close:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .insight-body {
+            padding: 2rem;
+        }
+
+        .insight-section {
+            margin-bottom: 2rem;
+        }
+
+        .insight-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #002B5C;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #002B5C;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insight-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #333;
+            margin-bottom: 0.75rem;
+        }
+
+        .model-card {
+            background: #F5F7FA;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #002B5C;
+        }
+
+        .model-name {
+            font-weight: 700;
+            color: #002B5C;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .model-detail {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 0.25rem;
+        }
+
+        .model-accuracy {
+            font-size: 0.8rem;
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .factor-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .factor-label {
+            min-width: 200px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .factor-bar-track {
+            flex: 1;
+            height: 24px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .factor-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .factor-detail {
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 200px;
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid #ddd;
+        }
+
+        .rec-card {
+            background: #FFFFFF;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .rec-card:hover {
+            border-color: #002B5C;
+            box-shadow: 0 2px 8px rgba(0,43,92,0.1);
+        }
+
+        .rec-priority {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-priority.critical {
+            background: rgba(220,53,69,0.1);
+            color: #dc3545;
+        }
+
+        .rec-priority.high {
+            background: rgba(255,193,7,0.15);
+            color: #856404;
+        }
+
+        .rec-priority.medium {
+            background: rgba(40,167,69,0.1);
+            color: #28a745;
+        }
+
+        .rec-title {
+            font-weight: 700;
+            color: #002B5C;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-detail {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .rec-impact {
+            font-size: 0.85rem;
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .rec-timeline {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .forecast-chart-container {
+            position: relative;
+            height: 250px;
+            margin: 1rem 0;
+        }
+
+        .insight-kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #002B5C;
+            text-align: center;
+            margin: 1rem 0 0.25rem;
+        }
+
+        .insight-kpi-label {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1.5rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .metric-value {
+                font-size: 1.75rem;
+            }
+
+            .grid-2, .grid-3, .grid-6 {
+                grid-template-columns: 1fr;
+            }
+
+            .insight-overlay {
+                padding: 0.5rem;
+            }
+
+            .factor-label {
+                min-width: 120px;
+            }
+
+            .factor-detail {
+                margin-left: 0;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════ */
+        /*  MODERN TOOLBAR                                     */
+        /* ═══════════════════════════════════════════════════ */
+        .toolbar {
+            background: #FFFFFF;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toolbar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: #344054;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .toolbar-btn:hover {
+            background: #F5F7FA;
+            border-color: #002B5C;
+            color: #002B5C;
+            box-shadow: 0 1px 3px rgba(0,43,92,0.1);
+        }
+        .toolbar-btn.primary {
+            background: #002B5C;
+            color: #FFFFFF;
+            border-color: #002B5C;
+        }
+        .toolbar-btn.primary:hover {
+            background: #003d7a;
+            box-shadow: 0 2px 6px rgba(0,43,92,0.25);
+        }
+        .toolbar-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: #e0e0e0;
+            margin: 0 0.25rem;
+        }
+        .toolbar-timestamp {
+            font-size: 0.75rem;
+            color: #888;
+            margin-left: 0.5rem;
+        }
+
+        /* ═══════════════════════════════════════════════════ */
+        /*  AI CHATBOT PANEL                                   */
+        /* ═══════════════════════════════════════════════════ */
+        .chatbot-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0052B3 0%, #002B5C 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,43,92,0.35);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: chatPulse 3s infinite;
+        }
+        .chatbot-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 28px rgba(0,43,92,0.5);
+        }
+        .chatbot-fab svg {
+            width: 32px;
+            height: 32px;
+        }
+        .chatbot-fab .fab-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background: #dc3545;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+        @keyframes chatPulse {
+            0%,100% { box-shadow: 0 6px 20px rgba(0,43,92,0.35); }
+            50% { box-shadow: 0 6px 28px rgba(0,82,179,0.5); }
+        }
+
+        .chatbot-panel {
+            position: fixed;
+            bottom: 104px;
+            right: 28px;
+            width: 420px;
+            max-height: 600px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+            z-index: 10001;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: chatSlideUp 0.3s ease;
+        }
+        .chatbot-panel.open {
+            display: flex;
+        }
+        @keyframes chatSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%);
+            color: white;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-header-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .chat-header-subtitle {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+        .chat-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-close:hover { background: rgba(255,255,255,0.3); }
+
+        .chat-suggestions {
+            padding: 0.75rem 1rem;
+            background: #F5F7FA;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .chat-suggestion {
+            padding: 0.3rem 0.7rem;
+            background: white;
+            border: 1px solid #d0d5dd;
+            border-radius: 16px;
+            font-size: 0.72rem;
+            color: #344054;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .chat-suggestion:hover {
+            background: #002B5C;
+            color: white;
+            border-color: #002B5C;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            min-height: 280px;
+            max-height: 360px;
+        }
+        .chat-msg {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chat-msg.user {
+            flex-direction: row-reverse;
+        }
+        .chat-msg-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.75rem;
+        }
+        .bot {
+            /* Bot message styling marker */
+        }
+        .user {
+            /* User message styling marker */
+        }
+        .chat-msg.bot .chat-msg-avatar {
+            background: linear-gradient(135deg, #0052B3, #002B5C);
+            color: white;
+        }
+        .chat-msg.user .chat-msg-avatar {
+            background: #e0e7ff;
+            color: #002B5C;
+        }
+        .chat-msg-bubble {
+            max-width: 80%;
+            padding: 0.65rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .chat-msg.bot .chat-msg-bubble {
+            background: #F5F7FA;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-msg.user .chat-msg-bubble {
+            background: #002B5C;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg-bubble table {
+            font-size: 0.78rem;
+            margin-top: 0.5rem;
+        }
+        .chat-msg-bubble table th {
+            font-size: 0.72rem;
+            padding: 0.4rem 0.6rem;
+        }
+        .chat-msg-bubble table td {
+            padding: 0.35rem 0.6rem;
+        }
+        .chat-typing {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem;
+        }
+        .chat-typing span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingDot {
+            0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        .chat-input-area {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+        }
+        .chat-input {
+            flex: 1;
+            border: 1px solid #d0d5dd;
+            border-radius: 10px;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.85rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .chat-input:focus {
+            border-color: #002B5C;
+            box-shadow: 0 0 0 3px rgba(0,43,92,0.1);
+        }
+        .chat-send {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #002B5C;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .chat-send:hover {
+            background: #003d7a;
+        }
+        .chat-send svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Anticipation tooltip */
+        .anticipation-bar {
+            position: fixed;
+            bottom: 100px;
+            right: 100px;
+            background: #FFFFFF;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 0.5rem 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 9998;
+            max-width: 280px;
+            font-size: 0.78rem;
+            color: #555;
+            display: none;
+            animation: chatSlideUp 0.3s ease;
+        }
+        .anticipation-bar.show {
+            display: block;
+        }
+        .anticipation-bar strong {
+            color: #002B5C;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Modern Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="toolbar-btn" onclick="window.print();" title="Print dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print
+            </button>
+            <button class="toolbar-btn" onclick="exportDashboard('pdf')" title="Export as PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Export PDF
+            </button>
+            <button class="toolbar-btn" onclick="exportDashboard('csv')" title="Export data as CSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="saveDashboardState()" title="Save current view">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save View
+            </button>
+            <button class="toolbar-btn" onclick="toggleBookmark()" id="bookmarkBtn" title="Bookmark this dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                Bookmark
+            </button>
+        </div>
+        <div class="toolbar-right">
+            <span class="toolbar-timestamp" id="lastUpdated"></span>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="refreshDashboard()" title="Refresh data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                Refresh
+            </button>
+            <button class="toolbar-btn primary" onclick="toggleChat()" title="Ask the AI analyst">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                Ask AI
+            </button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-placeholder">KP</div>
+            <h1>KP Medicare Advantage — Executive Summary</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="card card-full" style="text-align:center;padding:2rem;border-left:6px solid #dc3545;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap;">
+                <div>
+                    <h2 style="color:#002B5C;margin-bottom:0.5rem;">KP Performance Scorecard</h2>
+                    <div style="font-size:1.25rem;font-weight:700;color:#dc3545;">
+                        ACTION REQUIRED
+                    </div>
+                </div>
+                <div style="display:flex;gap:1.5rem;margin-top:0.5rem;">
+                    <div style="text-align:center;">
+                        <div style="font-size:2rem;font-weight:700;color:#28a745;">2</div>
+                        <div style="font-size:0.75rem;color:#666;">GREEN</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:2rem;font-weight:700;color:#ffc107;">2</div>
+                        <div style="font-size:0.75rem;color:#666;">AMBER</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:2rem;font-weight:700;color:#dc3545;">1</div>
+                        <div style="font-size:0.75rem;color:#666;">RED</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Key Performance Indicators</div>
+        <div class="grid grid-6">
+        
+            <div class="card metric-card clickable" style="border-top:4px solid #28a745;" onclick="openInsight('member_retention_rate')">
+                <div class="metric-label">Member Retention Rate</div>
+                <div class="metric-value" style="font-size:1.75rem;">91.78%</div>
+                <div style="font-size:0.75rem;color:#999;margin-top:0.25rem;">Target: 92.0%</div>
+                <div style="font-size:0.7rem;color:#aaa;">88-92%</div>
+                <span class="status-badge green" style="margin-top:0.5rem;">
+                    <span class="status-dot green"></span> GREEN
+                </span>
+            </div>
+            
+            <div class="card metric-card clickable" style="border-top:4px solid #ffc107;" onclick="openInsight('medical_loss_ratio')">
+                <div class="metric-label">Medical Loss Ratio</div>
+                <div class="metric-value" style="font-size:1.75rem;">56.48%</div>
+                <div style="font-size:0.75rem;color:#999;margin-top:0.25rem;">Target: 70.0%</div>
+                <div style="font-size:0.7rem;color:#aaa;">65-75% (allowed/billed)</div>
+                <span class="status-badge yellow" style="margin-top:0.5rem;">
+                    <span class="status-dot yellow"></span> AMBER
+                </span>
+            </div>
+            
+            <div class="card metric-card clickable" style="border-top:4px solid #28a745;" onclick="openInsight('claims_collection_rate')">
+                <div class="metric-label">Claims Collection Rate</div>
+                <div class="metric-value" style="font-size:1.75rem;">55.01%</div>
+                <div style="font-size:0.75rem;color:#999;margin-top:0.25rem;">Target: 55.0%</div>
+                <div style="font-size:0.7rem;color:#aaa;">50%+ (paid/allowed)</div>
+                <span class="status-badge green" style="margin-top:0.5rem;">
+                    <span class="status-dot green"></span> GREEN
+                </span>
+            </div>
+            
+            <div class="card metric-card clickable" style="border-top:4px solid #ffc107;" onclick="openInsight('denial_rate')">
+                <div class="metric-label">Denial Rate</div>
+                <div class="metric-value" style="font-size:1.75rem;">10.03%</div>
+                <div style="font-size:0.75rem;color:#999;margin-top:0.25rem;">Target: 7.0%</div>
+                <div style="font-size:0.7rem;color:#aaa;">5-10%</div>
+                <span class="status-badge yellow" style="margin-top:0.5rem;">
+                    <span class="status-dot yellow"></span> AMBER
+                </span>
+            </div>
+            
+            <div class="card metric-card clickable" style="border-top:4px solid #dc3545;" onclick="openInsight('average_risk_score')">
+                <div class="metric-label">Average Risk Score</div>
+                <div class="metric-value" style="font-size:1.75rem;">0.842</div>
+                <div style="font-size:0.75rem;color:#999;margin-top:0.25rem;">Target: 2.0</div>
+                <div style="font-size:0.7rem;color:#aaa;">1.5-3.0 (HCC-adjusted MA)</div>
+                <span class="status-badge red" style="margin-top:0.5rem;">
+                    <span class="status-dot red"></span> RED
+                </span>
+            </div>
+            
+        </div>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="chart-title">KPI Values vs Targets</div>
+                <div class="chart-container-large">
+                    <canvas id="chart_1"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title" style="margin-top:0;">Performance Highlights</div>
+        
+                <div class="action-item" style="border-left-color:#28a745;">
+                    <div class="action-item-title" style="color:#28a745;">Member Retention Rate</div>
+                    <div class="action-item-desc">91.78% — Benchmark: 88-92%</div>
+                </div>
+                
+                <div class="action-item" style="border-left-color:#28a745;">
+                    <div class="action-item-title" style="color:#28a745;">Claims Collection Rate</div>
+                    <div class="action-item-desc">55.01% — Benchmark: 50%+ (paid/allowed)</div>
+                </div>
+                
+                <div class="section-title" style="color:#dc3545;">Areas Requiring Attention</div>
+        
+                <div class="action-item" style="border-left-color:#ffc107;">
+                    <div class="action-item-title" style="color:#ffc107;">Medical Loss Ratio</div>
+                    <div class="action-item-desc">56.48% (target: 70.0%) — 65-75% (allowed/billed)</div>
+                </div>
+                
+                <div class="action-item" style="border-left-color:#ffc107;">
+                    <div class="action-item-title" style="color:#ffc107;">Denial Rate</div>
+                    <div class="action-item-desc">10.03% (target: 7.0%) — 5-10%</div>
+                </div>
+                
+                <div class="action-item" style="border-left-color:#dc3545;">
+                    <div class="action-item-title" style="color:#dc3545;">Average Risk Score</div>
+                    <div class="action-item-desc">0.842score (target: 2.0score) — 1.5-3.0 (HCC-adjusted MA)</div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="section-title">Strategic Priorities & Action Items</div>
+        
+        <div class="card" style="margin-bottom:1rem;border-left:4px solid #002B5C;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
+                <div style="background:#002B5C;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;">
+                    1
+                </div>
+                <div style="font-size:1.125rem;font-weight:700;color:#002B5C;">Denial Management</div>
+            </div>
+            <table style="margin-top:0;">
+                <tr><td style="font-weight:600;width:140px;color:#666;border:none;">Current State</td><td style="border:none;">10.0% denial rate (target: 7%)</td></tr>
+                <tr><td style="font-weight:600;width:140px;color:#666;border:none;">Recommended Action</td><td style="border:none;">Implement targeted denial prevention program, enhance pre-auth automation</td></tr>
+                <tr><td style="font-weight:600;width:140px;color:#666;border:none;">Expected Impact</td><td style="border:none;color:#28a745;font-weight:600;">Recovery of $100K-$500K annually</td></tr>
+            </table>
+        </div>
+            
+        <div class="card" style="margin-bottom:1rem;border-left:4px solid #002B5C;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
+                <div style="background:#002B5C;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;">
+                    2
+                </div>
+                <div style="font-size:1.125rem;font-weight:700;color:#002B5C;">Risk Score Optimization</div>
+            </div>
+            <table style="margin-top:0;">
+                <tr><td style="font-weight:600;width:140px;color:#666;border:none;">Current State</td><td style="border:none;">0.842 avg risk (target: 2.0+)</td></tr>
+                <tr><td style="font-weight:600;width:140px;color:#666;border:none;">Recommended Action</td><td style="border:none;">HCC capture rate improvement via provider education</td></tr>
+                <tr><td style="font-weight:600;width:140px;color:#666;border:none;">Expected Impact</td><td style="border:none;color:#28a745;font-weight:600;">0.05 risk increase = $50-$150 PMPM additional revenue</td></tr>
+            </table>
+        </div>
+            
+    </div>
+
+    <!-- AI Chatbot Floating Action Button -->
+    <button class="chatbot-fab" onclick="toggleChat()" id="chatFab" title="Ask the AI Healthcare Analyst">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 21a9 9 0 110-18 9 9 0 010 18z" fill="rgba(255,255,255,0.15)"/>
+            <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+            <path d="M9 16c1 1 2.5 1.5 3 1.5s2-.5 3-1.5"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none"/>
+            <circle cx="8.5" cy="10" r="1" fill="white"/>
+            <circle cx="15.5" cy="10" r="1" fill="white"/>
+            <path d="M9 15c.83.67 2 1 3 1s2.17-.33 3-1" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M12 2v1M22 12h-1M12 22v-1M2 12h1" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+            <path d="M4.93 4.93l.7.7M18.36 4.93l-.7.7M18.36 19.07l-.7-.7M4.93 19.07l.7-.7" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        </svg>
+        <div class="fab-badge" id="chatBadge" style="display:none;">!</div>
+    </button>
+
+    <!-- AI Chatbot Panel -->
+    <div class="chatbot-panel" id="chatPanel">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="20" height="20">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="chat-header-title">KP Healthcare AI Analyst</div>
+                    <div class="chat-header-subtitle">Powered by ML &bull; Deep Data Insights</div>
+                </div>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">&times;</button>
+        </div>
+        <div class="chat-suggestions" id="chatSuggestions">
+            <span class="chat-suggestion" onclick="askSuggestion(this)">What is our current MLR?</span>
+            <span class="chat-suggestion" onclick="askSuggestion(this)">Show denial rates by region</span>
+            <span class="chat-suggestion" onclick="askSuggestion(this)">Risk score distribution</span>
+            <span class="chat-suggestion" onclick="askSuggestion(this)">Revenue forecast next 6 months</span>
+            <span class="chat-suggestion" onclick="askSuggestion(this)">Member retention trends</span>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg bot">
+                <div class="chat-msg-avatar">AI</div>
+                <div class="chat-msg-bubble">
+                    Welcome! I'm your <strong>KP Healthcare AI Analyst</strong>. I have deep understanding of all your dashboard data — financial KPIs, Stars quality measures, member demographics, claims, and more.<br><br>
+                    Ask me anything about the data, and I'll provide insights backed by ML models, statistical analysis, and actionable recommendations. What would you like to explore?
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask about KPIs, trends, forecasts..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="chat-send" onclick="sendChat()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Anticipation tooltip -->
+    <div class="anticipation-bar" id="anticipationBar"></div>
+
+    <!-- Insight Drill-Down Overlay -->
+    <div id="insightOverlay" class="insight-overlay" onclick="if(event.target===this)closeInsight();">
+        <div id="insightModal" class="insight-modal">
+            <div class="insight-header">
+                <h2 id="insightTitle">KPI Deep Insights</h2>
+                <button class="insight-close" onclick="closeInsight();">&times;</button>
+            </div>
+            <div class="insight-body" id="insightBody">
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ── Insight Modal Engine (MUST load before page scripts) ──
+    var _insightData = {};
+    var _forecastCharts = {};
+
+    function registerInsight(key, data) {
+        _insightData[key] = data;
+    }
+
+    function openInsight(key) {
+        var d = _insightData[key];
+        if (!d) return;
+        document.getElementById('insightTitle').textContent = d.kpi_name || key;
+        document.getElementById('insightBody').innerHTML = buildInsightHTML(d, key);
+        document.getElementById('insightOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        // Render forecast chart after DOM update
+        setTimeout(function() { renderForecastChart(d, key); }, 100);
+    }
+
+    function closeInsight() {
+        document.getElementById('insightOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+        // Destroy forecast charts
+        Object.keys(_forecastCharts).forEach(function(k) {
+            if (_forecastCharts[k]) _forecastCharts[k].destroy();
+            delete _forecastCharts[k];
+        });
+    }
+
+    // Keyboard: Escape closes modal
+    document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeInsight(); });
+
+    function buildInsightHTML(d, key) {
+        var html = '';
+
+        // Current value banner
+        if (d.current_value !== null && d.current_value !== undefined) {
+            var unit = '';
+            if (d.kpi_name && (d.kpi_name.indexOf('Rate') >= 0 || d.kpi_name.indexOf('MLR') >= 0 || d.kpi_name.indexOf('Ratio') >= 0)) unit = '%';
+            else if (d.kpi_name && d.kpi_name.indexOf('PMPM') >= 0) unit = '';
+            html += '<div class="insight-kpi-value">' + (unit === '' && d.kpi_name && d.kpi_name.indexOf('Risk') < 0 ? '$' : '') + (typeof d.current_value === 'number' ? d.current_value.toLocaleString(undefined, {maximumFractionDigits:2}) : d.current_value) + unit + '</div>';
+            if (d.target) html += '<div class="insight-kpi-label">Target: ' + d.target + (unit||'') + (d.benchmark ? ' | Benchmark: ' + d.benchmark : '') + '</div>';
+        }
+
+        // 1. What was learned
+        if (d.data_learned) {
+            html += '<div class="insight-section"><div class="insight-section-title">📊 What We Learned from the Data</div>';
+            html += '<div class="insight-text">' + (d.data_learned.summary || '') + '</div>';
+            if (d.data_learned.variance_decomposition) {
+                var vd = d.data_learned.variance_decomposition;
+                html += '<div class="insight-text"><strong>Variance Decomposition:</strong> Trend explains ' + (vd.trend_pct||0).toFixed(1) + '%, Seasonal ' + (vd.seasonal_pct||0).toFixed(1) + '%, Residual ' + (vd.residual_pct||0).toFixed(1) + '%</div>';
+            }
+            if (d.data_learned.regional_spread) {
+                html += '<div class="insight-text"><strong>Regional Performance:</strong></div><table style="font-size:0.85rem;"><thead><tr><th>Region</th><th>Value</th></tr></thead><tbody>';
+                d.data_learned.regional_spread.forEach(function(r) {
+                    var v = r.pmpm || r.mlr || r.avg_risk || r.retention || 0;
+                    html += '<tr><td>' + r.region + '</td><td>' + (typeof v === 'number' ? v.toFixed(2) : v) + '</td></tr>';
+                });
+                html += '</tbody></table>';
+            }
+            if (d.data_learned.denial_breakdown) {
+                html += '<div class="insight-text"><strong>Denial Root Causes:</strong></div><table style="font-size:0.85rem;"><thead><tr><th>Reason</th><th>Count</th><th>$ at Risk</th></tr></thead><tbody>';
+                d.data_learned.denial_breakdown.forEach(function(dd) {
+                    html += '<tr><td>' + dd.reason + '</td><td>' + dd.count + '</td><td>$' + (dd.revenue||0).toLocaleString(undefined,{maximumFractionDigits:0}) + '</td></tr>';
+                });
+                html += '</tbody></table>';
+            }
+            if (d.risk_distribution) {
+                html += '<div class="insight-text"><strong>Risk Score Distribution:</strong></div><table style="font-size:0.85rem;"><thead><tr><th>Tier</th><th>Members</th><th>Avg Risk</th></tr></thead><tbody>';
+                d.risk_distribution.forEach(function(r) {
+                    html += '<tr><td>' + r.tier + '</td><td>' + r.count.toLocaleString() + '</td><td>' + r.avg.toFixed(3) + '</td></tr>';
+                });
+                html += '</tbody></table>';
+            }
+            html += '</div>';
+        }
+
+        // 2. Forecast chart
+        if (d.historical_values && d.historical_months) {
+            html += '<div class="insight-section"><div class="insight-section-title">📈 AI Forecast (6-Month Projection)</div>';
+            html += '<div class="forecast-chart-container"><canvas id="forecastChart_' + key + '"></canvas></div>';
+            if (d.forecast_accuracy_rationale) {
+                html += '<div class="insight-text" style="font-style:italic;color:#666;">' + d.forecast_accuracy_rationale + '</div>';
+            }
+            html += '</div>';
+        }
+
+        // 3. Models Used
+        if (d.models_used && d.models_used.length > 0) {
+            html += '<div class="insight-section"><div class="insight-section-title">🤖 ML/AI Models Used</div>';
+            d.models_used.forEach(function(m) {
+                html += '<div class="model-card">';
+                html += '<div class="model-name">' + m.name + '</div>';
+                html += '<div class="model-detail"><strong>Purpose:</strong> ' + (m.purpose || m.why_chosen || '') + '</div>';
+                html += '<div class="model-accuracy">Accuracy: ' + (m.accuracy || 'N/A') + '</div>';
+                if (m.why_chosen && m.purpose) html += '<div class="model-detail" style="margin-top:0.5rem;">' + m.why_chosen + '</div>';
+                if (m.forecast_6m) {
+                    if (Array.isArray(m.forecast_6m)) {
+                        html += '<div class="model-detail"><strong>6-Month Forecast:</strong> ' + m.forecast_6m.map(function(v){ return typeof v === 'number' ? v.toFixed(2) : v; }).join(' → ') + '</div>';
+                    } else if (typeof m.forecast_6m === 'object') {
+                        Object.keys(m.forecast_6m).forEach(function(fk) {
+                            var fv = m.forecast_6m[fk];
+                            html += '<div class="model-detail"><strong>' + fk + ':</strong> ' + (Array.isArray(fv) ? fv.map(function(v){return typeof v==='number'?v.toFixed(2):v;}).join(' → ') : fv) + '</div>';
+                        });
+                    }
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+        }
+
+        // 4. Contributing Factors
+        if (d.contributing_factors && d.contributing_factors.length > 0) {
+            html += '<div class="insight-section"><div class="insight-section-title">🔬 Contributing Factors (Ranked by Importance)</div>';
+            d.contributing_factors.forEach(function(f) {
+                var pct = ((f.importance || 0) * 100).toFixed(0);
+                var color = f.direction === 'positive' || f.direction === 'positive_opportunity' ? '#28a745' : f.direction === 'negative' ? '#dc3545' : '#ffc107';
+                html += '<div class="factor-bar"><div class="factor-label">' + f.factor + '</div>';
+                html += '<div class="factor-bar-track"><div class="factor-bar-fill" style="width:' + pct + '%;background:' + color + ';">' + pct + '%</div></div></div>';
+                html += '<div class="factor-detail">' + (f.detail || '') + '</div>';
+            });
+            html += '</div>';
+        }
+
+        // 5. Recommendations
+        if (d.recommendations && d.recommendations.length > 0) {
+            html += '<div class="insight-section"><div class="insight-section-title">💡 Detailed Recommendations</div>';
+            d.recommendations.forEach(function(r) {
+                var prClass = r.priority === 'critical' ? 'critical' : r.priority === 'high' ? 'high' : 'medium';
+                html += '<div class="rec-card">';
+                html += '<span class="rec-priority ' + prClass + '">' + (r.priority || 'medium') + '</span>';
+                html += '<div class="rec-title">' + r.title + '</div>';
+                html += '<div class="rec-detail">' + r.detail + '</div>';
+                if (r.impact) html += '<div class="rec-impact">Impact: ' + r.impact + '</div>';
+                if (r.timeline) html += '<div class="rec-timeline">Timeline: ' + r.timeline + '</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+        }
+
+        return html;
+    }
+
+    function renderForecastChart(d, key) {
+        var canvasId = 'forecastChart_' + key;
+        var canvas = document.getElementById(canvasId);
+        if (!canvas || !d.historical_values || !d.historical_months) return;
+
+        var labels = (d.historical_months || []).concat(d.forecast_months || []);
+        var historical = d.historical_values || [];
+        var forecastVals = [];
+
+        // Get best forecast (Holt-Winters if available)
+        if (d.models_used) {
+            for (var i = 0; i < d.models_used.length; i++) {
+                var m = d.models_used[i];
+                if (m.forecast_6m && Array.isArray(m.forecast_6m)) {
+                    forecastVals = m.forecast_6m;
+                    break;
+                }
+            }
+        }
+
+        // Build datasets
+        var histData = historical.concat(new Array(forecastVals.length).fill(null));
+        var fcData = new Array(historical.length - 1).fill(null).concat([historical[historical.length-1]]).concat(forecastVals);
+
+        // Monte Carlo bands
+        var p10 = null, p90 = null;
+        if (d.models_used) {
+            d.models_used.forEach(function(m) {
+                if (m.name && m.name.indexOf('Monte Carlo') >= 0 && m.forecast_6m && typeof m.forecast_6m === 'object' && !Array.isArray(m.forecast_6m)) {
+                    var keys = Object.keys(m.forecast_6m);
+                    keys.forEach(function(k) {
+                        if (k.indexOf('p10') >= 0 || k.indexOf('pessimistic') >= 0) p10 = m.forecast_6m[k];
+                        if (k.indexOf('p90') >= 0 || k.indexOf('optimistic') >= 0) p90 = m.forecast_6m[k];
+                    });
+                }
+            });
+        }
+
+        var datasets = [
+            {
+                label: 'Historical',
+                data: histData,
+                borderColor: '#002B5C',
+                backgroundColor: 'rgba(0,43,92,0.1)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#002B5C',
+                borderWidth: 2.5
+            },
+            {
+                label: 'Forecast',
+                data: fcData,
+                borderColor: '#0066E6',
+                borderDash: [6, 3],
+                backgroundColor: 'rgba(0,102,230,0.08)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#0066E6',
+                borderWidth: 2.5
+            }
+        ];
+
+        if (p10 && p90) {
+            var bandUpper = new Array(historical.length).fill(null).concat(p90);
+            var bandLower = new Array(historical.length).fill(null).concat(p10);
+            datasets.push({
+                label: '90th Percentile',
+                data: bandUpper,
+                borderColor: 'rgba(40,167,69,0.3)',
+                backgroundColor: 'rgba(40,167,69,0.08)',
+                borderDash: [2, 2],
+                fill: false,
+                pointRadius: 0,
+                borderWidth: 1
+            });
+            datasets.push({
+                label: '10th Percentile',
+                data: bandLower,
+                borderColor: 'rgba(220,53,69,0.3)',
+                backgroundColor: 'rgba(220,53,69,0.08)',
+                borderDash: [2, 2],
+                fill: '-1',
+                pointRadius: 0,
+                borderWidth: 1
+            });
+        }
+
+        if (_forecastCharts[key]) _forecastCharts[key].destroy();
+        _forecastCharts[key] = new Chart(canvas, {
+            type: 'line',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                var v = ctx.parsed.y;
+                                return ctx.dataset.label + ': ' + (v !== null ? v.toFixed(2) : 'N/A');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { maxRotation: 45, font: { size: 10 } } },
+                    y: { ticks: { callback: function(v) { return v.toLocaleString(undefined, {maximumFractionDigits:1}); } } }
+                }
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  AI CHATBOT ENGINE
+    // ═══════════════════════════════════════════════════
+    var _chatSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+    var _chatHistory = [];
+    var _chatOpen = false;
+    var _queryCount = 0;
+
+    function toggleChat() {
+        _chatOpen = !_chatOpen;
+        document.getElementById('chatPanel').classList.toggle('open', _chatOpen);
+        document.getElementById('chatBadge').style.display = 'none';
+        if (_chatOpen) {
+            document.getElementById('chatInput').focus();
+            // Update suggestions based on current dashboard context
+            updateSuggestions();
+        }
+    }
+
+    function askSuggestion(el) {
+        document.getElementById('chatInput').value = el.textContent;
+        sendChat();
+    }
+
+    function sendChat() {
+        var input = document.getElementById('chatInput');
+        var q = input.value.trim();
+        if (!q) return;
+        input.value = '';
+
+        // Add user message
+        appendChatMsg('user', q);
+        _chatHistory.push({ role: 'user', content: q, ts: Date.now() });
+        _queryCount++;
+
+        // Show typing indicator
+        var typingId = showTyping();
+
+        // Build API URL — try intelligent endpoint first
+        var apiBase = window.location.origin || '';
+        var url = apiBase + '/api/intelligent/query?q=' + encodeURIComponent(q) + '&session_id=' + _chatSessionId;
+
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                removeTyping(typingId);
+                var response = formatChatResponse(data, q);
+                appendChatMsg('bot', response);
+                _chatHistory.push({ role: 'bot', content: q, answer: data, ts: Date.now() });
+                // Trigger anticipation after 3+ queries
+                if (_queryCount >= 2) triggerAnticipation(q, data);
+                // Update suggestions based on what was asked
+                updateSuggestionsAfterQuery(q);
+            })
+            .catch(function(err) {
+                removeTyping(typingId);
+                // Fallback to basic /query endpoint
+                fetch(apiBase + '/query?q=' + encodeURIComponent(q))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var response = formatChatResponse(data, q);
+                        appendChatMsg('bot', response);
+                        _chatHistory.push({ role: 'bot', content: q, answer: data, ts: Date.now() });
+                    })
+                    .catch(function(e2) {
+                        appendChatMsg('bot', 'I encountered an issue processing your request. Please try rephrasing your question. <em style="color:#999;font-size:0.75rem;">(' + (e2.message||'Network error') + ')</em>');
+                    });
+            });
+    }
+
+    function formatChatResponse(data, query) {
+        var html = '';
+
+        // Narrative / explanation
+        if (data.narrative) {
+            html += '<div style="margin-bottom:0.5rem;">' + data.narrative + '</div>';
+        } else if (data.explanation) {
+            html += '<div style="margin-bottom:0.5rem;">' + data.explanation + '</div>';
+        }
+
+        // If there are rows, show as table
+        if (data.rows && data.rows.length > 0 && data.columns) {
+            html += '<table><thead><tr>';
+            data.columns.forEach(function(c) { html += '<th>' + c + '</th>'; });
+            html += '</tr></thead><tbody>';
+            var maxRows = Math.min(data.rows.length, 8);
+            for (var i = 0; i < maxRows; i++) {
+                html += '<tr>';
+                data.rows[i].forEach(function(v) {
+                    if (typeof v === 'number') {
+                        html += '<td>' + v.toLocaleString(undefined, {maximumFractionDigits:2}) + '</td>';
+                    } else {
+                        html += '<td>' + (v !== null ? v : '—') + '</td>';
+                    }
+                });
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            if (data.rows.length > 8) {
+                html += '<div style="font-size:0.72rem;color:#888;margin-top:0.25rem;">Showing 8 of ' + data.rows.length + ' rows</div>';
+            }
+        }
+
+        // Confidence indicator
+        if (data.confidence !== undefined) {
+            var confPct = Math.round((data.confidence || 0) * 100);
+            var confColor = confPct >= 85 ? '#28a745' : confPct >= 70 ? '#ffc107' : '#dc3545';
+            html += '<div style="margin-top:0.5rem;font-size:0.72rem;color:' + confColor + ';">Confidence: ' + confPct + '%</div>';
+        }
+
+        // WHY / HOW / WHAT framework
+        if (data.clinical_context || data.business_context) {
+            var ctx = data.clinical_context || data.business_context || {};
+            if (ctx.why) html += '<div style="margin-top:0.5rem;font-size:0.8rem;"><strong>WHY:</strong> ' + ctx.why + '</div>';
+            if (ctx.how) html += '<div style="font-size:0.8rem;"><strong>HOW:</strong> ' + ctx.how + '</div>';
+            if (ctx.what) html += '<div style="font-size:0.8rem;"><strong>WHAT:</strong> ' + ctx.what + '</div>';
+        }
+
+        // Recommendations
+        if (data.recommendations && data.recommendations.length) {
+            html += '<div style="margin-top:0.5rem;font-size:0.8rem;"><strong>Recommendations:</strong></div>';
+            data.recommendations.forEach(function(r) {
+                html += '<div style="font-size:0.78rem;color:#555;padding-left:0.5rem;border-left:2px solid #0052B3;margin:0.25rem 0;">' + (r.recommendation || r) + '</div>';
+            });
+        }
+
+        if (!html) {
+            html = 'I processed your query but didn't find specific data matching "<em>' + query + '</em>". Try being more specific — for example, "What is the PMPM revenue by region?" or "Show denial rates for SCAL."';
+        }
+
+        return html;
+    }
+
+    function appendChatMsg(role, html) {
+        var container = document.getElementById('chatMessages');
+        var div = document.createElement('div');
+        div.className = 'chat-msg ' + role;
+        var avatar = role === 'bot' ? 'AI' : '👤';
+        div.innerHTML = '<div class="chat-msg-avatar">' + avatar + '</div><div class="chat-msg-bubble">' + html + '</div>';
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function showTyping() {
+        var container = document.getElementById('chatMessages');
+        var div = document.createElement('div');
+        div.className = 'chat-msg bot';
+        div.id = 'typing_' + Date.now();
+        div.innerHTML = '<div class="chat-msg-avatar">AI</div><div class="chat-msg-bubble"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+        return div.id;
+    }
+
+    function removeTyping(id) {
+        var el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  ANTICIPATION ENGINE (Client-side)
+    // ═══════════════════════════════════════════════════
+    var _intentTransitions = {
+        'mlr': ['pmpm', 'denial_rate', 'expense_breakdown'],
+        'pmpm': ['revenue_forecast', 'regional_comparison', 'mlr'],
+        'denial_rate': ['denial_by_region', 'recovery_rate', 'coding_analysis'],
+        'risk_score': ['high_risk_members', 'risk_distribution', 'intervention'],
+        'retention': ['disenrollment_reasons', 'member_satisfaction', 'retention_forecast'],
+        'stars': ['hedis_measures', 'cahps_scores', 'quality_improvement'],
+        'financial': ['pmpm', 'mlr', 'revenue_forecast'],
+        'members': ['enrollment_trend', 'demographics', 'retention']
+    };
+
+    function triggerAnticipation(query, response) {
+        // Determine intent from query keywords
+        var qLow = query.toLowerCase();
+        var intent = 'general';
+        if (qLow.indexOf('mlr') >= 0 || qLow.indexOf('medical loss') >= 0) intent = 'mlr';
+        else if (qLow.indexOf('pmpm') >= 0 || qLow.indexOf('revenue') >= 0) intent = 'pmpm';
+        else if (qLow.indexOf('denial') >= 0) intent = 'denial_rate';
+        else if (qLow.indexOf('risk') >= 0) intent = 'risk_score';
+        else if (qLow.indexOf('retention') >= 0 || qLow.indexOf('disenroll') >= 0) intent = 'retention';
+        else if (qLow.indexOf('star') >= 0 || qLow.indexOf('hedis') >= 0 || qLow.indexOf('cahps') >= 0) intent = 'stars';
+        else if (qLow.indexOf('member') >= 0 || qLow.indexOf('enroll') >= 0) intent = 'members';
+
+        var nextIntents = _intentTransitions[intent];
+        if (!nextIntents || !nextIntents.length) return;
+
+        var suggestions = {
+            'pmpm': 'Explore PMPM revenue trends',
+            'mlr': 'Review Medical Loss Ratio breakdown',
+            'denial_rate': 'Investigate claim denial patterns',
+            'denial_by_region': 'Compare denial rates across regions',
+            'recovery_rate': 'Check projected denial recovery',
+            'coding_analysis': 'Analyze top denial codes',
+            'revenue_forecast': 'View 6-month revenue forecast',
+            'regional_comparison': 'Compare metrics across KP regions',
+            'expense_breakdown': 'Analyze expense categories',
+            'risk_distribution': 'See risk score distribution',
+            'high_risk_members': 'Identify high-risk member segments',
+            'intervention': 'Review intervention recommendations',
+            'disenrollment_reasons': 'Understand disenrollment drivers',
+            'member_satisfaction': 'Check CAHPS satisfaction scores',
+            'retention_forecast': 'Forecast member retention',
+            'hedis_measures': 'Deep dive into HEDIS performance',
+            'cahps_scores': 'Review patient experience scores',
+            'quality_improvement': 'Explore quality improvement areas',
+            'enrollment_trend': 'View enrollment trends',
+            'demographics': 'Analyze member demographics'
+        };
+
+        var nextSuggestion = suggestions[nextIntents[0]] || 'Explore related metrics';
+        var bar = document.getElementById('anticipationBar');
+        bar.innerHTML = '💡 <strong>You might want to:</strong> ' + nextSuggestion + ' <span style="cursor:pointer;color:#0052B3;text-decoration:underline;" onclick="askAnticipated('' + nextSuggestion + '')">Ask now →</span>';
+        bar.classList.add('show');
+
+        // Auto-hide after 8 seconds
+        setTimeout(function() { bar.classList.remove('show'); }, 8000);
+    }
+
+    function askAnticipated(text) {
+        document.getElementById('anticipationBar').classList.remove('show');
+        if (!_chatOpen) toggleChat();
+        setTimeout(function() {
+            document.getElementById('chatInput').value = text;
+            sendChat();
+        }, 300);
+    }
+
+    function updateSuggestions() {
+        // Dynamic suggestions based on dashboard type
+        var title = document.title.toLowerCase();
+        var container = document.getElementById('chatSuggestions');
+        var suggestions = [];
+
+        if (title.indexOf('financial') >= 0) {
+            suggestions = [
+                'What is driving our MLR increase?',
+                'PMPM breakdown by region',
+                'Top denial reasons and recovery potential',
+                'Revenue forecast next 6 months',
+                'Which region has highest costs?'
+            ];
+        } else if (title.indexOf('stars') >= 0 || title.indexOf('quality') >= 0) {
+            suggestions = [
+                'Which HEDIS measures are below benchmark?',
+                'CAHPS improvement opportunities',
+                'What impacts our overall star rating most?',
+                'Clinical quality gaps by condition',
+                'Admin measure performance trends'
+            ];
+        } else if (title.indexOf('executive') >= 0) {
+            suggestions = [
+                'Overall performance summary',
+                'Which KPIs need immediate attention?',
+                'Top 3 strategic priorities',
+                'Compare actual vs target across all KPIs',
+                'What improved most this quarter?'
+            ];
+        } else {
+            suggestions = [
+                'What is our current MLR?',
+                'Show denial rates by region',
+                'Risk score distribution',
+                'Revenue forecast next 6 months',
+                'Member retention trends'
+            ];
+        }
+
+        container.innerHTML = suggestions.map(function(s) {
+            return '<span class="chat-suggestion" onclick="askSuggestion(this)">' + s + '</span>';
+        }).join('');
+    }
+
+    function updateSuggestionsAfterQuery(query) {
+        // After each query, rotate in relevant follow-up suggestions
+        var qLow = query.toLowerCase();
+        var followUps = [];
+        if (qLow.indexOf('mlr') >= 0) followUps = ['MLR trend over 12 months', 'MLR by region', 'What drives MLR up?'];
+        else if (qLow.indexOf('denial') >= 0) followUps = ['Top denial codes', 'Denial recovery rate', 'Denials by claim type'];
+        else if (qLow.indexOf('risk') >= 0) followUps = ['High risk member count', 'Risk score by region', 'Interventions for high risk'];
+        else if (qLow.indexOf('member') >= 0 || qLow.indexOf('enroll') >= 0) followUps = ['Active vs disenrolled', 'Enrollment by region', 'Average member age'];
+
+        if (followUps.length) {
+            var container = document.getElementById('chatSuggestions');
+            var existing = Array.from(container.children).map(function(c) { return c.textContent; }).slice(0,2);
+            var merged = followUps.concat(existing).slice(0, 5);
+            container.innerHTML = merged.map(function(s) {
+                return '<span class="chat-suggestion" onclick="askSuggestion(this)">' + s + '</span>';
+            }).join('');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  TOOLBAR FUNCTIONS
+    // ═══════════════════════════════════════════════════
+    function exportDashboard(format) {
+        if (format === 'pdf') {
+            // Hide chatbot elements before printing
+            var fab = document.getElementById('chatFab');
+            var panel = document.getElementById('chatPanel');
+            var toolbar = document.querySelector('.toolbar');
+            fab.style.display = 'none';
+            panel.style.display = 'none';
+            toolbar.style.display = 'none';
+            window.print();
+            setTimeout(function() {
+                fab.style.display = '';
+                panel.style.display = '';
+                toolbar.style.display = '';
+            }, 500);
+        } else if (format === 'csv') {
+            // Export all visible tables as CSV
+            var tables = document.querySelectorAll('.container table');
+            var csv = '';
+            tables.forEach(function(table, idx) {
+                if (idx > 0) csv += '\n\n';
+                var rows = table.querySelectorAll('tr');
+                rows.forEach(function(row) {
+                    var cells = row.querySelectorAll('th, td');
+                    var rowData = [];
+                    cells.forEach(function(cell) {
+                        var text = cell.textContent.replace(/"/g, '""').trim();
+                        rowData.push('"' + text + '"');
+                    });
+                    csv += rowData.join(',') + '\n';
+                });
+            });
+            if (!csv) { alert('No table data found to export.'); return; }
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = document.title.replace(/[^a-zA-Z0-9]/g, '_') + '.csv';
+            link.click();
+        }
+    }
+
+    function saveDashboardState() {
+        var state = {
+            title: document.title,
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            chatHistory: _chatHistory,
+            sessionId: _chatSessionId
+        };
+        try {
+            var saved = JSON.parse(sessionStorage.getItem('kp_saved_views') || '[]');
+            saved.push(state);
+            sessionStorage.setItem('kp_saved_views', JSON.stringify(saved));
+            showToast('Dashboard view saved successfully');
+        } catch(e) {
+            // Fallback: download as JSON
+            var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'dashboard_state_' + Date.now() + '.json';
+            link.click();
+            showToast('Dashboard state downloaded');
+        }
+    }
+
+    var _bookmarked = false;
+    function toggleBookmark() {
+        _bookmarked = !_bookmarked;
+        var btn = document.getElementById('bookmarkBtn');
+        if (_bookmarked) {
+            btn.classList.add('primary');
+            showToast('Dashboard bookmarked');
+        } else {
+            btn.classList.remove('primary');
+            showToast('Bookmark removed');
+        }
+    }
+
+    function refreshDashboard() {
+        showToast('Refreshing dashboard data...');
+        setTimeout(function() { window.location.reload(); }, 500);
+    }
+
+    function showToast(msg) {
+        var toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#002B5C;color:white;padding:0.75rem 1.25rem;border-radius:8px;font-size:0.85rem;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:chatSlideUp 0.3s ease;';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 3000);
+    }
+
+    // Set last updated timestamp
+    document.addEventListener('DOMContentLoaded', function() {
+        var ts = document.getElementById('lastUpdated');
+        if (ts) ts.textContent = 'Updated: ' + new Date().toLocaleString();
+    });
+
+    </script>
+    
+        <script>
+            new Chart(document.getElementById('chart_1'), {
+                type: 'bar',
+                data: {
+                    labels: ["Member Retention Rate", "Medical Loss Ratio", "Claims Collection Rate", "Denial Rate", "Average Risk Score"],
+                    datasets: [{
+                        label: '% of Target',
+                        data: [99.8, 80.7, 100.0, 143.3, 42.1],
+                        backgroundColor: ["#28a745", "#ffc107", "#28a745", "#ffc107", "#dc3545"],
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    },
+                    {
+                        label: 'Target (100%)',
+                        data: [100, 100, 100, 100, 100],
+                        type: 'line',
+                        borderColor: '#ccc',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.x.toFixed(1) + '%'; }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 150,
+                            ticks: { callback: function(v) { return v + '%'; } }
+                        }
+                    }
+                }
+            });
+        </script>
+        
+<script>
+registerInsight('member_retention_rate', {"kpi_name": "Member Retention Rate", "current_value": 91.78, "target": 92.0, "data_learned": {"summary": "25,000 total members, 2,055 disenrolled (8.22% voluntary termination rate). Retention at 91.78% is approaching target.", "regional_retention": [{"region": "GA", "retention": 92.08}, {"region": "HI", "retention": 91.92}, {"region": "MAS", "retention": 91.84}, {"region": "CO", "retention": 91.8}, {"region": "MID", "retention": 91.78}, {"region": "NW", "retention": 91.78}, {"region": "NCAL", "retention": 91.71}, {"region": "SCAL", "retention": 91.35}]}, "models_used": [{"name": "Logistic Regression (Churn Prediction)", "accuracy": "AUC 0.78-0.85 expected", "why_chosen": "Binary classification of churn risk per member. Interpretable feature importance for interventions."}, {"name": "Survival Analysis (Kaplan-Meier)", "accuracy": "Censored data handling", "why_chosen": "Models time-to-disenrollment accounting for varying enrollment durations."}, {"name": "Random Forest (Risk Factors)", "accuracy": "Feature importance ranking", "why_chosen": "Identifies non-linear interactions between churn factors (e.g., denial + chronic condition)."}], "forecast_accuracy_rationale": "Current 91.78% retention is within benchmark (88-92%). Churn prediction models achieve 78-85% AUC using claims, denials, and engagement features.", "contributing_factors": [{"factor": "Denial Experience", "importance": 0.3, "detail": "Members with denied claims are 2-3x more likely to disenroll. 10.03% denial rate directly impacts retention.", "direction": "negative"}, {"factor": "Access to Care", "importance": 0.25, "detail": "54.95% outpatient access rate. Members without regular care engagement have higher churn.", "direction": "mixed"}, {"factor": "Chronic Disease Management", "importance": 0.25, "detail": "Actively managed chronic members have 95%+ retention. Unmanaged members churn at 2x rate.", "direction": "positive"}, {"factor": "Plan Satisfaction (CAHPS)", "importance": 0.2, "detail": "91.78% satisfaction correlates strongly with retention. Each 1% satisfaction increase = 0.5% retention improvement.", "direction": "positive"}], "recommendations": [{"title": "Proactive Disenrollment Risk Scoring", "detail": "Deploy ML model using claims patterns, denial history, care gaps, and demographics to predict churn risk 90 days before AEP.", "impact": "Identify and intervene with top 10% at-risk members. Projected 2-3% retention improvement.", "timeline": "2-3 months for model, ongoing for intervention", "priority": "high"}, {"title": "Care Navigator Program for High-Risk Members", "detail": "Assign dedicated care navigators to members with 3+ chronic conditions or recent denials. Proactive outreach and care coordination.", "impact": "15-20% reduction in churn among targeted population", "timeline": "1-3 months", "priority": "high"}, {"title": "Post-Denial Recovery Outreach", "detail": "Contact every member within 48 hours of a denial to explain, assist with appeals, and resolve friction.", "impact": "Reduce denial-driven churn by 40-50%", "timeline": "1 month", "priority": "critical"}], "historical_values": null, "historical_months": null, "forecast_months": null});
+registerInsight('medical_loss_ratio', {"kpi_name": "Medical Loss Ratio", "current_value": 56.67, "target": 70.0, "benchmark": "65-75%", "data_learned": {"summary": "MLR averaged 55.8% over 15 months. Trend is increasing at 0.06%/month.", "trend": "increasing", "variance_decomposition": {"trend_pct": 4.8, "seasonal_pct": 0.0, "residual_pct": 95.2}, "regional_spread": [{"region": "CO", "mlr": 32.8}, {"region": "GA", "mlr": 31.68}, {"region": "SCAL", "mlr": 31.27}, {"region": "MID", "mlr": 31.19}, {"region": "NW", "mlr": 31.13}, {"region": "MAS", "mlr": 30.66}, {"region": "HI", "mlr": 30.65}, {"region": "NCAL", "mlr": 28.99}]}, "models_used": [{"name": "Linear Regression", "accuracy": "R² = 0.0233", "forecast_6m": [56.23, 56.28, 56.34, 56.4, 56.45, 56.51], "why_chosen": "Identifies whether MLR is structurally improving or declining over time."}, {"name": "Holt-Winters", "accuracy": "MAPE = 16.25%", "forecast_6m": [61.55, 62.7, 63.84, 64.99, 66.14, 67.28], "why_chosen": "Captures level shifts from contract changes or seasonal patterns."}, {"name": "Monte Carlo", "accuracy": "1000 sims", "forecast_6m": [56.95, 57.03, 57.18, 57.52, 57.92, 58.14], "why_chosen": "Risk-adjusted projections for budgeting confidence intervals."}], "forecast_accuracy_rationale": "Model ensemble MAPE 16.2%. MLR is increasing — linear model explains 2% of variance. Monte Carlo shows 4.1% volatility.", "contributing_factors": [{"factor": "Claim Type Mix", "importance": 0.3, "detail": "Institutional claims have 31% MLR vs Professional at 30%. Higher institutional volume drives overall MLR down.", "direction": "negative"}, {"factor": "Provider Contract Rates", "importance": 0.25, "detail": "Allowed/Billed ratio varies by provider network. In-network providers have better contracted rates.", "direction": "positive"}, {"factor": "Coding Accuracy", "importance": 0.2, "detail": "Clean claims rate at 60% (target 95%). Coding errors cause underpayment and inflated billed amounts.", "direction": "negative"}, {"factor": "Regional Provider Mix", "importance": 0.15, "detail": "MLR ranges from 28.99% (NCAL) to 32.8% (CO).", "direction": "mixed"}, {"factor": "Service Intensity", "importance": 0.1, "detail": "Higher-acuity services (imaging, surgery) have lower MLR due to higher markups on billed amounts.", "direction": "neutral"}], "recommendations": [{"title": "Improve Clean Claims Rate to 95%", "detail": "Current 60.03% clean claims rate means 40% of claims require rework. Deploy real-time claim scrubbing with ICD-10/CPT validation before submission.", "impact": "Projected 5-8% MLR improvement through faster adjudication and reduced denials", "timeline": "2-4 months", "priority": "critical"}, {"title": "Renegotiate Provider Contracts", "detail": "Focus on high-volume institutional providers where allowed/billed ratio is lowest. Target 65-75% MLR benchmark.", "impact": "Each 1% MLR improvement = ~$4.3M additional collections", "timeline": "6-12 months (contract cycles)", "priority": "high"}, {"title": "Reduce Out-of-Network Utilization", "detail": "567 out-of-network denials with $4.2M at risk. Strengthen network adequacy and member navigation programs.", "impact": "Reduce OON utilization by 50% = $2.1M savings", "timeline": "3-6 months", "priority": "high"}], "historical_values": [53.46, 58.3, 55.9, 57.23, 53.07, 54.57, 53.28, 56.11, 58.62, 56.46, 55.85, 56.23, 55.57, 55.24, 56.67], "historical_months": ["2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "forecast_months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"]});
+registerInsight('claims_collection_rate', {"kpi_name": "Claims Collection Rate", "current_value": 58.81, "data_learned": {"summary": "Collection rate averaged 54.5% over 15 months.", "trend": "increasing"}, "models_used": [{"name": "Linear Regression", "accuracy": "R² = 0.0180", "forecast_6m": [55.5, 55.62, 55.74, 55.85, 55.97, 56.09], "why_chosen": "Detects structural trends in collection efficiency."}, {"name": "Holt-Winters", "accuracy": "MAPE = 10.20%", "forecast_6m": [59.53, 60.45, 61.38, 62.3, 63.22, 64.14], "why_chosen": "Adapts quickly to operational changes affecting collections."}, {"name": "Monte Carlo", "accuracy": "1000 sims", "forecast_6m": [59.85, 60.12, 60.77, 61.78, 62.81, 63.72], "why_chosen": "Budget risk quantification."}], "forecast_accuracy_rationale": "MAPE 10.2% indicates moderate forecasts.", "contributing_factors": [{"factor": "Claims Adjudication Speed", "importance": 0.3, "detail": "Average processing time 25.9 days. Faster adjudication improves cash flow and collection.", "direction": "positive"}, {"factor": "Denial Rate", "importance": 0.25, "detail": "10.03% denial rate reduces effective collection. Each denied claim requires appeal or write-off.", "direction": "negative"}, {"factor": "Contract Compliance", "importance": 0.25, "detail": "Payer contract terms dictate allowed amounts. Under-contracted rates reduce paid/allowed ratio.", "direction": "mixed"}, {"factor": "Timely Filing", "importance": 0.2, "detail": "529 timely filing denials ($4M at risk). Automated submission within 72 hours prevents this.", "direction": "negative"}], "recommendations": [{"title": "Automate Claims Submission Pipeline", "detail": "Reduce average submission time from current levels to <48 hours. Implement batch processing with real-time eligibility verification.", "impact": "Eliminate 529 timely filing denials, recover $4M annually", "timeline": "1-2 months", "priority": "critical"}, {"title": "Deploy AI-Powered Denial Prediction", "detail": "Use ML model trained on historical denial patterns to flag high-risk claims before submission. Features: diagnosis codes, provider, claim type, amount.", "impact": "Prevent 30-40% of denials proactively, improving collection by 3-5%", "timeline": "2-4 months", "priority": "high"}, {"title": "Contract Rate Optimization", "detail": "Analyze paid/allowed ratio by payer and service type. Identify contracts where paid amount consistently falls below allowed.", "impact": "Each 1% improvement in paid/allowed = ~$2.4M additional revenue", "timeline": "6-12 months", "priority": "medium"}], "historical_values": [49.48, 52.35, 61.85, 57.63, 53.85, 52.31, 54.7, 53.65, 47.91, 59.72, 54.51, 49.36, 57.15, 54.8, 58.81], "historical_months": ["2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "forecast_months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"]});
+registerInsight('denial_rate', {"kpi_name": "Denial Rate", "current_value": 8.85, "target": 7.0, "data_learned": {"summary": "Denial rate averaged 9.8% with 3300 total denials analyzed. Top driver: Coding error.", "trend": "decreasing", "denial_breakdown": [{"reason": "Coding error", "count": 574, "revenue": 4790428.8100000005}, {"reason": "Out of network", "count": 567, "revenue": 4233996.960000001}, {"reason": "Pre-auth required", "count": 565, "revenue": 3701970.36}, {"reason": "Duplicate claim", "count": 547, "revenue": 3353958.59}, {"reason": "Timely filing", "count": 529, "revenue": 3991453.870000001}, {"reason": "Not medically necessary", "count": 518, "revenue": 4273312.580000001}]}, "models_used": [{"name": "Linear Regression", "accuracy": "R² = 0.3477", "forecast_6m": [9.02, 8.93, 8.83, 8.74, 8.65, 8.56], "why_chosen": "Tracks whether denial prevention efforts are working over time."}, {"name": "Holt-Winters", "accuracy": "MAPE = 6.09%", "forecast_6m": [9.26, 9.22, 9.18, 9.15, 9.11, 9.08], "why_chosen": "Sensitive to recent policy changes affecting denial patterns."}, {"name": "Monte Carlo", "accuracy": "1000 sims", "forecast_6m": [8.79, 8.64, 8.54, 8.48, 8.43, 8.34], "why_chosen": "Models worst-case denial scenarios for risk planning."}], "forecast_accuracy_rationale": "MAPE 6.1%. Denial rate is decreasing — each 1% reduction recovers ~$4.6M.", "contributing_factors": [{"factor": "Coding error Denials", "importance": 0.174, "detail": "574 claims denied, $4,790,429 at risk. Avg claim $8,346.", "direction": "negative"}, {"factor": "Out of network Denials", "importance": 0.172, "detail": "567 claims denied, $4,233,997 at risk. Avg claim $7,467.", "direction": "negative"}, {"factor": "Pre-auth required Denials", "importance": 0.171, "detail": "565 claims denied, $3,701,970 at risk. Avg claim $6,552.", "direction": "negative"}, {"factor": "Duplicate claim Denials", "importance": 0.166, "detail": "547 claims denied, $3,353,959 at risk. Avg claim $6,132.", "direction": "negative"}, {"factor": "Timely filing Denials", "importance": 0.16, "detail": "529 claims denied, $3,991,454 at risk. Avg claim $7,545.", "direction": "negative"}], "recommendations": [{"title": "Coding Error Prevention System", "detail": "Deploy real-time ICD-10/CPT code validation with NLP-assisted code suggestion. Cross-reference diagnosis against procedure codes before submission.", "impact": "Prevent 574 coding denials, recover $4,790,429", "timeline": "1-3 months", "priority": "critical"}, {"title": "Prior Authorization Automation", "detail": "Integrate electronic prior auth (ePA) with payer systems. Auto-submit auth requests for high-denial service categories.", "impact": "Reduce pre-auth denials by 80%, recover $3M+", "timeline": "2-4 months", "priority": "critical"}, {"title": "Network Adequacy Enhancement", "detail": "Expand network contracts in specialties with highest OON denials. Implement smart referral routing to in-network providers.", "impact": "Reduce OON denials by 60%, save $2.5M", "timeline": "3-6 months", "priority": "high"}, {"title": "Duplicate Claim Detection Engine", "detail": "ML-based claim deduplication using fuzzy matching on member, date, CPT, provider. Flag potential duplicates before submission.", "impact": "Eliminate 547 duplicate denials", "timeline": "1-2 months", "priority": "high"}], "historical_values": [10.29, 10.51, 9.46, 10.82, 9.86, 9.38, 9.74, 10.13, 10.13, 9.69, 9.98, 8.76, 10.35, 8.33, 8.85], "historical_months": ["2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "forecast_months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"]});
+registerInsight('average_risk_score', {"kpi_name": "Average Risk Score", "current_value": 0.841, "target": 2.0, "benchmark": "1.5-3.0 (HCC-adjusted MA)", "data_learned": {"summary": "Analyzed 22945 active members across 7 risk tiers. Average risk score 0.841 is significantly below MA benchmark of 1.5-3.0, indicating substantial HCC documentation gaps.", "risk_distribution": [{"tier": "0.0-0.5", "members": 9194, "avg_risk": 0.293}, {"tier": "0.5-1.0", "members": 6853, "avg_risk": 0.748}, {"tier": "1.0-1.5", "members": 4595, "avg_risk": 1.246}, {"tier": "1.5-2.0", "members": 544, "avg_risk": 1.747}, {"tier": "2.0-2.5", "members": 597, "avg_risk": 2.241}, {"tier": "2.5-3.0", "members": 595, "avg_risk": 2.746}, {"tier": "3.0+", "members": 567, "avg_risk": 3.242}], "regional_comparison": [{"region": "CO", "avg_risk": 0.865}, {"region": "GA", "avg_risk": 0.848}, {"region": "MAS", "avg_risk": 0.847}, {"region": "SCAL", "avg_risk": 0.847}, {"region": "MID", "avg_risk": 0.844}, {"region": "NW", "avg_risk": 0.833}, {"region": "NCAL", "avg_risk": 0.821}, {"region": "HI", "avg_risk": 0.816}]}, "models_used": [{"name": "HCC Gap Analysis Model", "accuracy": "Based on CMS-HCC V28 risk model", "why_chosen": "Industry-standard for MA risk adjustment. Identifies systematic under-coding patterns.", "forecast_6m": [0.861, 0.881, 0.901, 0.921, 0.941, 0.961]}, {"name": "Provider Coding Pattern Analysis", "accuracy": "Cross-provider variance analysis", "why_chosen": "Identifies which providers consistently under-code, targeting education efforts.", "forecast_6m": null}, {"name": "Monte Carlo Revenue Impact", "accuracy": "1000 simulations", "why_chosen": "Quantifies revenue impact of risk score improvement scenarios.", "forecast_6m": {"conservative": 0.968, "moderate": 1.136, "aggressive": 1.346}}], "forecast_accuracy_rationale": "Risk score at 0.841 is 58% below MA benchmark midpoint (2.0). Historical MA plan data shows newly implemented HCC capture programs achieve 15-35% lift within 12 months.", "contributing_factors": [{"factor": "Low-Risk Member Concentration", "importance": 0.35, "detail": "9194 members (40%) in lowest tier (0-0.5). Many likely have uncaptured HCCs.", "direction": "negative"}, {"factor": "HCC Documentation Gaps", "importance": 0.3, "detail": "Average risk 0.842 vs MA benchmark 1.5-3.0 suggests significant HCC under-coding. Each missed HCC = $500-2000 annual revenue loss per member.", "direction": "negative"}, {"factor": "Provider Coding Patterns", "importance": 0.2, "detail": "Coding specificity varies by provider. Primary care captures fewer chronic conditions than specialists.", "direction": "mixed"}, {"factor": "Chronic Condition Prevalence", "importance": 0.15, "detail": "567 members with risk >3.0 — high-cost, high-complexity requiring intensive care management.", "direction": "neutral"}], "recommendations": [{"title": "Comprehensive HCC Retrospective Review", "detail": "Deploy NLP chart mining on 9194 lowest-tier members. Extract undiagnosed chronic conditions from clinical notes, lab results, and medication history.", "impact": "Each 0.1 risk score increase = $100-300 PMPM additional CMS revenue. Target: lift average from 0.842 to 1.2+ = $90-180M annual revenue increase.", "timeline": "1-3 months for NLP deployment, 6-12 months for full capture", "priority": "critical"}, {"title": "Provider HCC Coding Education", "detail": "Launch condition-specific coding workshops for top 100 PCPs. Focus on diabetes with complications, CHF, COPD, CKD documentation requirements.", "impact": "15-25% improvement in HCC capture rate within trained provider panels", "timeline": "2-4 months", "priority": "critical"}, {"title": "Prospective Risk Adjustment Program", "detail": "Implement pre-visit chart preparation identifying suspected HCC gaps. Alert providers during encounters to document and code chronic conditions.", "impact": "Real-time capture improves risk score accuracy by 0.2-0.4 points", "timeline": "3-6 months", "priority": "high"}, {"title": "Annual Wellness Visit Optimization", "detail": "Increase AWV completion rate. Each AWV is an opportunity to comprehensively document all chronic conditions and capture HCCs.", "impact": "AWV members have 20-30% higher risk score accuracy", "timeline": "1-3 months for outreach campaign", "priority": "high"}], "historical_values": null, "historical_months": null, "forecast_months": null, "risk_distribution": [{"tier": "0.0-0.5", "count": 9194, "avg": 0.293}, {"tier": "0.5-1.0", "count": 6853, "avg": 0.748}, {"tier": "1.0-1.5", "count": 4595, "avg": 1.246}, {"tier": "1.5-2.0", "count": 544, "avg": 1.747}, {"tier": "2.0-2.5", "count": 597, "avg": 2.241}, {"tier": "2.5-3.0", "count": 595, "avg": 2.746}, {"tier": "3.0+", "count": 567, "avg": 3.242}]});
+</script>
+
+</body>
+</html>

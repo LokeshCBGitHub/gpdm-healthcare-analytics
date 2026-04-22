@@ -1,0 +1,181 @@
+{
+  "table_name": "prescriptions",
+  "file_name": "prescriptions.csv",
+  "total_rows": 3000,
+  "total_columns": 16,
+  "checked_at": "2026-03-31T15:16:07.510428",
+  "column_checks": {
+    "RX_ID": {
+      "field_type": "rx_id",
+      "completeness": 100.0,
+      "uniqueness": 99.93,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 99.98,
+      "issues": [
+        "Uniqueness issues: 99.93% unique"
+      ]
+    },
+    "MEMBER_ID": {
+      "field_type": "member_id",
+      "completeness": 100.0,
+      "uniqueness": 86.63,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 95.99,
+      "issues": [
+        "Uniqueness issues: 86.63% unique"
+      ]
+    },
+    "PRESCRIBING_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 43.1,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 82.93,
+      "issues": []
+    },
+    "MEDICATION_NAME": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "MEDICATION_CLASS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "NDC_CODE": {
+      "field_type": "ndc",
+      "completeness": 100.0,
+      "uniqueness": 100.0,
+      "validity": 0.0,
+      "consistency": 100,
+      "column_score": 80.0,
+      "issues": [
+        "Validity issues: 0.0% valid format"
+      ]
+    },
+    "QUANTITY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DAYS_SUPPLY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "REFILLS_AUTHORIZED": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "REFILLS_USED": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PRESCRIPTION_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "FILL_DATE": {
+      "field_type": null,
+      "completeness": 84.6,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 93.84,
+      "issues": [
+        "Low completeness: 84.6% non-null"
+      ]
+    },
+    "PHARMACY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "COST": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "COPAY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "STATUS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "RX_ID": 99.98,
+    "MEMBER_ID": 95.99,
+    "PRESCRIBING_NPI": 82.93,
+    "MEDICATION_NAME": 100.0,
+    "MEDICATION_CLASS": 100.0,
+    "NDC_CODE": 80.0,
+    "QUANTITY": 100.0,
+    "DAYS_SUPPLY": 100.0,
+    "REFILLS_AUTHORIZED": 100.0,
+    "REFILLS_USED": 100.0,
+    "PRESCRIPTION_DATE": 100.0,
+    "FILL_DATE": 93.84,
+    "PHARMACY": 100.0,
+    "COST": 100.0,
+    "COPAY": 100.0,
+    "STATUS": 100.0
+  },
+  "dq_score": 97.05,
+  "dq_grade": "A"
+}

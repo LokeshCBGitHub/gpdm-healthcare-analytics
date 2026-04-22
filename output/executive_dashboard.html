@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Executive Intelligence Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Executive Intelligence Dashboard</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 6 data queries • April 20, 2026</div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For Your Organization</h3>
+    <div class="insight-item">Financial Health — Denial Rate: 9.9% (Average). At 9.9%, this sits between good (5.0%) and average (10.0%). Room for improvement.</div><div class="insight-item">Financial Health — Clean Claim Rate: 60.4% (Needs Improvement). At 60.4%, this is 36% below the good benchmark of 95.0%. Significant gap — action required.</div><div class="insight-item">Financial Health — Loss Ratio: 34.6% (Performing Well). At 34.6%, this is 59% below the good benchmark of 85%. Strong performance.</div><div class="insight-item">NW: Members (1,039) is 7% higher than the network average (970). This region or group may be growing rapidly — evaluate capacity and provider network adequacy.</div><div class="insight-item">CO: Avg Risk (2) is 4% lower than the network average (2). Healthier population — good candidate for wellness and preventive care programs to maintain health.</div><div class="insight-item">MAS — Denial Rate: 9.1% (Average). At 9.1%, this sits between good (5.0%) and average (10.0%). Room for improvement.</div><div class="insight-item">HI — Denial Rate: 9.1% (Average). At 9.1%, this sits between good (5.0%) and average (10.0%). Room for improvement.</div><div class="insight-item">MID — Denial Rate: 9.8% (Average). At 9.8%, this sits between good (5.0%) and average (10.0%). Room for improvement.</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $157,300</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_86558_0').style.display=document.getElementById('method_86558_0').style.display==='none'?'block':'none'"><strong><span style="color:#28a745;font-weight:700">&#9632;</span> Cost Reduction — ER Diversion Program</strong><br>Divert 121 ER visits to urgent care/telehealth — saves $157,300/year<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_86558_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> ER visit avg cost $1,500, urgent care $200, telehealth $75 (HCUP national statistics). 15% diversion rate is conservative industry benchmark.</div></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]ER Diversion Program: Divert 121 ER visits to urgent care/telehealth — saves $157,300/year</div><div class="rec-item"><strong>Initiative:</strong> Improve Clean Claim Rate for Financial Health: increase from 60.4% toward 95.0% (industry good). This gap indicates operational or quality issues needing immediate attention.</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate for SCAL: reduce from 10.5% toward 5.0% (industry good). This gap represents a significant opportunity for cost savings and quality improvement.</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate for NW: reduce from 10.8% toward 5.0% (industry good). This gap represents a significant opportunity for cost savings and quality improvement.</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate for CO: reduce from 10.5% toward 5.0% (industry good). This gap represents a significant opportunity for cost savings and quality improvement.</div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">10,000</div><div class="label">Total Members</div><div class="subtitle-text">10,000 lives covered. Mid-size plan — network adequacy standards apply.</div></div><div class="kpi"><div class="value">1,500</div><div class="label">Total Providers</div></div><div class="kpi"><div class="value">15,000</div><div class="label">Total Claims</div><div class="subtitle-text">15,000 claims processed</div></div><div class="kpi"><div class="value">15,068</div><div class="label">Total Encounters</div><div class="subtitle-text">15,068 patient encounters across all care settings</div></div><div class="kpi"><div class="value">$38.8M</div><div class="label">Total Paid</div><div class="subtitle-text">Total reimbursements | $38.8M paid to providers</div></div><div class="kpi"><div class="value">3,000</div><div class="label">Total Rx</div></div></div><div class="kpi-row"><div class="kpi"><div class="value">4,999</div><div class="label">Cost Per Member</div><div class="subtitle-text">Industry avg: $4,500-6,000/year | Average range</div></div><div class="kpi"><div class="value">9.9</div><div class="label">Denial Rate</div><div class="subtitle-text">Industry good: <5% | Average: 10% | Needs focus</div></div><div class="kpi"><div class="value">60.4</div><div class="label">Clean Claim Rate</div><div class="subtitle-text">Industry target: >95% | Significant gap — revenue at risk</div></div><div class="kpi"><div class="value">34.6</div><div class="label">Loss Ratio</div><div class="subtitle-text">Paid vs Billed | Industry healthy: <85% | Excellent efficiency</div></div></div><div class="kpi-row"><div class="kpi"><div class="value">2.3</div><div class="label">Avg Risk</div><div class="subtitle-text">1.0 = average acuity | High acuity — care management recommended</div></div><div class="kpi"><div class="value">3</div><div class="label">Avg Chronic</div><div class="subtitle-text">3.0 conditions avg — intensive care coordination required</div></div><div class="kpi"><div class="value">3,468</div><div class="label">High Risk Count</div></div><div class="kpi"><div class="value">34.7</div><div class="label">High Risk Pct</div><div class="subtitle-text">34.7% of members in high-risk tier | These members drive 60-80% of total cost</div></div></div><div class="card"><h3>Regional Performance</h3><div class="table-container"><table><thead><tr><th>Kp Region</th><th>Members</th><th>Avg Risk</th><th>Cost Per Member</th><th>Denial Rate</th></tr></thead><tbody><tr><td>MAS</td><td>946</td><td>2.39</td><td>5,287.08</td><td>9.10</td></tr><tr><td>HI</td><td>947</td><td>2.32</td><td>5,232.84</td><td>9.10</td></tr><tr><td>MID</td><td>980</td><td>2.37</td><td>5,136.48</td><td>9.80</td></tr><tr><td>SCAL</td><td>982</td><td>2.33</td><td>5,132.37</td><td>10.50</td></tr><tr><td>NCAL</td><td>940</td><td>2.33</td><td>4,911.88</td><td>9.40</td></tr><tr><td>GA</td><td>954</td><td>2.32</td><td>4,815.71</td><td>10.00</td></tr><tr><td>NW</td><td>1,039</td><td>2.33</td><td>4,776.90</td><td>10.80</td></tr><tr><td>CO</td><td>974</td><td>2.24</td><td>4,721.26</td><td>10.50</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 8 rows of 8 total. Review the data above for patterns and outliers.</div></div><div class="card"><h3>Utilization Summary</h3><div class="chart-container"><canvas id="chart_58968" data-chart='{"type": "doughnut", "data": {"labels": ["OUTPATIENT", "TELEHEALTH", "INPATIENT", "URGENT_CARE", "EMERGENCY", "HOME_HEALTH"], "datasets": [{"label": "Encounters", "data": [5999.0, 2925.0, 2352.0, 1525.0, 1501.0, 766.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [39.8, 19.4, 15.6, 10.1, 10.0, 5.1], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Encounters: OUTPATIENT (5,999). Lowest: HOME_HEALTH (766). Average: 2,511. A 683% spread between highest and lowest warrants investigation into what drives this variation.</div></div><div class="card"><h3>Top Cost Drivers</h3><div class="chart-container"><canvas id="chart_48299" data-chart='{"type": "bar", "data": {"labels": ["Cardiology", "ENT", "Radiology", "Emergency Medicine", "Rheumatology", "Nephrology", "Orthopedics", "Oncology"], "datasets": [{"label": "Claims", "data": [919.0, 866.0, 825.0, 811.0, 802.0, 779.0, 807.0, 825.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Total Cost", "data": [2349310.0, 2283776.0, 2185722.0, 2169128.0, 2149348.0, 2136573.0, 2114908.0, 2099350.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Total", "data": [6.1, 5.9, 5.6, 5.6, 5.5, 5.5, 5.5, 5.4], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Claims: Cardiology (919). Lowest: Nephrology (779). Average: 829.2.</div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Deep dive into member demographics</span><span class="followup">Where are we losing money?</span><span class="followup">What quality initiatives should we prioritize?</span><span class="followup">Show me provider network performance</span><span class="followup">What are the biggest risk factors in our population?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

@@ -1,0 +1,2975 @@
+[
+  {
+    "idx": 0,
+    "q": "how many claims are there",
+    "cat": "claims-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM claims;",
+    "rows": 1,
+    "ms": 9.2,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 1,
+    "q": "total number of claims",
+    "cat": "claims-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM claims;",
+    "rows": 1,
+    "ms": 3.0,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 2,
+    "q": "show me all claims",
+    "cat": "claims-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_ID, CLAIM_STATUS, CLAIM_TYPE FROM claims LIMIT 50;",
+    "rows": 50,
+    "ms": 3.7,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 3,
+    "q": "claims count by status",
+    "cat": "claims-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_STATUS, COUNT(*) as count FROM claims GROUP BY CLAIM_STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 4.1,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 4,
+    "q": "claim status distribution",
+    "cat": "claims-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_STATUS, COUNT(*) as count FROM claims GROUP BY CLAIM_STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 3.6,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 5,
+    "q": "claims breakdown by region",
+    "cat": "claims-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 4.4,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 6,
+    "q": "claims count by plan type",
+    "cat": "claims-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, COUNT(*) as count FROM claims GROUP BY PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 9.7,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 7,
+    "q": "how many denied claims",
+    "cat": "claims-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM claims WHERE CLAIM_STATUS = 'DENIED';",
+    "rows": 1,
+    "ms": 3.3,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 8,
+    "q": "show denied claims",
+    "cat": "claims-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_STATUS, DENIAL_REASON, CLAIM_ID, CLAIM_TYPE FROM claims WHERE CLAIM_STATUS = 'DENIED' LIMIT 50;",
+    "rows": 50,
+    "ms": 2.5,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 9,
+    "q": "claims with status pending",
+    "cat": "claims-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT BILLED_AMOUNT, PAID_AMOUNT, CLAIM_STATUS, CLAIM_ID, CLAIM_TYPE FROM claims WHERE CLAIM_STATUS = 'PENDING' LIMIT 50;",
+    "rows": 50,
+    "ms": 3.6,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 10,
+    "q": "total billed amount",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SUM(CAST(BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims;",
+    "rows": 1,
+    "ms": 6.0,
+    "agg": "SUM",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 11,
+    "q": "average paid amount",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT AVG(CAST(PAID_AMOUNT AS REAL)) as avg_paid_amount FROM claims;",
+    "rows": 1,
+    "ms": 5.8,
+    "agg": "AVG",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 12,
+    "q": "total billed amount by region",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, SUM(CAST(BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims GROUP BY KP_REGION ORDER BY sum_billed_amount DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 15.2,
+    "agg": "SUM",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 13,
+    "q": "average copay by plan type",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, AVG(CAST(COPAY AS REAL)) as avg_copay FROM claims GROUP BY PLAN_TYPE ORDER BY avg_copay DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 8.2,
+    "agg": "AVG",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 14,
+    "q": "highest billed amount",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MAX(CAST(BILLED_AMOUNT AS REAL)) as max_billed_amount FROM claims;",
+    "rows": 1,
+    "ms": 6.6,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 15,
+    "q": "total paid amount by facility",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.FACILITY, SUM(CAST(c.PAID_AMOUNT AS REAL)) as sum_paid_amount FROM claims c JOIN encounters e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID GROUP BY c.FACILITY ORDER BY sum_paid_amount DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 13.4,
+    "agg": "SUM",
+    "tables": [
+      "claims",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 16,
+    "q": "denial reasons breakdown",
+    "cat": "claims-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT DENIAL_REASON, COUNT(*) as count FROM claims GROUP BY DENIAL_REASON ORDER BY count DESC LIMIT 30;",
+    "rows": 7,
+    "ms": 7.6,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 17,
+    "q": "claims by CPT code",
+    "cat": "claims-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CPT_CODE, COUNT(*) as count FROM claims GROUP BY CPT_CODE ORDER BY count DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 5.3,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 18,
+    "q": "top 10 CPT codes by claim count",
+    "cat": "claims-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CPT_CODE, COUNT(*) as count FROM claims GROUP BY CPT_CODE ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 6.5,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 19,
+    "q": "top 5 facilities by billed amount",
+    "cat": "claims-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, SUM(CAST(BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims GROUP BY FACILITY ORDER BY sum_billed_amount DESC LIMIT 5;",
+    "rows": 5,
+    "ms": 10.5,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 20,
+    "q": "claims per month",
+    "cat": "claims-time",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SUBSTR(SERVICE_DATE, 1, 7) as month, COUNT(*) as count FROM claims GROUP BY SUBSTR(SERVICE_DATE, 1, 7) ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 6.0,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 21,
+    "q": "average billed amount per claim type",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_TYPE, AVG(CAST(BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM claims GROUP BY CLAIM_TYPE ORDER BY avg_billed_amount DESC LIMIT 30;",
+    "rows": 4,
+    "ms": 10.8,
+    "agg": "AVG",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 22,
+    "q": "sum of allowed amount by region",
+    "cat": "claims-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, SUM(CAST(ALLOWED_AMOUNT AS REAL)) as sum_allowed_amount FROM claims GROUP BY KP_REGION ORDER BY sum_allowed_amount DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 14.3,
+    "agg": "SUM",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 23,
+    "q": "how many claims in NCAL region",
+    "cat": "claims-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM claims WHERE KP_REGION = 'NCAL';",
+    "rows": 1,
+    "ms": 6.1,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 24,
+    "q": "denied claims by denial reason",
+    "cat": "claims-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT DENIAL_REASON, COUNT(*) as count FROM claims WHERE CLAIM_STATUS = 'DENIED' GROUP BY DENIAL_REASON ORDER BY count DESC LIMIT 30;",
+    "rows": 7,
+    "ms": 5.6,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 25,
+    "q": "how many members do we have",
+    "cat": "members-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM members;",
+    "rows": 1,
+    "ms": 2.8,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 26,
+    "q": "total number of patients",
+    "cat": "members-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM members;",
+    "rows": 1,
+    "ms": 3.2,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 27,
+    "q": "member count by gender",
+    "cat": "members-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT GENDER, COUNT(*) as count FROM members GROUP BY GENDER ORDER BY count DESC LIMIT 30;",
+    "rows": 2,
+    "ms": 8.2,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 28,
+    "q": "members by region",
+    "cat": "members-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 3.2,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 29,
+    "q": "member distribution by plan type",
+    "cat": "members-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, COUNT(*) as count FROM members GROUP BY PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 5.4,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 30,
+    "q": "average risk score by region",
+    "cat": "members-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, AVG(CAST(RISK_SCORE AS REAL)) as avg_risk_score FROM members GROUP BY KP_REGION ORDER BY avg_risk_score DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 9.1,
+    "agg": "AVG",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 31,
+    "q": "members with high risk score",
+    "cat": "members-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEMBER_ID, MRN, FIRST_NAME, LAST_NAME, RISK_SCORE FROM members WHERE CAST(RISK_SCORE AS REAL) >= 3.5 LIMIT 50;",
+    "rows": 50,
+    "ms": 3.2,
+    "agg": null,
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 32,
+    "q": "member count by race",
+    "cat": "members-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT RACE, COUNT(*) as count FROM members GROUP BY RACE ORDER BY count DESC LIMIT 30;",
+    "rows": 9,
+    "ms": 5.1,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 33,
+    "q": "members by language",
+    "cat": "members-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT LANGUAGE, COUNT(*) as count FROM members GROUP BY LANGUAGE ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 5.4,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 34,
+    "q": "how many members enrolled in HMO",
+    "cat": "members-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM members WHERE PLAN_TYPE = 'HMO';",
+    "rows": 1,
+    "ms": 5.2,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 35,
+    "q": "average risk score",
+    "cat": "members-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT AVG(CAST(RISK_SCORE AS REAL)) as avg_risk_score FROM members;",
+    "rows": 1,
+    "ms": 4.5,
+    "agg": "AVG",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 36,
+    "q": "members with chronic conditions",
+    "cat": "members-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.CHRONIC_CONDITIONS, d.ICD10_DESCRIPTION, d.IS_CHRONIC, m.MEMBER_ID, m.MRN, m.FIRST_NAME, m.LAST_NAME FROM members m JOIN diagnoses d ON m.MEMBER_ID = d.MEMBER_ID WHERE d.IS_CHRONIC = 'Y' LIMIT 50;",
+    "rows": 50,
+    "ms": 4.7,
+    "agg": null,
+    "tables": [
+      "members",
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 37,
+    "q": "gender distribution of members",
+    "cat": "members-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT GENDER, COUNT(*) as count FROM members GROUP BY GENDER ORDER BY count DESC LIMIT 30;",
+    "rows": 2,
+    "ms": 5.7,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 38,
+    "q": "how many encounters",
+    "cat": "encounters-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM encounters;",
+    "rows": 1,
+    "ms": 3.0,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 39,
+    "q": "total visits",
+    "cat": "encounters-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM encounters;",
+    "rows": 1,
+    "ms": 1.8,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 40,
+    "q": "encounters by visit type",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT VISIT_TYPE, COUNT(*) as count FROM encounters GROUP BY VISIT_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 9.4,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 41,
+    "q": "visit type distribution",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT VISIT_TYPE, COUNT(*) as count FROM encounters GROUP BY VISIT_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 5.9,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 42,
+    "q": "how many emergency visits",
+    "cat": "encounters-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM encounters WHERE VISIT_TYPE = 'EMERGENCY';",
+    "rows": 1,
+    "ms": 4.9,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 43,
+    "q": "how many inpatient encounters",
+    "cat": "encounters-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM encounters WHERE VISIT_TYPE = 'INPATIENT';",
+    "rows": 1,
+    "ms": 4.5,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 44,
+    "q": "encounters by department",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.DEPARTMENT, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI GROUP BY e.DEPARTMENT ORDER BY count DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 9.9,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 45,
+    "q": "average length of stay",
+    "cat": "encounters-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT AVG(CAST(LENGTH_OF_STAY AS REAL)) as avg_length_of_stay FROM encounters;",
+    "rows": 1,
+    "ms": 5.2,
+    "agg": "AVG",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 46,
+    "q": "average length of stay by visit type",
+    "cat": "encounters-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT VISIT_TYPE, AVG(CAST(LENGTH_OF_STAY AS REAL)) as avg_length_of_stay FROM encounters GROUP BY VISIT_TYPE ORDER BY avg_length_of_stay DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 8.4,
+    "agg": "AVG",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 47,
+    "q": "encounters by facility",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, COUNT(*) as count FROM encounters GROUP BY FACILITY ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 6.9,
+    "agg": null,
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 48,
+    "q": "telehealth visits count",
+    "cat": "encounters-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM encounters WHERE VISIT_TYPE = 'TELEHEALTH';",
+    "rows": 1,
+    "ms": 4.5,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 49,
+    "q": "encounter status breakdown",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.ENCOUNTER_STATUS, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI GROUP BY e.ENCOUNTER_STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 3,
+    "ms": 10.7,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 50,
+    "q": "top departments by encounter volume",
+    "cat": "encounters-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.DEPARTMENT, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI GROUP BY e.DEPARTMENT ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 10.9,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 51,
+    "q": "disposition distribution",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT DISPOSITION, COUNT(*) as count FROM encounters GROUP BY DISPOSITION ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 6.1,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 52,
+    "q": "encounters per region",
+    "cat": "encounters-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM encounters GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 6.6,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 53,
+    "q": "how many diagnoses",
+    "cat": "diagnoses-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM diagnoses;",
+    "rows": 1,
+    "ms": 2.2,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 54,
+    "q": "top 10 diagnosis codes",
+    "cat": "diagnoses-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT ICD10_CODE, COUNT(*) as count FROM diagnoses GROUP BY ICD10_CODE ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 2.6,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 55,
+    "q": "diagnoses by severity",
+    "cat": "diagnoses-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SEVERITY, COUNT(*) as count FROM diagnoses GROUP BY SEVERITY ORDER BY count DESC LIMIT 30;",
+    "rows": 4,
+    "ms": 4.6,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 56,
+    "q": "chronic vs non-chronic diagnoses",
+    "cat": "diagnoses-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM diagnoses WHERE IS_CHRONIC = 'Y';",
+    "rows": 1,
+    "ms": 4.6,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 57,
+    "q": "top HCC categories",
+    "cat": "diagnoses-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT HCC_CATEGORY, COUNT(*) as count FROM diagnoses GROUP BY HCC_CATEGORY ORDER BY count DESC LIMIT 10;",
+    "rows": 7,
+    "ms": 3.1,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 58,
+    "q": "diagnosis type distribution",
+    "cat": "diagnoses-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT DIAGNOSIS_TYPE, COUNT(*) as count FROM diagnoses GROUP BY DIAGNOSIS_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 4,
+    "ms": 3.7,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 59,
+    "q": "most common ICD10 codes",
+    "cat": "diagnoses-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT ICD10_CODE, COUNT(*) as count FROM diagnoses GROUP BY ICD10_CODE ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 2.8,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 60,
+    "q": "how many prescriptions",
+    "cat": "rx-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM prescriptions;",
+    "rows": 1,
+    "ms": 1.7,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 61,
+    "q": "total prescriptions",
+    "cat": "rx-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM prescriptions;",
+    "rows": 1,
+    "ms": 1.5,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 62,
+    "q": "prescriptions by medication class",
+    "cat": "rx-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEDICATION_CLASS, COUNT(*) as count FROM prescriptions GROUP BY MEDICATION_CLASS ORDER BY count DESC LIMIT 30;",
+    "rows": 12,
+    "ms": 3.6,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 63,
+    "q": "top 10 medications by prescription count",
+    "cat": "rx-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEDICATION_NAME, COUNT(*) as count FROM prescriptions GROUP BY MEDICATION_NAME ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 3.9,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 64,
+    "q": "average prescription cost",
+    "cat": "rx-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT AVG(CAST(p.COST AS REAL)) as avg_cost FROM prescriptions p JOIN claims c ON p.MEMBER_ID = c.MEMBER_ID;",
+    "rows": 1,
+    "ms": 7.7,
+    "agg": "AVG",
+    "tables": [
+      "prescriptions",
+      "claims"
+    ]
+  },
+  {
+    "idx": 65,
+    "q": "total medication cost by class",
+    "cat": "rx-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.MEDICATION_CLASS, SUM(CAST(p.COST AS REAL)) as sum_cost FROM claims c JOIN prescriptions p ON c.MEMBER_ID = p.MEMBER_ID GROUP BY p.MEDICATION_CLASS ORDER BY sum_cost DESC LIMIT 30;",
+    "rows": 12,
+    "ms": 5.5,
+    "agg": "SUM",
+    "tables": [
+      "claims",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 66,
+    "q": "prescriptions by pharmacy",
+    "cat": "rx-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PHARMACY, COUNT(*) as count FROM prescriptions GROUP BY PHARMACY ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 3.1,
+    "agg": null,
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 67,
+    "q": "average days supply",
+    "cat": "rx-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT AVG(CAST(DAYS_SUPPLY AS REAL)) as avg_days_supply FROM prescriptions;",
+    "rows": 1,
+    "ms": 2.7,
+    "agg": "AVG",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 68,
+    "q": "prescription status breakdown",
+    "cat": "rx-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT RX_ID, STATUS, COUNT(*) as count FROM prescriptions GROUP BY RX_ID, STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 4.6,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 69,
+    "q": "how many providers",
+    "cat": "providers-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM providers;",
+    "rows": 1,
+    "ms": 2.3,
+    "agg": "COUNT",
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 70,
+    "q": "providers by specialty",
+    "cat": "providers-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SPECIALTY, COUNT(*) as count FROM providers GROUP BY SPECIALTY ORDER BY count DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 3.0,
+    "agg": "COUNT",
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 71,
+    "q": "provider count by region",
+    "cat": "providers-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM providers GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 3.7,
+    "agg": "COUNT",
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 72,
+    "q": "providers by department",
+    "cat": "providers-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT DEPARTMENT, COUNT(*) as count FROM providers GROUP BY DEPARTMENT ORDER BY count DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 3.3,
+    "agg": "COUNT",
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 73,
+    "q": "average panel size by specialty",
+    "cat": "providers-agg",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SPECIALTY, AVG(CAST(PANEL_SIZE AS REAL)) as avg_panel_size FROM providers GROUP BY SPECIALTY ORDER BY avg_panel_size DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 4.2,
+    "agg": "AVG",
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 74,
+    "q": "providers accepting new patients",
+    "cat": "providers-filter",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, m.PCP_NPI, p.PROVIDER_FIRST_NAME, p.PROVIDER_LAST_NAME, m.MEMBER_ID, m.MRN, m.FIRST_NAME, m.LAST_NAME, p.ACCEPTS_NEW_PATIENTS FROM members m JOIN claims claims ON m.MEMBER_ID = claims.MEMBER_ID JOIN providers p ON claims.RENDERING_NPI = p.NPI WHERE p.ACCEPTS_NEW_PATIENTS = 'Y' LIMIT 50;",
+    "rows": 50,
+    "ms": 5.7,
+    "agg": null,
+    "tables": [
+      "members",
+      "providers"
+    ]
+  },
+  {
+    "idx": 75,
+    "q": "provider type distribution",
+    "cat": "providers-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PROVIDER_TYPE, COUNT(*) as count FROM providers GROUP BY PROVIDER_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 7,
+    "ms": 3.2,
+    "agg": "COUNT",
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 76,
+    "q": "how many referrals",
+    "cat": "referrals-basic",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM referrals;",
+    "rows": 1,
+    "ms": 2.1,
+    "agg": "COUNT",
+    "tables": [
+      "referrals"
+    ]
+  },
+  {
+    "idx": 77,
+    "q": "referrals by urgency",
+    "cat": "referrals-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT URGENCY, COUNT(*) as count FROM referrals GROUP BY URGENCY ORDER BY count DESC LIMIT 30;",
+    "rows": 4,
+    "ms": 3.1,
+    "agg": "COUNT",
+    "tables": [
+      "referrals"
+    ]
+  },
+  {
+    "idx": 78,
+    "q": "referral type distribution",
+    "cat": "referrals-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT REFERRAL_TYPE, COUNT(*) as count FROM referrals GROUP BY REFERRAL_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 3,
+    "ms": 3.2,
+    "agg": "COUNT",
+    "tables": [
+      "referrals"
+    ]
+  },
+  {
+    "idx": 79,
+    "q": "referrals by specialty",
+    "cat": "referrals-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT r.SPECIALTY, COUNT(*) as count FROM referrals r JOIN providers p ON r.REFERRING_NPI = p.NPI GROUP BY r.SPECIALTY ORDER BY count DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 3.6,
+    "agg": "COUNT",
+    "tables": [
+      "referrals",
+      "providers"
+    ]
+  },
+  {
+    "idx": 80,
+    "q": "referral status breakdown",
+    "cat": "referrals-group",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT REFERRAL_ID, STATUS, COUNT(*) as count FROM referrals GROUP BY REFERRAL_ID, STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 4.3,
+    "agg": "COUNT",
+    "tables": [
+      "referrals"
+    ]
+  },
+  {
+    "idx": 81,
+    "q": "top referral reasons",
+    "cat": "referrals-topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT REFERRAL_REASON, COUNT(*) as count FROM referrals GROUP BY REFERRAL_REASON ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 3.2,
+    "agg": "COUNT",
+    "tables": [
+      "referrals"
+    ]
+  },
+  {
+    "idx": 82,
+    "q": "claims count by member",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.MEMBER_ID, COUNT(*) as count FROM claims c JOIN members m ON c.MEMBER_ID = m.MEMBER_ID GROUP BY c.MEMBER_ID ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 7.1,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "members"
+    ]
+  },
+  {
+    "idx": 83,
+    "q": "which members have most claims",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.MEMBER_ID, COUNT(*) as count FROM claims c JOIN members m ON c.MEMBER_ID = m.MEMBER_ID GROUP BY c.MEMBER_ID ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 7.7,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "members"
+    ]
+  },
+  {
+    "idx": 84,
+    "q": "total billed amount per member",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY sum_billed_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 18.6,
+    "agg": "SUM",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 85,
+    "q": "average paid amount by member",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, AVG(CAST(c.PAID_AMOUNT AS REAL)) as avg_paid_amount FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY avg_paid_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 19.4,
+    "agg": "AVG",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 86,
+    "q": "denied claims per member",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.MEMBER_ID, COUNT(*) as count FROM claims c JOIN members m ON c.MEMBER_ID = m.MEMBER_ID WHERE c.CLAIM_STATUS = 'DENIED' GROUP BY c.MEMBER_ID ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 5.3,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "members"
+    ]
+  },
+  {
+    "idx": 87,
+    "q": "members with highest billed amount",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY sum_billed_amount DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 18.7,
+    "agg": "SUM",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 88,
+    "q": "claims by member gender",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, m.GENDER, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID, m.GENDER ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 12.3,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 89,
+    "q": "total paid amount by member plan type",
+    "cat": "join-member-claims",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, m.PLAN_TYPE, SUM(CAST(c.PAID_AMOUNT AS REAL)) as sum_paid_amount FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID, m.PLAN_TYPE ORDER BY sum_paid_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 28.9,
+    "agg": "SUM",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 90,
+    "q": "encounters per member",
+    "cat": "join-member-encounters",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, COUNT(*) as count FROM members m JOIN encounters e ON m.MEMBER_ID = e.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 6.8,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 91,
+    "q": "which members have most emergency visits",
+    "cat": "join-member-encounters",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.MEMBER_ID, COUNT(*) as count FROM encounters e JOIN members m ON e.MEMBER_ID = m.MEMBER_ID WHERE e.VISIT_TYPE = 'EMERGENCY' GROUP BY e.MEMBER_ID ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 12.7,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "members"
+    ]
+  },
+  {
+    "idx": 92,
+    "q": "average length of stay by member",
+    "cat": "join-member-encounters",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.MEMBER_ID, AVG(CAST(e.LENGTH_OF_STAY AS REAL)) as avg_length_of_stay FROM encounters e JOIN members m ON e.MEMBER_ID = m.MEMBER_ID GROUP BY e.MEMBER_ID ORDER BY avg_length_of_stay DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 16.6,
+    "agg": "AVG",
+    "tables": [
+      "encounters",
+      "members"
+    ]
+  },
+  {
+    "idx": 93,
+    "q": "emergency visits by region",
+    "cat": "join-member-encounters",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM encounters WHERE VISIT_TYPE = 'EMERGENCY' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 5.3,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 94,
+    "q": "inpatient encounters by facility",
+    "cat": "join-member-encounters",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, COUNT(*) as count FROM encounters WHERE VISIT_TYPE = 'INPATIENT' GROUP BY FACILITY ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 6.3,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 95,
+    "q": "claims by provider specialty",
+    "cat": "join-claims-providers",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, p.SPECIALTY, COUNT(*) as count FROM providers p JOIN claims c ON p.NPI = c.RENDERING_NPI GROUP BY p.NPI, p.SPECIALTY ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 24.8,
+    "agg": "COUNT",
+    "tables": [
+      "providers",
+      "claims"
+    ]
+  },
+  {
+    "idx": 96,
+    "q": "top 5 providers by total billed amount",
+    "cat": "join-claims-providers",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.NPI ORDER BY sum_billed_amount DESC LIMIT 5;",
+    "rows": 5,
+    "ms": 18.4,
+    "agg": null,
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 97,
+    "q": "average paid amount by provider specialty",
+    "cat": "join-claims-providers",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, p.SPECIALTY, AVG(CAST(c.PAID_AMOUNT AS REAL)) as avg_paid_amount FROM providers p JOIN claims c ON p.NPI = c.RENDERING_NPI GROUP BY p.NPI, p.SPECIALTY ORDER BY avg_paid_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 22.4,
+    "agg": "AVG",
+    "tables": [
+      "providers",
+      "claims"
+    ]
+  },
+  {
+    "idx": 98,
+    "q": "which provider has most denied claims",
+    "cat": "join-claims-providers",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, COUNT(*) as count FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI WHERE c.CLAIM_STATUS = 'DENIED' GROUP BY p.NPI ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 9.0,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 99,
+    "q": "claims per provider",
+    "cat": "join-claims-providers",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, COUNT(*) as count FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.NPI ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 13.8,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 100,
+    "q": "total billed by specialty",
+    "cat": "join-claims-providers",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.SPECIALTY, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM providers p JOIN claims c ON p.NPI = c.RENDERING_NPI GROUP BY p.SPECIALTY ORDER BY sum_billed_amount DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 17.3,
+    "agg": "SUM",
+    "tables": [
+      "providers",
+      "claims"
+    ]
+  },
+  {
+    "idx": 101,
+    "q": "top diagnosis codes in emergency visits",
+    "cat": "join-encounters-diag",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT d.ICD10_CODE, COUNT(*) as count FROM diagnoses d JOIN encounters e ON d.ENCOUNTER_ID = e.ENCOUNTER_ID WHERE e.VISIT_TYPE = 'EMERGENCY' GROUP BY d.ICD10_CODE ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 11.6,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 102,
+    "q": "diagnosis count by visit type",
+    "cat": "join-encounters-diag",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.VISIT_TYPE, COUNT(*) as count FROM diagnoses d JOIN encounters e ON d.ENCOUNTER_ID = e.ENCOUNTER_ID GROUP BY e.VISIT_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 8.6,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 103,
+    "q": "chronic diagnoses by department",
+    "cat": "join-encounters-diag",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.DEPARTMENT, COUNT(*) as count FROM diagnoses d JOIN providers p ON d.DIAGNOSING_NPI = p.NPI WHERE d.IS_CHRONIC = 'Y' GROUP BY p.DEPARTMENT ORDER BY count DESC LIMIT 30;",
+    "rows": 0,
+    "ms": 5.3,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses",
+      "providers"
+    ]
+  },
+  {
+    "idx": 104,
+    "q": "prescriptions per member",
+    "cat": "join-member-rx",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, COUNT(*) as count FROM members m JOIN prescriptions p ON m.MEMBER_ID = p.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 4.5,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 105,
+    "q": "which members have most prescriptions",
+    "cat": "join-member-rx",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, COUNT(*) as count FROM members m JOIN prescriptions p ON m.MEMBER_ID = p.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 5.9,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 106,
+    "q": "average prescription cost by member",
+    "cat": "join-member-rx",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.MEMBER_ID, AVG(CAST(p.COST AS REAL)) as avg_cost FROM prescriptions p JOIN members m ON p.MEMBER_ID = m.MEMBER_ID JOIN claims c ON p.MEMBER_ID = c.MEMBER_ID GROUP BY p.MEMBER_ID ORDER BY avg_cost DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 7.0,
+    "agg": "AVG",
+    "tables": [
+      "prescriptions",
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 107,
+    "q": "total medication cost per member",
+    "cat": "join-member-rx",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.MEMBER_ID, SUM(CAST(p.COST AS REAL)) as sum_cost FROM prescriptions p JOIN members m ON p.MEMBER_ID = m.MEMBER_ID JOIN claims c ON p.MEMBER_ID = c.MEMBER_ID GROUP BY p.MEMBER_ID ORDER BY sum_cost DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 6.8,
+    "agg": "SUM",
+    "tables": [
+      "prescriptions",
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 108,
+    "q": "referrals per member",
+    "cat": "join-member-referrals",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT r.MEMBER_ID, COUNT(*) as count FROM referrals r JOIN members m ON r.MEMBER_ID = m.MEMBER_ID GROUP BY r.MEMBER_ID ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 4.1,
+    "agg": "COUNT",
+    "tables": [
+      "referrals",
+      "members"
+    ]
+  },
+  {
+    "idx": 109,
+    "q": "urgent referrals by region",
+    "cat": "join-referrals-region",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM referrals WHERE URGENCY = 'URGENT' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 3.7,
+    "agg": "COUNT",
+    "tables": [
+      "referrals"
+    ]
+  },
+  {
+    "idx": 110,
+    "q": "average billed amount by provider specialty for denied claims",
+    "cat": "complex-3table",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, p.SPECIALTY, AVG(CAST(c.BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI WHERE c.CLAIM_STATUS = 'DENIED' GROUP BY p.NPI, p.SPECIALTY ORDER BY avg_billed_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 11.1,
+    "agg": "AVG",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 111,
+    "q": "claims by member gender and region",
+    "cat": "complex-3table",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, m.GENDER, m.KP_REGION, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID, m.GENDER, m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 15.1,
+    "agg": null,
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 112,
+    "q": "emergency visits per provider specialty",
+    "cat": "complex-3table",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, p.SPECIALTY, COUNT(*) as count FROM providers p JOIN encounters e ON p.NPI = e.RENDERING_NPI WHERE e.VISIT_TYPE = 'EMERGENCY' GROUP BY p.NPI, p.SPECIALTY ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 8.2,
+    "agg": "COUNT",
+    "tables": [
+      "providers",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 113,
+    "q": "which region has most claims",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims GROUP BY KP_REGION ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 3.7,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 114,
+    "q": "which facility has highest billed amount",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.FACILITY, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims c JOIN encounters e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID GROUP BY c.FACILITY ORDER BY sum_billed_amount DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 14.2,
+    "agg": "SUM",
+    "tables": [
+      "claims",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 115,
+    "q": "which specialty has most encounters",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.SPECIALTY, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI GROUP BY p.SPECIALTY ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 16.8,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 116,
+    "q": "which plan type has most members",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, COUNT(*) as count FROM members GROUP BY PLAN_TYPE ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 6.4,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 117,
+    "q": "which medication is most prescribed",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEDICATION_NAME, COUNT(*) as count FROM prescriptions GROUP BY MEDICATION_NAME ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 5.1,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 118,
+    "q": "which department has most encounters",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.DEPARTMENT, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI GROUP BY e.DEPARTMENT ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 11.5,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 119,
+    "q": "what are the top denial reasons",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT DENIAL_REASON, COUNT(*) as count FROM claims GROUP BY DENIAL_REASON ORDER BY count DESC LIMIT 10;",
+    "rows": 7,
+    "ms": 6.7,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 120,
+    "q": "what is the average billed amount",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT AVG(CAST(BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM claims;",
+    "rows": 1,
+    "ms": 6.7,
+    "agg": "AVG",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 121,
+    "q": "what is the total paid amount",
+    "cat": "which-what",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SUM(CAST(PAID_AMOUNT AS REAL)) as sum_paid_amount FROM claims;",
+    "rows": 1,
+    "ms": 5.4,
+    "agg": "SUM",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 122,
+    "q": "top 5 members by claims count",
+    "cat": "topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.MEMBER_ID, COUNT(*) as count FROM claims c JOIN members m ON c.MEMBER_ID = m.MEMBER_ID GROUP BY c.MEMBER_ID ORDER BY count DESC LIMIT 5;",
+    "rows": 5,
+    "ms": 7.7,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "members"
+    ]
+  },
+  {
+    "idx": 123,
+    "q": "top 10 providers by billed amount",
+    "cat": "topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.NPI ORDER BY sum_billed_amount DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 19.4,
+    "agg": null,
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 124,
+    "q": "top 3 regions by denied claims",
+    "cat": "topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims WHERE CLAIM_STATUS = 'DENIED' GROUP BY KP_REGION ORDER BY count DESC LIMIT 3;",
+    "rows": 3,
+    "ms": 5.5,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 125,
+    "q": "bottom 5 facilities by paid amount",
+    "cat": "topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, SUM(CAST(PAID_AMOUNT AS REAL)) as sum_paid_amount FROM claims GROUP BY FACILITY ORDER BY sum_paid_amount ASC LIMIT 5;",
+    "rows": 5,
+    "ms": 9.8,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 126,
+    "q": "top 5 diagnosis codes",
+    "cat": "topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT ICD10_CODE, COUNT(*) as count FROM diagnoses GROUP BY ICD10_CODE ORDER BY count DESC LIMIT 5;",
+    "rows": 5,
+    "ms": 2.8,
+    "agg": "COUNT",
+    "tables": [
+      "diagnoses"
+    ]
+  },
+  {
+    "idx": 127,
+    "q": "top medications by cost",
+    "cat": "topn",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEDICATION_NAME, SUM(CAST(COST AS REAL)) as sum_cost FROM prescriptions GROUP BY MEDICATION_NAME ORDER BY sum_cost DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 3.1,
+    "agg": null,
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 128,
+    "q": "members with more than 3 claims",
+    "cat": "having",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.MEMBER_ID, COUNT(*) as count FROM claims c JOIN members m ON c.MEMBER_ID = m.MEMBER_ID GROUP BY c.MEMBER_ID HAVING COUNT(*) > 3 ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 7.9,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "members"
+    ]
+  },
+  {
+    "idx": 129,
+    "q": "providers with more than 10 claims",
+    "cat": "having",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, COUNT(*) as count FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.NPI HAVING COUNT(*) > 10 ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 15.4,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 130,
+    "q": "facilities with more than 100 encounters",
+    "cat": "having",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, COUNT(*) as count FROM encounters GROUP BY FACILITY HAVING COUNT(*) > 100 ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 8.8,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 131,
+    "q": "members with more than 2 prescriptions",
+    "cat": "having",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, COUNT(*) as count FROM members m JOIN prescriptions p ON m.MEMBER_ID = p.MEMBER_ID GROUP BY m.MEMBER_ID HAVING COUNT(*) > 2 ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 5.1,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 132,
+    "q": "show me the claim count for each region",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 3.9,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 133,
+    "q": "I want to see claims grouped by facility",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.FACILITY, COUNT(*) as count FROM claims c JOIN encounters e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID GROUP BY c.FACILITY ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 11.8,
+    "agg": null,
+    "tables": [
+      "claims",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 134,
+    "q": "can you tell me how many patients we have",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM members;",
+    "rows": 1,
+    "ms": 3.3,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 135,
+    "q": "give me the total spend by region",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, SUM(CAST(BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims GROUP BY KP_REGION ORDER BY sum_billed_amount DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 13.6,
+    "agg": "SUM",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 136,
+    "q": "list all providers in cardiology",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT NPI, PROVIDER_FIRST_NAME, PROVIDER_LAST_NAME FROM providers WHERE SPECIALTY LIKE '%CARDIOLOGY%' LIMIT 50;",
+    "rows": 50,
+    "ms": 3.9,
+    "agg": null,
+    "tables": [
+      "providers"
+    ]
+  },
+  {
+    "idx": 137,
+    "q": "what does the denial rate look like by facility",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.FACILITY, COUNT(*) as total_claims, SUM(CASE WHEN c.CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) as denied_count, ROUND(100.0 * SUM(CASE WHEN c.CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) / COUNT(*), 2) as denial_rate FROM claims c JOIN encounters e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID GROUP BY c.FACILITY ORDER BY denial_rate DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 13.7,
+    "agg": null,
+    "tables": [
+      "claims",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 138,
+    "q": "break down encounters by type",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT VISIT_TYPE, COUNT(*) as count FROM encounters GROUP BY VISIT_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 6.7,
+    "agg": null,
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 139,
+    "q": "how is the cost distributed across regions",
+    "cat": "natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 4.7,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 140,
+    "q": "give me claims count by memeber",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEMBER_ID, COUNT(*) as count FROM claims GROUP BY MEMBER_ID ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 5.1,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 141,
+    "q": "which memebers have higest number of claims",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEMBER_ID, COUNT(*) as count FROM claims GROUP BY MEMBER_ID ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 7.0,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 142,
+    "q": "show claim staus distribution",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_STATUS, COUNT(*) as count FROM claims GROUP BY CLAIM_STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 3.5,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 143,
+    "q": "top 5 provders by billed amount",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT BILLING_NPI, SUM(CAST(BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims GROUP BY BILLING_NPI ORDER BY sum_billed_amount DESC LIMIT 5;",
+    "rows": 5,
+    "ms": 11.2,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 144,
+    "q": "claims by reigon",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 2.9,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 145,
+    "q": "total biled amount by member",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.MEMBER_ID, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID GROUP BY m.MEMBER_ID ORDER BY sum_billed_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 19.9,
+    "agg": "SUM",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 146,
+    "q": "encountr count by visit tpye",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT VISIT_TYPE, COUNT(*) as count FROM encounters GROUP BY VISIT_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 7.4,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 147,
+    "q": "perscriptions by medicaton class",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEDICATION_CLASS, COUNT(*) as count FROM prescriptions GROUP BY MEDICATION_CLASS LIMIT 30;",
+    "rows": 12,
+    "ms": 4.2,
+    "agg": null,
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 148,
+    "q": "wich facilty has most claims",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, COUNT(*) as count FROM claims GROUP BY FACILITY ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 7.5,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 149,
+    "q": "averge paid amout by reigon",
+    "cat": "typo",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, AVG(CAST(PAID_AMOUNT AS REAL)) as avg_paid_amount FROM claims WHERE CLAIM_STATUS = 'PAID' GROUP BY KP_REGION ORDER BY avg_paid_amount DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 7.5,
+    "agg": "AVG",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 150,
+    "q": "claims",
+    "cat": "edge",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_ID, CLAIM_STATUS, CLAIM_TYPE FROM claims LIMIT 50;",
+    "rows": 50,
+    "ms": 1.2,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 151,
+    "q": "show everything in claims table",
+    "cat": "edge",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_ID, CLAIM_STATUS, CLAIM_TYPE FROM claims LIMIT 50;",
+    "rows": 50,
+    "ms": 3.5,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 152,
+    "q": "count",
+    "cat": "edge",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM claims;",
+    "rows": 1,
+    "ms": 0.9,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 153,
+    "q": "all data",
+    "cat": "edge",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SERVICE_DATE, ADMIT_DATE, DISCHARGE_DATE FROM encounters ORDER BY SERVICE_DATE DESC LIMIT 50;",
+    "rows": 50,
+    "ms": 2.4,
+    "agg": null,
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 154,
+    "q": "claims and encounters",
+    "cat": "edge",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.ENCOUNTER_ID, e.VISIT_TYPE, e.ENCOUNTER_STATUS, c.CLAIM_ID, c.CLAIM_STATUS, c.CLAIM_TYPE, c.PAID_AMOUNT FROM claims c JOIN encounters e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID LIMIT 50;",
+    "rows": 50,
+    "ms": 2.9,
+    "agg": null,
+    "tables": [
+      "claims",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 155,
+    "q": "claims in 2024",
+    "cat": "date",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_ID, CLAIM_STATUS, CLAIM_TYPE FROM claims WHERE SERVICE_DATE LIKE '2024%' LIMIT 50;",
+    "rows": 50,
+    "ms": 1.6,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 156,
+    "q": "encounters in 2025",
+    "cat": "date",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT ENCOUNTER_ID, VISIT_TYPE, ENCOUNTER_STATUS FROM encounters WHERE SERVICE_DATE LIKE '2025%' LIMIT 50;",
+    "rows": 50,
+    "ms": 1.7,
+    "agg": null,
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 157,
+    "q": "claims trend by month",
+    "cat": "date",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SUBSTR(SERVICE_DATE, 1, 7) as month, COUNT(*) as count FROM claims GROUP BY SUBSTR(SERVICE_DATE, 1, 7) ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 5.0,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 158,
+    "q": "monthly claim volume",
+    "cat": "date",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT SUBSTR(SERVICE_DATE, 1, 7) as month, COUNT(*) as count FROM claims GROUP BY SUBSTR(SERVICE_DATE, 1, 7) ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 5.4,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 159,
+    "q": "denial rate by region",
+    "cat": "analytical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as total_claims, SUM(CASE WHEN CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) as denied_count, ROUND(100.0 * SUM(CASE WHEN CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) / COUNT(*), 2) as denial_rate FROM claims GROUP BY KP_REGION ORDER BY denial_rate DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 10.4,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 160,
+    "q": "average cost per encounter by visit type",
+    "cat": "analytical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.VISIT_TYPE, AVG(CAST(c.BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM encounters e JOIN claims c ON e.ENCOUNTER_ID = c.ENCOUNTER_ID GROUP BY e.VISIT_TYPE ORDER BY avg_billed_amount DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 23.1,
+    "agg": "AVG",
+    "tables": [
+      "encounters",
+      "claims"
+    ]
+  },
+  {
+    "idx": 161,
+    "q": "claims per provider per region",
+    "cat": "analytical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, c.KP_REGION, COUNT(*) as count FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.NPI, c.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 22.7,
+    "agg": null,
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 162,
+    "q": "member utilization by plan type",
+    "cat": "analytical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.PLAN_TYPE, COUNT(*) as count FROM members m JOIN encounters e ON m.MEMBER_ID = e.MEMBER_ID GROUP BY m.PLAN_TYPE LIMIT 30;",
+    "rows": 6,
+    "ms": 9.6,
+    "agg": null,
+    "tables": [
+      "members",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 163,
+    "q": "high cost claims above 10000",
+    "cat": "analytical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_ID, CLAIM_STATUS, CLAIM_TYPE, BILLED_AMOUNT, PAID_AMOUNT FROM claims WHERE CAST(BILLED_AMOUNT AS REAL) > 10000 LIMIT 50;",
+    "rows": 50,
+    "ms": 2.4,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 164,
+    "q": "readmission rate by facility",
+    "cat": "analytical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, COUNT(*) as count FROM encounters WHERE VISIT_TYPE = 'INPATIENT' AND DISPOSITION = 'Admitted' GROUP BY FACILITY ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 4.6,
+    "agg": null,
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 165,
+    "q": "count of foster care members for each region on medicaid",
+    "cat": "domain-age",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members WHERE DATE_OF_BIRTH >= date('now', '-21 years') AND PLAN_TYPE = 'Medicaid' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 12.0,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 166,
+    "q": "how many pediatric members are enrolled in each region",
+    "cat": "domain-age",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members WHERE DATE_OF_BIRTH >= date('now', '-18 years') GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 11.0,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 167,
+    "q": "count of senior patients on medicare by region",
+    "cat": "domain-age",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members WHERE PLAN_TYPE = 'Medicare Advantage' AND DATE_OF_BIRTH <= date('now', '-65 years') GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 9.0,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 168,
+    "q": "total claims for elderly members by region",
+    "cat": "domain-age",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE m.DATE_OF_BIRTH <= date('now', '-65 years') GROUP BY m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 11.0,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 169,
+    "q": "how many diabetic members by region",
+    "cat": "domain-clinical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE c.ICD10_CODE LIKE 'E11%' GROUP BY m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 72.6,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 170,
+    "q": "total claims for members with hypertension",
+    "cat": "domain-clinical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT COUNT(*) as total_count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE c.ICD10_CODE LIKE 'I10%';",
+    "rows": 1,
+    "ms": 28.0,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 171,
+    "q": "average billed amount for asthma claims by region",
+    "cat": "domain-clinical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, AVG(CAST(BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM claims WHERE ICD10_CODE LIKE 'J45%' GROUP BY KP_REGION ORDER BY avg_billed_amount DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 56.1,
+    "agg": "AVG",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 172,
+    "q": "how many members with depression by gender",
+    "cat": "domain-clinical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.GENDER, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE c.ICD10_CODE LIKE 'F32%' GROUP BY m.GENDER ORDER BY count DESC LIMIT 30;",
+    "rows": 2,
+    "ms": 15.7,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 173,
+    "q": "obesity claims by facility",
+    "cat": "domain-clinical",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.FACILITY, COUNT(*) as count FROM claims c JOIN encounters e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID WHERE c.ICD10_CODE LIKE 'E66%' GROUP BY c.FACILITY ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 42.8,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "encounters"
+    ]
+  },
+  {
+    "idx": 174,
+    "q": "count of high risk members by plan type",
+    "cat": "domain-risk",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, COUNT(*) as count FROM members WHERE CAST(RISK_SCORE AS REAL) >= 3.5 GROUP BY PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 7.8,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 175,
+    "q": "comorbid patients by region on medicaid",
+    "cat": "domain-risk",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members WHERE PLAN_TYPE = 'Medicaid' AND CAST(CHRONIC_CONDITIONS AS INTEGER) >= 2 GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 50.0,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 176,
+    "q": "average billed amount for medicare members by region",
+    "cat": "domain-risk",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, AVG(CAST(c.BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE m.PLAN_TYPE = 'Medicare Advantage' GROUP BY m.KP_REGION ORDER BY avg_billed_amount DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 35.5,
+    "agg": "AVG",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 177,
+    "q": "denial rate for medicaid members by region",
+    "cat": "domain-risk",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as total_claims, SUM(CASE WHEN c.CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) as denied_count, ROUND(100.0 * SUM(CASE WHEN c.CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) / COUNT(*), 2) as denial_rate FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE m.PLAN_TYPE = 'Medicaid' GROUP BY m.KP_REGION ORDER BY denial_rate DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 26.1,
+    "agg": null,
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 178,
+    "q": "count of emergency visits for medicaid members by facility",
+    "cat": "domain-visit",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.FACILITY, COUNT(*) as count FROM encounters e JOIN members m ON e.MEMBER_ID = m.MEMBER_ID WHERE m.PLAN_TYPE = 'Medicaid' AND e.VISIT_TYPE = 'EMERGENCY' GROUP BY e.FACILITY ORDER BY count DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 12.3,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "members"
+    ]
+  },
+  {
+    "idx": 179,
+    "q": "ed visits by region",
+    "cat": "domain-visit",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM encounters WHERE VISIT_TYPE = 'EMERGENCY' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 4.2,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 180,
+    "q": "telehealth visits by department",
+    "cat": "domain-visit",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.DEPARTMENT, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI WHERE e.VISIT_TYPE = 'TELEHEALTH' GROUP BY e.DEPARTMENT ORDER BY count DESC LIMIT 30;",
+    "rows": 20,
+    "ms": 6.7,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 181,
+    "q": "members on antidepressants by region",
+    "cat": "domain-medication",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as count FROM members m JOIN prescriptions p ON m.MEMBER_ID = p.MEMBER_ID WHERE p.MEDICATION_CLASS = 'Depression' GROUP BY m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 10.6,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 182,
+    "q": "how many patients on pain medication by plan type",
+    "cat": "domain-medication",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.PLAN_TYPE, COUNT(*) as count FROM members m JOIN prescriptions p ON m.MEMBER_ID = p.MEMBER_ID WHERE p.MEDICATION_CLASS = 'Pain' GROUP BY m.PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 5.7,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 183,
+    "q": "institutional claims by region",
+    "cat": "domain-complex",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims WHERE CLAIM_TYPE = 'INSTITUTIONAL' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 11.2,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 184,
+    "q": "total claims for elderly diabetic patients on medicare by region",
+    "cat": "domain-complex",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE m.PLAN_TYPE = 'Medicare Advantage' AND c.ICD10_CODE LIKE 'E11%' AND m.DATE_OF_BIRTH <= date('now', '-65 years') GROUP BY m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 7,
+    "ms": 14.3,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 185,
+    "q": "how many comorbid patients on medicaid by region",
+    "cat": "domain-complex",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members WHERE PLAN_TYPE = 'Medicaid' AND CAST(CHRONIC_CONDITIONS AS INTEGER) >= 2 GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 11.6,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 186,
+    "q": "what is the most prescribed medication",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT MEDICATION_NAME, COUNT(*) as count FROM prescriptions GROUP BY MEDICATION_NAME ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 4.8,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 187,
+    "q": "which facilities handle the most emergency cases",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, COUNT(*) as count FROM encounters WHERE VISIT_TYPE = 'EMERGENCY' GROUP BY FACILITY ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 9.3,
+    "agg": "COUNT",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 188,
+    "q": "give me a count of members enrolled in each plan",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, COUNT(*) as count FROM members GROUP BY PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 7.1,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 189,
+    "q": "how many claims were denied for each region",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM claims WHERE CLAIM_STATUS = 'DENIED' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 5.1,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 190,
+    "q": "show me all the inpatient encounters",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT ENCOUNTER_ID, VISIT_TYPE, ENCOUNTER_STATUS, MEMBER_ID, MRN, SERVICE_DATE, ADMIT_DATE FROM encounters WHERE VISIT_TYPE = 'INPATIENT' ORDER BY SERVICE_DATE DESC LIMIT 50;",
+    "rows": 50,
+    "ms": 5.5,
+    "agg": null,
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 191,
+    "q": "breakdown of claims by status",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT CLAIM_STATUS, COUNT(*) as count FROM claims GROUP BY CLAIM_STATUS ORDER BY count DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 4.4,
+    "agg": "COUNT",
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 192,
+    "q": "distribution of members across risk levels",
+    "cat": "production-natural",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT RISK_SCORE, COUNT(*) as count FROM members GROUP BY RISK_SCORE ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 8.4,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 193,
+    "q": "top specialties by encounter volume",
+    "cat": "production-cross",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.SPECIALTY, COUNT(*) as count FROM encounters e JOIN providers p ON e.RENDERING_NPI = p.NPI GROUP BY p.SPECIALTY ORDER BY count DESC LIMIT 10;",
+    "rows": 10,
+    "ms": 15.9,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "providers"
+    ]
+  },
+  {
+    "idx": 194,
+    "q": "average length of stay by facility",
+    "cat": "production-cross",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT FACILITY, AVG(CAST(LENGTH_OF_STAY AS REAL)) as avg_length_of_stay FROM encounters GROUP BY FACILITY ORDER BY avg_length_of_stay DESC LIMIT 30;",
+    "rows": 26,
+    "ms": 9.1,
+    "agg": "AVG",
+    "tables": [
+      "encounters"
+    ]
+  },
+  {
+    "idx": 195,
+    "q": "which provider has the most denied claims",
+    "cat": "production-cross",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, COUNT(*) as count FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI WHERE c.CLAIM_STATUS = 'DENIED' GROUP BY p.NPI ORDER BY count DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 6.8,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 196,
+    "q": "prescriptions by medication class and plan type",
+    "cat": "production-cross",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.MEDICATION_CLASS, m.PLAN_TYPE, COUNT(*) as count FROM prescriptions p JOIN members m ON p.MEMBER_ID = m.MEMBER_ID GROUP BY p.MEDICATION_CLASS, m.PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 7.2,
+    "agg": "COUNT",
+    "tables": [
+      "prescriptions",
+      "members"
+    ]
+  },
+  {
+    "idx": 197,
+    "q": "which region has the highest average risk score",
+    "cat": "production-cross",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, AVG(CAST(RISK_SCORE AS REAL)) as avg_risk_score FROM members GROUP BY KP_REGION ORDER BY avg_risk_score DESC LIMIT 1;",
+    "rows": 1,
+    "ms": 10.1,
+    "agg": "AVG",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 198,
+    "q": "claims where billed amount exceeds 10000",
+    "cat": "production-cross",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT BILLED_AMOUNT, PAID_AMOUNT, ALLOWED_AMOUNT, CLAIM_ID, CLAIM_STATUS, CLAIM_TYPE, SERVICE_DATE FROM claims WHERE CAST(BILLED_AMOUNT AS REAL) > 10000 ORDER BY SERVICE_DATE DESC LIMIT 50;",
+    "rows": 50,
+    "ms": 4.5,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 199,
+    "q": "high risk diabetic members by region",
+    "cat": "production-domain",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as count FROM members m JOIN claims c ON m.MEMBER_ID = c.MEMBER_ID WHERE CAST(m.RISK_SCORE AS REAL) >= 3.5 AND c.ICD10_CODE LIKE 'E11%' GROUP BY m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 12.9,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "claims"
+    ]
+  },
+  {
+    "idx": 200,
+    "q": "foster care members on medicaid by region",
+    "cat": "production-domain",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT KP_REGION, COUNT(*) as count FROM members WHERE DATE_OF_BIRTH >= date('now', '-21 years') AND PLAN_TYPE = 'Medicaid' GROUP BY KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 8.2,
+    "agg": "COUNT",
+    "tables": [
+      "members"
+    ]
+  },
+  {
+    "idx": 201,
+    "q": "members on antidepressants by region",
+    "cat": "production-domain",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT m.KP_REGION, COUNT(*) as count FROM members m JOIN prescriptions p ON m.MEMBER_ID = p.MEMBER_ID WHERE p.MEDICATION_CLASS = 'Depression' GROUP BY m.KP_REGION ORDER BY count DESC LIMIT 30;",
+    "rows": 8,
+    "ms": 9.8,
+    "agg": "COUNT",
+    "tables": [
+      "members",
+      "prescriptions"
+    ]
+  },
+  {
+    "idx": 202,
+    "q": "average billed amount by specialty and region",
+    "cat": "production-domain",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.SPECIALTY, c.KP_REGION, AVG(CAST(c.BILLED_AMOUNT AS REAL)) as avg_billed_amount FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.SPECIALTY, c.KP_REGION ORDER BY avg_billed_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 24.5,
+    "agg": "AVG",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  },
+  {
+    "idx": 203,
+    "q": "denial rate by plan type",
+    "cat": "production-domain",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT PLAN_TYPE, COUNT(*) as total_claims, SUM(CASE WHEN CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) as denied_count, ROUND(100.0 * SUM(CASE WHEN CLAIM_STATUS = 'DENIED' THEN 1 ELSE 0 END) / COUNT(*), 2) as denial_rate FROM claims GROUP BY PLAN_TYPE ORDER BY denial_rate DESC LIMIT 30;",
+    "rows": 6,
+    "ms": 6.9,
+    "agg": null,
+    "tables": [
+      "claims"
+    ]
+  },
+  {
+    "idx": 204,
+    "q": "claims by region and gender",
+    "cat": "production-multidim",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT c.KP_REGION, m.GENDER, COUNT(*) as count FROM claims c JOIN members m ON c.MEMBER_ID = m.MEMBER_ID GROUP BY c.KP_REGION, m.GENDER ORDER BY count DESC LIMIT 30;",
+    "rows": 16,
+    "ms": 27.7,
+    "agg": "COUNT",
+    "tables": [
+      "claims",
+      "members"
+    ]
+  },
+  {
+    "idx": 205,
+    "q": "encounters by visit type and plan type",
+    "cat": "production-multidim",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT e.VISIT_TYPE, m.PLAN_TYPE, COUNT(*) as count FROM encounters e JOIN members m ON e.MEMBER_ID = m.MEMBER_ID GROUP BY e.VISIT_TYPE, m.PLAN_TYPE ORDER BY count DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 22.1,
+    "agg": "COUNT",
+    "tables": [
+      "encounters",
+      "members"
+    ]
+  },
+  {
+    "idx": 206,
+    "q": "total billed amount per provider",
+    "cat": "production-multidim",
+    "status": "PASS",
+    "errors": [],
+    "sql": "SELECT p.NPI, SUM(CAST(c.BILLED_AMOUNT AS REAL)) as sum_billed_amount FROM claims c JOIN providers p ON c.RENDERING_NPI = p.NPI GROUP BY p.NPI ORDER BY sum_billed_amount DESC LIMIT 30;",
+    "rows": 30,
+    "ms": 17.2,
+    "agg": "SUM",
+    "tables": [
+      "claims",
+      "providers"
+    ]
+  }
+]

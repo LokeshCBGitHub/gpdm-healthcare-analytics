@@ -1,0 +1,940 @@
+{
+  "table_name": "prescriptions",
+  "file_name": "prescriptions.csv",
+  "total_rows": 3000,
+  "total_columns": 16,
+  "table_purpose": "Pharmacy and prescription records",
+  "columns": {
+    "RX_ID": {
+      "column_name": "RX_ID",
+      "data_type": "string",
+      "semantic_type": "rx_id",
+      "healthcare_type": "rx_id",
+      "is_phi": false,
+      "cardinality": 2998,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "RX1956785",
+          "count": 2
+        },
+        {
+          "value": "RX4116608",
+          "count": 2
+        },
+        {
+          "value": "RX7342525",
+          "count": 1
+        },
+        {
+          "value": "RX5092385",
+          "count": 1
+        },
+        {
+          "value": "RX4203534",
+          "count": 1
+        },
+        {
+          "value": "RX4959000",
+          "count": 1
+        },
+        {
+          "value": "RX3231347",
+          "count": 1
+        },
+        {
+          "value": "RX3358465",
+          "count": 1
+        },
+        {
+          "value": "RX2964724",
+          "count": 1
+        },
+        {
+          "value": "RX9613608",
+          "count": 1
+        }
+      ],
+      "description": "Unique identifier for a prescription",
+      "sample_values": [
+        "RX7390985",
+        "RX8804869",
+        "RX7436866",
+        "RX6442318",
+        "RX2546709"
+      ]
+    },
+    "MEMBER_ID": {
+      "column_name": "MEMBER_ID",
+      "data_type": "string",
+      "semantic_type": "member_id",
+      "healthcare_type": "member_id",
+      "is_phi": false,
+      "cardinality": 2599,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MBR957827139",
+          "count": 4
+        },
+        {
+          "value": "MBR583295693",
+          "count": 4
+        },
+        {
+          "value": "MBR311986050",
+          "count": 4
+        },
+        {
+          "value": "MBR114223091",
+          "count": 3
+        },
+        {
+          "value": "MBR780749793",
+          "count": 3
+        },
+        {
+          "value": "MBR989316932",
+          "count": 3
+        },
+        {
+          "value": "MBR401731449",
+          "count": 3
+        },
+        {
+          "value": "MBR243130186",
+          "count": 3
+        },
+        {
+          "value": "MBR813051822",
+          "count": 3
+        },
+        {
+          "value": "MBR176487657",
+          "count": 3
+        }
+      ],
+      "description": "Unique health plan member identifier used for linking enrollment, claims, and encounters",
+      "sample_values": [
+        "MBR377441595",
+        "MBR176487657",
+        "MBR722679879",
+        "MBR678609939",
+        "MBR926227984"
+      ]
+    },
+    "PRESCRIBING_NPI": {
+      "column_name": "PRESCRIBING_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 1293,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1000231520.0,
+      "max_value": 1998930676.0,
+      "mean": 1495671841.0486667,
+      "top_values": [
+        {
+          "value": "1295477796",
+          "count": 7
+        },
+        {
+          "value": "1207622474",
+          "count": 7
+        },
+        {
+          "value": "1963167620",
+          "count": 7
+        },
+        {
+          "value": "1451985669",
+          "count": 7
+        },
+        {
+          "value": "1932988445",
+          "count": 7
+        },
+        {
+          "value": "1051233974",
+          "count": 7
+        },
+        {
+          "value": "1612526616",
+          "count": 6
+        },
+        {
+          "value": "1760882716",
+          "count": 6
+        },
+        {
+          "value": "1524763783",
+          "count": 6
+        },
+        {
+          "value": "1218045176",
+          "count": 6
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1390232275",
+        "1073334439",
+        "1827277347",
+        "1765150119",
+        "1789400748"
+      ]
+    },
+    "MEDICATION_NAME": {
+      "column_name": "MEDICATION_NAME",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 20,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Azithromycin 250mg",
+          "count": 174
+        },
+        {
+          "value": "Metoprolol 50mg",
+          "count": 170
+        },
+        {
+          "value": "Lisinopril 10mg",
+          "count": 167
+        },
+        {
+          "value": "Tramadol 50mg",
+          "count": 158
+        },
+        {
+          "value": "Amoxicillin 500mg",
+          "count": 158
+        },
+        {
+          "value": "Duloxetine 60mg",
+          "count": 157
+        },
+        {
+          "value": "Albuterol Inhaler",
+          "count": 156
+        },
+        {
+          "value": "Escitalopram 10mg",
+          "count": 153
+        },
+        {
+          "value": "Ibuprofen 800mg",
+          "count": 153
+        },
+        {
+          "value": "Levothyroxine 50mcg",
+          "count": 153
+        }
+      ],
+      "description": "Field: MEDICATION_NAME",
+      "sample_values": [
+        "Azithromycin 250mg",
+        "Tramadol 50mg",
+        "Duloxetine 60mg",
+        "Duloxetine 60mg",
+        "Lisinopril 10mg"
+      ]
+    },
+    "MEDICATION_CLASS": {
+      "column_name": "MEDICATION_CLASS",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 12,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Hypertension",
+          "count": 766
+        },
+        {
+          "value": "Infection",
+          "count": 332
+        },
+        {
+          "value": "Pain",
+          "count": 311
+        },
+        {
+          "value": "Depression",
+          "count": 300
+        },
+        {
+          "value": "GERD",
+          "count": 278
+        },
+        {
+          "value": "Asthma",
+          "count": 156
+        },
+        {
+          "value": "Anxiety",
+          "count": 153
+        },
+        {
+          "value": "Hypothyroid",
+          "count": 153
+        },
+        {
+          "value": "Cholesterol",
+          "count": 150
+        },
+        {
+          "value": "Diabetes",
+          "count": 138
+        }
+      ],
+      "description": "Field: MEDICATION_CLASS",
+      "sample_values": [
+        "Pain",
+        "Depression",
+        "Cholesterol",
+        "Cholesterol",
+        "Anxiety"
+      ]
+    },
+    "NDC_CODE": {
+      "column_name": "NDC_CODE",
+      "data_type": "string",
+      "semantic_type": "ndc",
+      "healthcare_type": "ndc",
+      "is_phi": false,
+      "cardinality": 3000,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "NDC50763441958",
+          "count": 1
+        },
+        {
+          "value": "NDC80182311011",
+          "count": 1
+        },
+        {
+          "value": "NDC30987155583",
+          "count": 1
+        },
+        {
+          "value": "NDC44043976161",
+          "count": 1
+        },
+        {
+          "value": "NDC16470849986",
+          "count": 1
+        },
+        {
+          "value": "NDC30316805265",
+          "count": 1
+        },
+        {
+          "value": "NDC35066335159",
+          "count": 1
+        },
+        {
+          "value": "NDC46151363069",
+          "count": 1
+        },
+        {
+          "value": "NDC74731564814",
+          "count": 1
+        },
+        {
+          "value": "NDC70049589777",
+          "count": 1
+        }
+      ],
+      "description": "National Drug Code for pharmaceutical products",
+      "sample_values": [
+        "NDC91387684454",
+        "NDC55668125060",
+        "NDC28602459738",
+        "NDC53670769249",
+        "NDC66383051222"
+      ]
+    },
+    "QUANTITY": {
+      "column_name": "QUANTITY",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 6,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 7.0,
+      "max_value": 120.0,
+      "mean": 53.538,
+      "top_values": [
+        {
+          "value": "7",
+          "count": 534
+        },
+        {
+          "value": "120",
+          "count": 514
+        },
+        {
+          "value": "90",
+          "count": 499
+        },
+        {
+          "value": "14",
+          "count": 489
+        },
+        {
+          "value": "60",
+          "count": 484
+        },
+        {
+          "value": "30",
+          "count": 480
+        }
+      ],
+      "description": "Coded value: QUANTITY",
+      "sample_values": [
+        "7",
+        "7",
+        "120",
+        "90",
+        "120"
+      ]
+    },
+    "DAYS_SUPPLY": {
+      "column_name": "DAYS_SUPPLY",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 5,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 7.0,
+      "max_value": 90.0,
+      "mean": 41.584,
+      "top_values": [
+        {
+          "value": "90",
+          "count": 629
+        },
+        {
+          "value": "60",
+          "count": 627
+        },
+        {
+          "value": "30",
+          "count": 624
+        },
+        {
+          "value": "14",
+          "count": 566
+        },
+        {
+          "value": "7",
+          "count": 554
+        }
+      ],
+      "description": "Coded value: DAYS_SUPPLY",
+      "sample_values": [
+        "90",
+        "30",
+        "60",
+        "90",
+        "14"
+      ]
+    },
+    "REFILLS_AUTHORIZED": {
+      "column_name": "REFILLS_AUTHORIZED",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 12,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 0.0,
+      "max_value": 11.0,
+      "mean": 5.602,
+      "top_values": [
+        {
+          "value": "7",
+          "count": 278
+        },
+        {
+          "value": "11",
+          "count": 270
+        },
+        {
+          "value": "2",
+          "count": 262
+        },
+        {
+          "value": "10",
+          "count": 260
+        },
+        {
+          "value": "9",
+          "count": 256
+        },
+        {
+          "value": "1",
+          "count": 254
+        },
+        {
+          "value": "5",
+          "count": 245
+        },
+        {
+          "value": "8",
+          "count": 244
+        },
+        {
+          "value": "3",
+          "count": 235
+        },
+        {
+          "value": "6",
+          "count": 235
+        }
+      ],
+      "description": "Coded value: REFILLS_AUTHORIZED",
+      "sample_values": [
+        "7",
+        "11",
+        "3",
+        "3",
+        "3"
+      ]
+    },
+    "REFILLS_USED": {
+      "column_name": "REFILLS_USED",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 12,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 0.0,
+      "max_value": 11.0,
+      "mean": 2.785,
+      "top_values": [
+        {
+          "value": "0",
+          "count": 744
+        },
+        {
+          "value": "1",
+          "count": 537
+        },
+        {
+          "value": "2",
+          "count": 428
+        },
+        {
+          "value": "3",
+          "count": 309
+        },
+        {
+          "value": "4",
+          "count": 243
+        },
+        {
+          "value": "5",
+          "count": 211
+        },
+        {
+          "value": "6",
+          "count": 165
+        },
+        {
+          "value": "7",
+          "count": 130
+        },
+        {
+          "value": "8",
+          "count": 84
+        },
+        {
+          "value": "9",
+          "count": 73
+        }
+      ],
+      "description": "Coded value: REFILLS_USED",
+      "sample_values": [
+        "0",
+        "1",
+        "1",
+        "4",
+        "1"
+      ]
+    },
+    "PRESCRIPTION_DATE": {
+      "column_name": "PRESCRIPTION_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 1027,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2023-07-11",
+          "count": 9
+        },
+        {
+          "value": "2024-03-10",
+          "count": 8
+        },
+        {
+          "value": "2025-11-28",
+          "count": 8
+        },
+        {
+          "value": "2024-08-28",
+          "count": 8
+        },
+        {
+          "value": "2023-05-16",
+          "count": 7
+        },
+        {
+          "value": "2024-09-14",
+          "count": 7
+        },
+        {
+          "value": "2025-04-26",
+          "count": 7
+        },
+        {
+          "value": "2023-09-11",
+          "count": 7
+        },
+        {
+          "value": "2023-05-30",
+          "count": 7
+        },
+        {
+          "value": "2023-09-23",
+          "count": 7
+        }
+      ],
+      "description": "Date field: PRESCRIPTION_DATE",
+      "sample_values": [
+        "2025-12-16",
+        "2023-08-24",
+        "2025-03-30",
+        "2023-03-22",
+        "2023-11-12"
+      ]
+    },
+    "FILL_DATE": {
+      "column_name": "FILL_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 999,
+      "null_count": 462,
+      "null_percentage": 15.4,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2024-09-14",
+          "count": 7
+        },
+        {
+          "value": "2025-04-26",
+          "count": 7
+        },
+        {
+          "value": "2023-09-11",
+          "count": 7
+        },
+        {
+          "value": "2023-05-30",
+          "count": 7
+        },
+        {
+          "value": "2025-01-08",
+          "count": 7
+        },
+        {
+          "value": "2024-03-10",
+          "count": 7
+        },
+        {
+          "value": "2025-11-28",
+          "count": 7
+        },
+        {
+          "value": "2023-01-16",
+          "count": 7
+        },
+        {
+          "value": "2023-09-04",
+          "count": 7
+        },
+        {
+          "value": "2023-08-26",
+          "count": 7
+        }
+      ],
+      "description": "Date field: FILL_DATE",
+      "sample_values": [
+        "2023-08-26",
+        "2024-03-10",
+        "2024-11-12",
+        "2025-12-04",
+        "2024-05-15"
+      ]
+    },
+    "PHARMACY": {
+      "column_name": "PHARMACY",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 6,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "KP Pharmacy LA",
+          "count": 520
+        },
+        {
+          "value": "KP Mail Order",
+          "count": 516
+        },
+        {
+          "value": "Walgreens",
+          "count": 513
+        },
+        {
+          "value": "CVS",
+          "count": 502
+        },
+        {
+          "value": "Rite Aid",
+          "count": 485
+        },
+        {
+          "value": "KP Pharmacy Oakland",
+          "count": 464
+        }
+      ],
+      "description": "Field: PHARMACY",
+      "sample_values": [
+        "KP Mail Order",
+        "KP Pharmacy LA",
+        "KP Pharmacy LA",
+        "Walgreens",
+        "KP Pharmacy LA"
+      ]
+    },
+    "COST": {
+      "column_name": "COST",
+      "data_type": "float",
+      "semantic_type": "currency",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 2955,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 5.03,
+      "max_value": 799.75,
+      "mean": 398.6957866666667,
+      "top_values": [
+        {
+          "value": "319.14",
+          "count": 2
+        },
+        {
+          "value": "445.95",
+          "count": 2
+        },
+        {
+          "value": "695.41",
+          "count": 2
+        },
+        {
+          "value": "79.44",
+          "count": 2
+        },
+        {
+          "value": "110.04",
+          "count": 2
+        },
+        {
+          "value": "726.61",
+          "count": 2
+        },
+        {
+          "value": "312.61",
+          "count": 2
+        },
+        {
+          "value": "118.32",
+          "count": 2
+        },
+        {
+          "value": "105.71",
+          "count": 2
+        },
+        {
+          "value": "155.43",
+          "count": 2
+        }
+      ],
+      "description": "Monetary amount: COST",
+      "sample_values": [
+        "378.25",
+        "685.46",
+        "134.93",
+        "723.26",
+        "502.04"
+      ]
+    },
+    "COPAY": {
+      "column_name": "COPAY",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 0.0,
+      "max_value": 50.0,
+      "mean": 19.263333333333332,
+      "top_values": [
+        {
+          "value": "30",
+          "count": 419
+        },
+        {
+          "value": "5",
+          "count": 388
+        },
+        {
+          "value": "25",
+          "count": 384
+        },
+        {
+          "value": "15",
+          "count": 380
+        },
+        {
+          "value": "0",
+          "count": 372
+        },
+        {
+          "value": "10",
+          "count": 360
+        },
+        {
+          "value": "20",
+          "count": 349
+        },
+        {
+          "value": "50",
+          "count": 348
+        }
+      ],
+      "description": "Coded value: COPAY",
+      "sample_values": [
+        "20",
+        "50",
+        "5",
+        "25",
+        "25"
+      ]
+    },
+    "STATUS": {
+      "column_name": "STATUS",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 5,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "FILLED",
+          "count": 2091
+        },
+        {
+          "value": "PENDING",
+          "count": 317
+        },
+        {
+          "value": "EXPIRED",
+          "count": 291
+        },
+        {
+          "value": "TRANSFERRED",
+          "count": 152
+        },
+        {
+          "value": "CANCELLED",
+          "count": 149
+        }
+      ],
+      "description": "Field: STATUS",
+      "sample_values": [
+        "FILLED",
+        "FILLED",
+        "FILLED",
+        "FILLED",
+        "FILLED"
+      ]
+    }
+  },
+  "dq_score": 85,
+  "profiled_at": "2026-04-02T01:48:52.214817",
+  "has_phi": true
+}

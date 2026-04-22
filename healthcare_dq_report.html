@@ -1,0 +1,2221 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Data Quality Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #002B5C 0%, #004B87 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .score-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .overall-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #F39C12;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .score-status {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #F39C12;
+        }
+
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .status-item {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            text-align: center;
+            border-top: 3px solid #002B5C;
+        }
+
+        .status-item strong {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-item.pass strong { color: #27AE60; }
+        .status-item.warn strong { color: #F39C12; }
+        .status-item.fail strong { color: #E74C3C; }
+
+        .status-item span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .category-scores {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .category-scores h2 {
+            color: #002B5C;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #002B5C;
+            padding-bottom: 0.5rem;
+        }
+
+        .category-score {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #002B5C;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-bar {
+            background-color: #e0e0e0;
+            border-radius: 0.25rem;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .score-value {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .recommendations {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .recommendations h2 {
+            color: #002B5C;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #002B5C;
+            padding-bottom: 0.5rem;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .results-section h2 {
+            color: #002B5C;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #002B5C;
+            padding-bottom: 0.5rem;
+        }
+
+        .check-result {
+            transition: all 0.2s ease;
+        }
+
+        .check-result:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        table th {
+            background-color: #f0f0f0;
+            padding: 0.5rem;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .footer {
+            text-align: center;
+            color: #999;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare Data Quality Report</h1>
+            <p>Comprehensive data quality assessment based on Tuva Project framework</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Generated: 2026-04-21T12:46:03.561721</p>
+        </div>
+
+        <div class="score-card">
+            <div class="overall-score">
+                <div class="score-circle">79</div>
+                <div class="score-status">Good</div>
+            </div>
+            <div>
+                <h3 style="color: #002B5C; margin-bottom: 1rem;">Check Summary</h3>
+                <div class="status-summary">
+                    <div class="status-item pass">
+                        <strong>66</strong>
+                        <span>Passed</span>
+                    </div>
+                    <div class="status-item warn">
+                        <strong>7</strong>
+                        <span>Warnings</span>
+                    </div>
+                    <div class="status-item fail">
+                        <strong>0</strong>
+                        <span>Failed</span>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                    <strong>Total Checks:</strong> 73
+                </p>
+            </div>
+        </div>
+
+        <div class="category-scores">
+            <h2>Category Scores</h2>
+            
+                <div class="category-score">
+                    <div class="category-name">Referential Integrity</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%; background-color: #27AE60;"></div>
+                    </div>
+                    <div class="score-value">100% (12/12)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Orphan Records</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 20.0%; background-color: #E74C3C;"></div>
+                    </div>
+                    <div class="score-value">20% (1/5)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Completeness</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%; background-color: #27AE60;"></div>
+                    </div>
+                    <div class="score-value">100% (35/35)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Validity</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 85.71428571428571%; background-color: #F39C12;"></div>
+                    </div>
+                    <div class="score-value">86% (6/7)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Duplicates</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%; background-color: #27AE60;"></div>
+                    </div>
+                    <div class="score-value">100% (4/4)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Temporal</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%; background-color: #27AE60;"></div>
+                    </div>
+                    <div class="score-value">100% (5/5)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Cross Table</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 0.0%; background-color: #E74C3C;"></div>
+                    </div>
+                    <div class="score-value">0% (0/1)</div>
+                </div>
+                
+                <div class="category-score">
+                    <div class="category-name">Business Rules</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 75.0%; background-color: #F39C12;"></div>
+                    </div>
+                    <div class="score-value">75% (3/4)</div>
+                </div>
+                
+        </div>
+
+        <div class="recommendations">
+            <h2>Recommendations & Priority Actions</h2>
+            <div style="background-color: #D5F4E6; border-left: 4px solid #27AE60; padding: 1rem; border-radius: 0.25rem;"><h4 style="margin: 0 0 0.5rem 0; color: #1E8449;">Data Quality Status</h4><p style="margin: 0;">Your dataset has passed all critical checks. Continue monitoring for data quality issues.</p></div>
+        </div>
+
+        <div class="results-section">
+            <h2>Detailed Check Results</h2>
+            <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Business Rules</h3>
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Denied claims have DENIAL_REASON</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 1,619 of 5,000 records (32.4%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 1619 denied claims missing denial reason
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE CLAIM_STATUS = 'DENIED' OR CLAIM_STATUS = 'Denied'
+            AND (DENIAL_REASON IS NULL OR DENIAL_REASON = '')
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>CLAIM_ID</th><th>MEMBER_ID</th><th>ENCOUNTER_ID</th><th>SERVICE_DATE</th><th>RENDERING_NPI</th><th>BILLING_NPI</th><th>CPT_CODE</th><th>CPT_DESCRIPTION</th><th>ICD10_CODE</th><th>ICD10_DESCRIPTION</th><th>BILLED_AMOUNT</th><th>ALLOWED_AMOUNT</th><th>PAID_AMOUNT</th><th>MEMBER_RESPONSIBILITY</th><th>COPAY</th><th>COINSURANCE</th><th>DEDUCTIBLE</th><th>CLAIM_STATUS</th><th>DENIAL_REASON</th><th>KP_REGION</th><th>FACILITY</th><th>PLAN_TYPE</th><th>CLAIM_TYPE</th><th>SUBMITTED_DATE</th><th>ADJUDICATED_DATE</th></tr><tr><td>CLM000007</td><td>MEM000215</td><td>ENC004446</td><td>2024-07-27</td><td>NPI000125</td><td>NPI001054</td><td>CPT83972</td><td>Service Desc</td><td>I23.1</td><td>Diagnosis Desc</td><td>1803.42</td><td>1113.06</td><td>923.59</td><td>0</td><td>25</td><td>0</td><td>0</td><td>DENIED</td><td>Provider not in network</td><td>HI</td><td>Downtown Clinic</td><td>HMO</td><td>Medical</td><td>2024-08-18</td><td>2024-09-26</td></tr><tr><td>CLM000011</td><td>MEM000274</td><td>ENC001114</td><td>2023-04-17</td><td>NPI000348</td><td>NPI000956</td><td>CPT13069</td><td>Service Desc</td><td>I91.8</td><td>Diagnosis Desc</td><td>4077.83</td><td>2609.96</td><td>1843.61</td><td>0</td><td>25</td><td>0</td><td>0</td><td>DENIED</td><td>Provider not in network</td><td>CA</td><td>Urgent Care</td><td>HMO</td><td>Medical</td><td>2023-05-06</td><td>2023-06-07</td></tr><tr><td>CLM000016</td><td>MEM000288</td><td>ENC004159</td><td>2024-05-07</td><td>NPI000761</td><td>NPI000213</td><td>CPT57754</td><td>Service Desc</td><td>I53.9</td><td>Diagnosis Desc</td><td>4958.16</td><td>3836.47</td><td>2938.81</td><td>0</td><td>25</td><td>0</td><td>0</td><td>DENIED</td><td>Provider not in network</td><td>WA</td><td>Urgent Care</td><td>HMO</td><td>Medical</td><td>2024-05-30</td><td>2024-07-07</td></tr><tr><td>CLM000020</td><td>MEM000358</td><td>ENC001295</td><td>2024-09-15</td><td>NPI000169</td><td>NPI000358</td><td>CPT50026</td><td>Service Desc</td><td>I49.6</td><td>Diagnosis Desc</td><td>3203.69</td><td>3098.07</td><td>2595.84</td><td>0</td><td>25</td><td>0</td><td>0</td><td>DENIED</td><td>Provider not in network</td><td>WA</td><td>Downtown Clinic</td><td>HMO</td><td>Medical</td><td>2024-10-11</td><td>2024-12-02</td></tr><tr><td>CLM000022</td><td>MEM000899</td><td>ENC000236</td><td>2024-04-08</td><td>NPI000816</td><td>NPI000764</td><td>CPT83973</td><td>Service Desc</td><td>I74.9</td><td>Diagnosis Desc</td><td>4785.96</td><td>4231.04</td><td>3710.18</td><td>0</td><td>25</td><td>0</td><td>0</td><td>DENIED</td><td>Provider not in network</td><td>OR</td><td>Urgent Care</td><td>HMO</td><td>Medical</td><td>2024-04-19</td><td>2024-04-22</td></tr></table></div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Inpatient encounters have valid LENGTH_OF_STAY</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 inpatient encounters have invalid length of stay
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM ENCOUNTERS
+            WHERE (VISIT_TYPE = 'INPATIENT' OR VISIT_TYPE = 'Inpatient')
+            AND (LENGTH_OF_STAY IS NULL OR LENGTH_OF_STAY = '' OR CAST(LENGTH_OF_STAY AS INTEGER) <= 0)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Active providers have positive PANEL_SIZE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 active providers have zero or missing panel size
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM PROVIDERS
+            WHERE (STATUS = 'ACTIVE' OR STATUS = 'Active')
+            AND (PANEL_SIZE IS NULL OR PANEL_SIZE = '' OR CAST(PANEL_SIZE AS INTEGER) <= 0)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Completed referrals have APPOINTMENT_DATE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 completed referrals missing appointment date
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM REFERRALS
+            WHERE (STATUS = 'COMPLETED' OR STATUS = 'Completed')
+            AND (APPOINTMENT_DATE IS NULL OR APPOINTMENT_DATE = '')
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Completeness</h3>
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.DATE_OF_BIRTH - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing DATE_OF_BIRTH
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE DATE_OF_BIRTH IS NULL OR DATE_OF_BIRTH = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.GENDER - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing GENDER
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE GENDER IS NULL OR GENDER = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.ENROLLMENT_DATE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing ENROLLMENT_DATE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE ENROLLMENT_DATE IS NULL OR ENROLLMENT_DATE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.PCP_NPI - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing PCP_NPI
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE PCP_NPI IS NULL OR PCP_NPI = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.RISK_SCORE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing RISK_SCORE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE RISK_SCORE IS NULL OR RISK_SCORE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.KP_REGION - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing KP_REGION
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE KP_REGION IS NULL OR KP_REGION = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.PLAN_TYPE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing PLAN_TYPE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE PLAN_TYPE IS NULL OR PLAN_TYPE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>MEMBERS.ZIP_CODE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing ZIP_CODE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM MEMBERS
+                WHERE ZIP_CODE IS NULL OR ZIP_CODE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.SERVICE_DATE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing SERVICE_DATE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE SERVICE_DATE IS NULL OR SERVICE_DATE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.BILLED_AMOUNT - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing BILLED_AMOUNT
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE BILLED_AMOUNT IS NULL OR BILLED_AMOUNT = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.PAID_AMOUNT - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing PAID_AMOUNT
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE PAID_AMOUNT IS NULL OR PAID_AMOUNT = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.CLAIM_STATUS - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing CLAIM_STATUS
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE CLAIM_STATUS IS NULL OR CLAIM_STATUS = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.CPT_CODE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing CPT_CODE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE CPT_CODE IS NULL OR CPT_CODE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.ICD10_CODE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing ICD10_CODE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE ICD10_CODE IS NULL OR ICD10_CODE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>CLAIMS.RENDERING_NPI - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing RENDERING_NPI
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM CLAIMS
+                WHERE RENDERING_NPI IS NULL OR RENDERING_NPI = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>ENCOUNTERS.SERVICE_DATE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing SERVICE_DATE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM ENCOUNTERS
+                WHERE SERVICE_DATE IS NULL OR SERVICE_DATE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>ENCOUNTERS.VISIT_TYPE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing VISIT_TYPE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM ENCOUNTERS
+                WHERE VISIT_TYPE IS NULL OR VISIT_TYPE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>ENCOUNTERS.RENDERING_NPI - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing RENDERING_NPI
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM ENCOUNTERS
+                WHERE RENDERING_NPI IS NULL OR RENDERING_NPI = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>ENCOUNTERS.DEPARTMENT - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing DEPARTMENT
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM ENCOUNTERS
+                WHERE DEPARTMENT IS NULL OR DEPARTMENT = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>ENCOUNTERS.ENCOUNTER_STATUS - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing ENCOUNTER_STATUS
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM ENCOUNTERS
+                WHERE ENCOUNTER_STATUS IS NULL OR ENCOUNTER_STATUS = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>DIAGNOSES.ICD10_CODE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 3,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing ICD10_CODE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM DIAGNOSES
+                WHERE ICD10_CODE IS NULL OR ICD10_CODE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>DIAGNOSES.DIAGNOSIS_TYPE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 3,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing DIAGNOSIS_TYPE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM DIAGNOSES
+                WHERE DIAGNOSIS_TYPE IS NULL OR DIAGNOSIS_TYPE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>DIAGNOSES.SEVERITY - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 3,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing SEVERITY
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM DIAGNOSES
+                WHERE SEVERITY IS NULL OR SEVERITY = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>DIAGNOSES.DIAGNOSIS_DATE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 3,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing DIAGNOSIS_DATE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM DIAGNOSES
+                WHERE DIAGNOSIS_DATE IS NULL OR DIAGNOSIS_DATE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PROVIDERS.SPECIALTY - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing SPECIALTY
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PROVIDERS
+                WHERE SPECIALTY IS NULL OR SPECIALTY = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PROVIDERS.DEPARTMENT - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing DEPARTMENT
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PROVIDERS
+                WHERE DEPARTMENT IS NULL OR DEPARTMENT = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PROVIDERS.STATUS - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing STATUS
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PROVIDERS
+                WHERE STATUS IS NULL OR STATUS = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PROVIDERS.PANEL_SIZE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing PANEL_SIZE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PROVIDERS
+                WHERE PANEL_SIZE IS NULL OR PANEL_SIZE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PRESCRIPTIONS.MEDICATION_NAME - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing MEDICATION_NAME
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PRESCRIPTIONS
+                WHERE MEDICATION_NAME IS NULL OR MEDICATION_NAME = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PRESCRIPTIONS.PRESCRIPTION_DATE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing PRESCRIPTION_DATE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PRESCRIPTIONS
+                WHERE PRESCRIPTION_DATE IS NULL OR PRESCRIPTION_DATE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PRESCRIPTIONS.COST - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing COST
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PRESCRIPTIONS
+                WHERE COST IS NULL OR COST = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>PRESCRIPTIONS.DAYS_SUPPLY - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing DAYS_SUPPLY
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM PRESCRIPTIONS
+                WHERE DAYS_SUPPLY IS NULL OR DAYS_SUPPLY = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>REFERRALS.STATUS - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing STATUS
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM REFERRALS
+                WHERE STATUS IS NULL OR STATUS = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>REFERRALS.REFERRAL_DATE - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing REFERRAL_DATE
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM REFERRALS
+                WHERE REFERRAL_DATE IS NULL OR REFERRAL_DATE = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>REFERRALS.URGENCY - Completeness</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 (0.0%) records missing URGENCY
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as null_count FROM REFERRALS
+                WHERE URGENCY IS NULL OR URGENCY = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Cross Table</h3>
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims KP_REGION matches Member KP_REGION</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 3,811 of 5,000 records (76.2%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 3811 claims have mismatched KP_REGION values
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as mismatch_count
+            FROM CLAIMS c
+            JOIN MEMBERS m ON c.MEMBER_ID = m.MEMBER_ID
+            WHERE c.KP_REGION IS NOT NULL AND m.KP_REGION IS NOT NULL
+            AND c.KP_REGION != '' AND m.KP_REGION != ''
+            AND c.KP_REGION != m.KP_REGION
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>CLAIM_ID</th><th>MEMBER_ID</th><th>ENCOUNTER_ID</th><th>SERVICE_DATE</th><th>RENDERING_NPI</th><th>BILLING_NPI</th><th>CPT_CODE</th><th>CPT_DESCRIPTION</th><th>ICD10_CODE</th><th>ICD10_DESCRIPTION</th><th>BILLED_AMOUNT</th><th>ALLOWED_AMOUNT</th><th>PAID_AMOUNT</th><th>MEMBER_RESPONSIBILITY</th><th>COPAY</th><th>COINSURANCE</th><th>DEDUCTIBLE</th><th>CLAIM_STATUS</th><th>DENIAL_REASON</th><th>KP_REGION</th><th>FACILITY</th><th>PLAN_TYPE</th><th>CLAIM_TYPE</th><th>SUBMITTED_DATE</th><th>ADJUDICATED_DATE</th><th>MEMBER_REGION</th></tr><tr><td>CLM000001</td><td>MEM000631</td><td>(NULL)</td><td>2023-05-09</td><td>NPI000689</td><td>NPI000950</td><td>CPT67860</td><td>Service Desc</td><td>I36.5</td><td>Diagnosis Desc</td><td>1539.5</td><td>1320.69</td><td>1125.73</td><td>0</td><td>25</td><td>0</td><td>0</td><td>PENDING</td><td>(NULL)</td><td>CA</td><td>Suburban Center</td><td>HMO</td><td>Medical</td><td>2023-05-15</td><td>2023-06-20</td><td>WA</td></tr><tr><td>CLM000002</td><td>MEM000237</td><td>ENC003769</td><td>2023-07-16</td><td>NPI000578</td><td>NPI000917</td><td>CPT75186</td><td>Service Desc</td><td>I94.4</td><td>Diagnosis Desc</td><td>3623.65</td><td>2953.86</td><td>2404.52</td><td>0</td><td>25</td><td>0</td><td>0</td><td>PAID</td><td>(NULL)</td><td>WA</td><td>Medical Center</td><td>HMO</td><td>Medical</td><td>2023-07-21</td><td>2023-08-16</td><td>HI</td></tr><tr><td>CLM000003</td><td>MEM000121</td><td>(NULL)</td><td>2024-10-20</td><td>NPI000918</td><td>NPI000240</td><td>CPT56718</td><td>Service Desc</td><td>I51.7</td><td>Diagnosis Desc</td><td>1431.79</td><td>1028.7</td><td>944.41</td><td>0</td><td>25</td><td>0</td><td>0</td><td>PAID</td><td>(NULL)</td><td>WA</td><td>Suburban Center</td><td>HMO</td><td>Medical</td><td>2024-10-23</td><td>2024-11-01</td><td>OR</td></tr><tr><td>CLM000006</td><td>MEM000021</td><td>ENC002411</td><td>2025-01-22</td><td>NPI000305</td><td>NPI000032</td><td>CPT55980</td><td>Service Desc</td><td>I12.2</td><td>Diagnosis Desc</td><td>1267.86</td><td>993.29</td><td>831.39</td><td>0</td><td>25</td><td>0</td><td>0</td><td>PENDING</td><td>(NULL)</td><td>OR</td><td>Medical Center</td><td>HMO</td><td>Medical</td><td>2025-01-27</td><td>2025-01-29</td><td>WA</td></tr><tr><td>CLM000007</td><td>MEM000215</td><td>ENC004446</td><td>2024-07-27</td><td>NPI000125</td><td>NPI001054</td><td>CPT83972</td><td>Service Desc</td><td>I23.1</td><td>Diagnosis Desc</td><td>1803.42</td><td>1113.06</td><td>923.59</td><td>0</td><td>25</td><td>0</td><td>0</td><td>DENIED</td><td>Provider not in network</td><td>HI</td><td>Downtown Clinic</td><td>HMO</td><td>Medical</td><td>2024-08-18</td><td>2024-09-26</td><td>OR</td></tr></table></div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Duplicates</h3>
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims - Duplicate CLAIM_IDs</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 duplicate claim records found
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT CLAIM_ID, COUNT(*) as cnt FROM CLAIMS
+            WHERE CLAIM_ID IS NOT NULL AND CLAIM_ID != ''
+            GROUP BY CLAIM_ID HAVING COUNT(*) > 1
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members - Duplicate MEMBER_IDs</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 duplicate member records found
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT MEMBER_ID, COUNT(*) as cnt FROM MEMBERS
+            WHERE MEMBER_ID IS NOT NULL AND MEMBER_ID != ''
+            GROUP BY MEMBER_ID HAVING COUNT(*) > 1
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Encounters - Duplicate ENCOUNTER_IDs</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 duplicate encounter records found
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT ENCOUNTER_ID, COUNT(*) as cnt FROM ENCOUNTERS
+            WHERE ENCOUNTER_ID IS NOT NULL AND ENCOUNTER_ID != ''
+            GROUP BY ENCOUNTER_ID HAVING COUNT(*) > 1
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Providers - Duplicate NPIs</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 duplicate provider records found
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT NPI, COUNT(*) as cnt FROM PROVIDERS
+            WHERE NPI IS NOT NULL AND NPI != ''
+            GROUP BY NPI HAVING COUNT(*) > 1
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Orphan Records</h3>
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members without any claims</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 10 of 1,000 records (1.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 10 members have no claim history
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as orphan_count FROM MEMBERS
+            WHERE MEMBER_ID NOT IN (SELECT DISTINCT MEMBER_ID FROM CLAIMS)
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>MEMBER_ID</th><th>MRN</th><th>FIRST_NAME</th><th>LAST_NAME</th><th>DATE_OF_BIRTH</th><th>GENDER</th><th>RACE</th><th>LANGUAGE</th><th>ADDRESS</th><th>CITY</th><th>STATE</th><th>ZIP_CODE</th><th>PHONE</th><th>EMAIL</th><th>KP_REGION</th><th>FACILITY</th><th>PLAN_TYPE</th><th>ENROLLMENT_DATE</th><th>DISENROLLMENT_DATE</th><th>PCP_NPI</th><th>RISK_SCORE</th><th>CHRONIC_CONDITIONS</th></tr><tr><td>MEM000094</td><td>MRN000094</td><td>First94</td><td>Last94</td><td>1942-12-28</td><td>M</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>OR</td><td>90094</td><td>555-0094</td><td>member94@test.com</td><td>CA</td><td>Downtown Clinic</td><td>HMO</td><td>2022-02-19</td><td>2023-01-09</td><td>NPI000094</td><td>5.1</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000173</td><td>MRN000173</td><td>First173</td><td>Last173</td><td>1955-07-23</td><td>M</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>OR</td><td>90173</td><td>555-0173</td><td>member173@test.com</td><td>CA</td><td>Suburban Center</td><td>HMO</td><td>2022-01-10</td><td>(NULL)</td><td>NPI000073</td><td>8.4</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000195</td><td>MRN000195</td><td>First195</td><td>Last195</td><td>1988-07-21</td><td>F</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>CA</td><td>90195</td><td>555-0195</td><td>member195@test.com</td><td>WA</td><td>Urgent Care</td><td>HMO</td><td>2021-10-22</td><td>(NULL)</td><td>NPI000095</td><td>1.7</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000204</td><td>MRN000204</td><td>First204</td><td>Last204</td><td>1987-03-10</td><td>F</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>OR</td><td>90204</td><td>555-0204</td><td>member204@test.com</td><td>WA</td><td>Urgent Care</td><td>HMO</td><td>2022-09-18</td><td>2023-02-13</td><td>NPI000004</td><td>1.0</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000256</td><td>MRN000256</td><td>First256</td><td>Last256</td><td>1945-10-26</td><td>F</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>CA</td><td>90256</td><td>555-0256</td><td>member256@test.com</td><td>CA</td><td>Downtown Clinic</td><td>HMO</td><td>2022-02-04</td><td>(NULL)</td><td>NPI000056</td><td>1.6</td><td>Hypertension,Diabetes</td></tr></table></div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members without any encounters</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 13 of 1,000 records (1.3%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 13 members have no encounter history
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as orphan_count FROM MEMBERS
+            WHERE MEMBER_ID NOT IN (SELECT DISTINCT MEMBER_ID FROM ENCOUNTERS)
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>MEMBER_ID</th><th>MRN</th><th>FIRST_NAME</th><th>LAST_NAME</th><th>DATE_OF_BIRTH</th><th>GENDER</th><th>RACE</th><th>LANGUAGE</th><th>ADDRESS</th><th>CITY</th><th>STATE</th><th>ZIP_CODE</th><th>PHONE</th><th>EMAIL</th><th>KP_REGION</th><th>FACILITY</th><th>PLAN_TYPE</th><th>ENROLLMENT_DATE</th><th>DISENROLLMENT_DATE</th><th>PCP_NPI</th><th>RISK_SCORE</th><th>CHRONIC_CONDITIONS</th></tr><tr><td>MEM000070</td><td>MRN000070</td><td>First70</td><td>Last70</td><td>1981-09-26</td><td>F</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>WA</td><td>90070</td><td>555-0070</td><td>member70@test.com</td><td>OR</td><td>Medical Center</td><td>HMO</td><td>2020-12-17</td><td>(NULL)</td><td>NPI000070</td><td>2.6</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000243</td><td>MRN000243</td><td>First243</td><td>Last243</td><td>1984-08-07</td><td>M</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>OR</td><td>90243</td><td>555-0243</td><td>member243@test.com</td><td>WA</td><td>Downtown Clinic</td><td>HMO</td><td>2022-04-25</td><td>(NULL)</td><td>NPI000043</td><td>8.2</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000304</td><td>MRN000304</td><td>First304</td><td>Last304</td><td>1970-09-27</td><td>M</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>CA</td><td>90304</td><td>555-0304</td><td>member304@test.com</td><td>HI</td><td>Downtown Clinic</td><td>HMO</td><td>2021-03-18</td><td>(NULL)</td><td>NPI000004</td><td>4.6</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000417</td><td>MRN000417</td><td>First417</td><td>Last417</td><td>1953-02-28</td><td>M</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>WA</td><td>90417</td><td>555-0417</td><td>member417@test.com</td><td>HI</td><td>Urgent Care</td><td>HMO</td><td>2022-02-06</td><td>(NULL)</td><td>NPI000017</td><td>3.1</td><td>Hypertension,Diabetes</td></tr><tr><td>MEM000438</td><td>MRN000438</td><td>First438</td><td>Last438</td><td>1985-08-11</td><td>F</td><td>White</td><td>EN</td><td>123 Main St</td><td>City</td><td>CA</td><td>90438</td><td>555-0438</td><td>member438@test.com</td><td>HI</td><td>Downtown Clinic</td><td>HMO</td><td>2021-10-28</td><td>(NULL)</td><td>NPI000038</td><td>5.1</td><td>Hypertension,Diabetes</td></tr></table></div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members without PCP assignment</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 members lack PCP assignment
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as orphan_count FROM MEMBERS
+            WHERE PCP_NPI IS NULL OR PCP_NPI = ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Encounters without any diagnoses</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 2,743 of 5,000 records (54.9%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 2743 encounters lack diagnosis information
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as orphan_count FROM ENCOUNTERS
+            WHERE ENCOUNTER_ID NOT IN (SELECT DISTINCT ENCOUNTER_ID FROM DIAGNOSES
+                                       WHERE ENCOUNTER_ID IS NOT NULL AND ENCOUNTER_ID != '')
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>ENCOUNTER_ID</th><th>MEMBER_ID</th><th>MRN</th><th>SERVICE_DATE</th><th>ADMIT_DATE</th><th>DISCHARGE_DATE</th><th>RENDERING_NPI</th><th>SUPERVISING_NPI</th><th>VISIT_TYPE</th><th>DEPARTMENT</th><th>FACILITY</th><th>KP_REGION</th><th>PRIMARY_DIAGNOSIS</th><th>DIAGNOSIS_DESCRIPTION</th><th>CHIEF_COMPLAINT</th><th>DISPOSITION</th><th>LENGTH_OF_STAY</th><th>ENCOUNTER_STATUS</th></tr><tr><td>ENC000000</td><td>MEM000949</td><td>MRN000352</td><td>2025-01-16</td><td>(NULL)</td><td>(NULL)</td><td>NPI000767</td><td>NPI000358</td><td>ER</td><td>Medical Center</td><td>Medical Center</td><td>WA</td><td>I81.0</td><td>Primary diagnosis</td><td>Chief complaint</td><td>DISCHARGED</td><td>0</td><td>COMPLETED</td></tr><tr><td>ENC000004</td><td>MEM000287</td><td>MRN000030</td><td>2023-07-04</td><td>(NULL)</td><td>(NULL)</td><td>NPI000757</td><td>NPI001105</td><td>OFFICE</td><td>Medical Center</td><td>Suburban Center</td><td>HI</td><td>I86.1</td><td>Primary diagnosis</td><td>Chief complaint</td><td>DISCHARGED</td><td>0</td><td>COMPLETED</td></tr><tr><td>ENC000006</td><td>MEM000903</td><td>MRN000012</td><td>2024-04-01</td><td>(NULL)</td><td>(NULL)</td><td>NPI000618</td><td>NPI001128</td><td>TELEHEALTH</td><td>Medical Center</td><td>Downtown Clinic</td><td>WA</td><td>I39.1</td><td>Primary diagnosis</td><td>Chief complaint</td><td>DISCHARGED</td><td>0</td><td>COMPLETED</td></tr><tr><td>ENC000007</td><td>MEM000282</td><td>MRN000947</td><td>2024-07-04</td><td>(NULL)</td><td>(NULL)</td><td>NPI001461</td><td>NPI000470</td><td>TELEHEALTH</td><td>Downtown Clinic</td><td>Medical Center</td><td>WA</td><td>I35.3</td><td>Primary diagnosis</td><td>Chief complaint</td><td>DISCHARGED</td><td>0</td><td>COMPLETED</td></tr><tr><td>ENC000008</td><td>MEM000721</td><td>MRN000503</td><td>2024-03-24</td><td>(NULL)</td><td>(NULL)</td><td>NPI000084</td><td>NPI000171</td><td>OFFICE</td><td>Suburban Center</td><td>Medical Center</td><td>OR</td><td>I95.5</td><td>Primary diagnosis</td><td>Chief complaint</td><td>DISCHARGED</td><td>0</td><td>COMPLETED</td></tr></table></div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Providers never billed</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 1 of 1,500 records (0.1%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 1 providers have no claims history
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as orphan_count FROM PROVIDERS
+            WHERE NPI NOT IN (SELECT DISTINCT RENDERING_NPI FROM CLAIMS
+                             WHERE RENDERING_NPI IS NOT NULL AND RENDERING_NPI != '')
+            AND NPI NOT IN (SELECT DISTINCT BILLING_NPI FROM CLAIMS
+                           WHERE BILLING_NPI IS NOT NULL AND BILLING_NPI != '')
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>NPI</th><th>PROVIDER_FIRST_NAME</th><th>PROVIDER_LAST_NAME</th><th>SPECIALTY</th><th>DEPARTMENT</th><th>KP_REGION</th><th>FACILITY</th><th>PROVIDER_TYPE</th><th>DEA_NUMBER</th><th>LICENSE_STATE</th><th>HIRE_DATE</th><th>STATUS</th><th>PANEL_SIZE</th><th>ACCEPTS_NEW_PATIENTS</th></tr><tr><td>NPI001401</td><td>Dr1401</td><td>Provider1401</td><td>Dermatology</td><td>Suburban Center</td><td>OR</td><td>Medical Center</td><td>MD</td><td>DEA00001401</td><td>CA</td><td>2013-01-31</td><td>Active</td><td>377</td><td>Y</td></tr></table></div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Referential Integrity</h3>
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims.MEMBER_ID → Members.MEMBER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims reference non-existent members
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE MEMBER_ID NOT IN (SELECT MEMBER_ID FROM MEMBERS)
+            AND MEMBER_ID IS NOT NULL AND MEMBER_ID != ''
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims.ENCOUNTER_ID → Encounters.ENCOUNTER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims reference non-existent encounters
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE ENCOUNTER_ID IS NOT NULL AND ENCOUNTER_ID != ''
+            AND ENCOUNTER_ID NOT IN (SELECT ENCOUNTER_ID FROM ENCOUNTERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims.RENDERING_NPI → Providers.NPI</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims reference non-existent rendering providers
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE RENDERING_NPI IS NOT NULL AND RENDERING_NPI != ''
+            AND RENDERING_NPI NOT IN (SELECT NPI FROM PROVIDERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims.BILLING_NPI → Providers.NPI</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims reference non-existent billing providers
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE BILLING_NPI IS NOT NULL AND BILLING_NPI != ''
+            AND BILLING_NPI NOT IN (SELECT NPI FROM PROVIDERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Diagnoses.MEMBER_ID → Members.MEMBER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 3,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 diagnoses reference non-existent members
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM DIAGNOSES
+            WHERE MEMBER_ID NOT IN (SELECT MEMBER_ID FROM MEMBERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Diagnoses.ENCOUNTER_ID → Encounters.ENCOUNTER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 3,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 diagnoses reference non-existent encounters
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM DIAGNOSES
+            WHERE ENCOUNTER_ID IS NOT NULL AND ENCOUNTER_ID != ''
+            AND ENCOUNTER_ID NOT IN (SELECT ENCOUNTER_ID FROM ENCOUNTERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Encounters.MEMBER_ID → Members.MEMBER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 encounters reference non-existent members
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM ENCOUNTERS
+            WHERE MEMBER_ID NOT IN (SELECT MEMBER_ID FROM MEMBERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Encounters.RENDERING_NPI → Providers.NPI</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 encounters reference non-existent rendering providers
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM ENCOUNTERS
+            WHERE RENDERING_NPI IS NOT NULL AND RENDERING_NPI != ''
+            AND RENDERING_NPI NOT IN (SELECT NPI FROM PROVIDERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Prescriptions.MEMBER_ID → Members.MEMBER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 prescriptions reference non-existent members
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM PRESCRIPTIONS
+            WHERE MEMBER_ID NOT IN (SELECT MEMBER_ID FROM MEMBERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Referrals.MEMBER_ID → Members.MEMBER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 referrals reference non-existent members
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM REFERRALS
+            WHERE MEMBER_ID NOT IN (SELECT MEMBER_ID FROM MEMBERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Appointments.MEMBER_ID → Members.MEMBER_ID</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,500 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 appointments reference non-existent members
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM APPOINTMENTS
+            WHERE MEMBER_ID NOT IN (SELECT MEMBER_ID FROM MEMBERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members.PCP_NPI → Providers.NPI</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 members assigned to non-existent PCPs
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM MEMBERS
+            WHERE PCP_NPI IS NOT NULL AND PCP_NPI != ''
+            AND PCP_NPI NOT IN (SELECT NPI FROM PROVIDERS)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Temporal</h3>
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims - SUBMITTED_DATE before SERVICE_DATE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims submitted before service date
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE SERVICE_DATE IS NOT NULL AND SUBMITTED_DATE IS NOT NULL
+            AND SERVICE_DATE != '' AND SUBMITTED_DATE != ''
+            AND SUBMITTED_DATE < SERVICE_DATE
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims - ADJUDICATED_DATE before SUBMITTED_DATE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims adjudicated before submission
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE SUBMITTED_DATE IS NOT NULL AND ADJUDICATED_DATE IS NOT NULL
+            AND SUBMITTED_DATE != '' AND ADJUDICATED_DATE != ''
+            AND ADJUDICATED_DATE < SUBMITTED_DATE
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Encounters - ADMIT_DATE after DISCHARGE_DATE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 encounters have invalid admission/discharge dates
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM ENCOUNTERS
+            WHERE ADMIT_DATE IS NOT NULL AND DISCHARGE_DATE IS NOT NULL
+            AND ADMIT_DATE != '' AND DISCHARGE_DATE != ''
+            AND ADMIT_DATE > DISCHARGE_DATE
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Prescriptions - PRESCRIPTION_DATE after FILL_DATE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 prescriptions have prescription date after fill date
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM PRESCRIPTIONS
+            WHERE PRESCRIPTION_DATE IS NOT NULL AND FILL_DATE IS NOT NULL
+            AND PRESCRIPTION_DATE != '' AND FILL_DATE != ''
+            AND PRESCRIPTION_DATE > FILL_DATE
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Referrals - REFERRAL_DATE after APPOINTMENT_DATE</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 referrals have invalid date sequences
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM REFERRALS
+            WHERE REFERRAL_DATE IS NOT NULL AND APPOINTMENT_DATE IS NOT NULL
+            AND REFERRAL_DATE != '' AND APPOINTMENT_DATE != ''
+            AND REFERRAL_DATE > APPOINTMENT_DATE
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                <h3 style="margin-top: 2rem; color: #002B5C; border-bottom: 2px solid #002B5C; padding-bottom: 0.5rem;">Validity</h3>
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members - Invalid DATE_OF_BIRTH format or values</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 invalid date values in DATE_OF_BIRTH
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM MEMBERS
+            WHERE DATE_OF_BIRTH IS NOT NULL AND DATE_OF_BIRTH != ''
+            AND (
+                DATE_OF_BIRTH NOT LIKE '____-__-__' OR
+                DATE_OF_BIRTH > DATE('now') OR
+                DATE_OF_BIRTH < '1900-01-01'
+            )
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members - Invalid GENDER values</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 invalid gender values
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM MEMBERS
+            WHERE GENDER IS NOT NULL AND GENDER != ''
+            AND UPPER(GENDER) NOT IN ('M', 'F', 'U', 'O')
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims - Invalid financial waterfall</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims violate financial waterfall logic
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE (CAST(BILLED_AMOUNT AS REAL) < CAST(ALLOWED_AMOUNT AS REAL)
+                   OR CAST(ALLOWED_AMOUNT AS REAL) < CAST(PAID_AMOUNT AS REAL))
+            AND BILLED_AMOUNT IS NOT NULL AND ALLOWED_AMOUNT IS NOT NULL AND PAID_AMOUNT IS NOT NULL
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Claims - Negative paid amounts</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 5,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 claims have negative paid amounts
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM CLAIMS
+            WHERE PAID_AMOUNT IS NOT NULL AND PAID_AMOUNT != ''
+            AND CAST(PAID_AMOUNT AS REAL) < 0
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Members - Invalid RISK_SCORE range</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 1,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 members have risk scores outside 0-10 range
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM MEMBERS
+            WHERE RISK_SCORE IS NOT NULL AND RISK_SCORE != ''
+            AND (CAST(RISK_SCORE AS REAL) < 0 OR CAST(RISK_SCORE AS REAL) > 10)
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #27AE60; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Prescriptions - Invalid DAYS_SUPPLY</strong>
+                        <div>
+                            <span style="background-color: #27AE60; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">PASS</span>
+                            <span style="background-color: #3498DB; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">LOW</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 0 of 2,000 records (0.0%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 0 prescriptions have invalid days supply
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM PRESCRIPTIONS
+            WHERE DAYS_SUPPLY IS NOT NULL AND DAYS_SUPPLY != ''
+            AND CAST(DAYS_SUPPLY AS REAL) <= 0
+                        </div>
+                    </div>
+
+                    <div style="color: #999; font-size: 0.85rem;">No affected records in sample.</div>
+                </div>
+                
+                <div class="check-result" style="border-left: 4px solid #F39C12; padding: 1rem; margin: 0.5rem 0; background-color: #f9f9f9; border-radius: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>Prescriptions - Refills used > authorized</strong>
+                        <div>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.85rem;">WARN</span>
+                            <span style="background-color: #F39C12; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">MEDIUM</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Impact:</strong> 404 of 2,000 records (20.2%)
+                    </div>
+                    <div style="color: #555; margin-bottom: 0.5rem;">
+                        <strong>Message:</strong> 404 prescriptions have more refills used than authorized
+                    </div>
+                    <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0.25rem; padding: 0.5rem; margin: 0.5rem 0; max-height: 200px; overflow-y: auto;">
+                        <div style="font-size: 0.75rem; color: #666; font-family: monospace; word-break: break-all;">
+                            <strong>SQL Query:</strong><br/>
+                            SELECT COUNT(*) as invalid_count FROM PRESCRIPTIONS
+            WHERE REFILLS_USED IS NOT NULL AND REFILLS_AUTHORIZED IS NOT NULL
+            AND CAST(REFILLS_USED AS INTEGER) > CAST(REFILLS_AUTHORIZED AS INTEGER)
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;"><strong>Sample Records:</strong><table><tr><th>RX_ID</th><th>MEMBER_ID</th><th>PRESCRIBING_NPI</th><th>MEDICATION_NAME</th><th>MEDICATION_CLASS</th><th>NDC_CODE</th><th>QUANTITY</th><th>DAYS_SUPPLY</th><th>REFILLS_AUTHORIZED</th><th>REFILLS_USED</th><th>PRESCRIPTION_DATE</th><th>FILL_DATE</th><th>PHARMACY</th><th>COST</th><th>COPAY</th><th>STATUS</th></tr><tr><td>RX000001</td><td>MEM000201</td><td>NPI000274</td><td>Amoxicillin</td><td>Drug Class</td><td>NDC41904822</td><td>29</td><td>74</td><td>1</td><td>2</td><td>2025-02-02</td><td>2025-02-04</td><td>Local Pharmacy</td><td>106.65</td><td>38.04</td><td>FILLED</td></tr><tr><td>RX000003</td><td>MEM000910</td><td>NPI000479</td><td>Metformin</td><td>Drug Class</td><td>NDC70925579</td><td>45</td><td>53</td><td>1</td><td>5</td><td>2023-09-29</td><td>2023-10-03</td><td>Local Pharmacy</td><td>185.26</td><td>43.24</td><td>FILLED</td></tr><tr><td>RX000017</td><td>MEM000401</td><td>NPI000276</td><td>Amoxicillin</td><td>Drug Class</td><td>NDC83384755</td><td>46</td><td>55</td><td>0</td><td>3</td><td>2023-10-17</td><td>2023-10-18</td><td>Local Pharmacy</td><td>144.24</td><td>21.28</td><td>FILLED</td></tr><tr><td>RX000019</td><td>MEM000849</td><td>NPI001093</td><td>Atorvastatin</td><td>Drug Class</td><td>NDC69604075</td><td>25</td><td>77</td><td>0</td><td>3</td><td>2024-01-21</td><td>2024-01-21</td><td>Local Pharmacy</td><td>132.44</td><td>10.5</td><td>FILLED</td></tr><tr><td>RX000021</td><td>MEM000552</td><td>NPI000906</td><td>Omeprazole</td><td>Drug Class</td><td>NDC78643355</td><td>30</td><td>85</td><td>0</td><td>1</td><td>2023-02-17</td><td>2023-02-21</td><td>Local Pharmacy</td><td>148.51</td><td>49.67</td><td>FILLED</td></tr></table></div>
+                </div>
+                
+        </div>
+
+        <div class="footer">
+            <p>This report was generated by the Healthcare Data Quality Engine.</p>
+            <p>For remediation assistance, review the SQL queries and sample records for each failed check.</p>
+        </div>
+    </div>
+</body>
+</html>
+        

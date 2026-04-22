@@ -1,0 +1,1299 @@
+{
+  "table_name": "members",
+  "file_name": "members.csv",
+  "total_rows": 10000,
+  "total_columns": 22,
+  "table_purpose": "Member enrollment and demographics",
+  "columns": {
+    "MRN": {
+      "column_name": "MRN",
+      "data_type": "string",
+      "semantic_type": "text",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 9996,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MRN1853853",
+          "count": 2
+        },
+        {
+          "value": "MRN4921059",
+          "count": 2
+        },
+        {
+          "value": "MRN3479713",
+          "count": 2
+        },
+        {
+          "value": "MRN9635332",
+          "count": 2
+        },
+        {
+          "value": "MRN9874152",
+          "count": 1
+        },
+        {
+          "value": "MRN1059486",
+          "count": 1
+        },
+        {
+          "value": "MRN3726327",
+          "count": 1
+        },
+        {
+          "value": "MRN9546409",
+          "count": 1
+        },
+        {
+          "value": "MRN2173965",
+          "count": 1
+        },
+        {
+          "value": "MRN6406444",
+          "count": 1
+        }
+      ],
+      "description": "Field: MRN",
+      "sample_values": [
+        "MRN7215231",
+        "MRN2275009",
+        "MRN7755673",
+        "MRN9223013",
+        "MRN8359792"
+      ]
+    },
+    "MEMBER_ID": {
+      "column_name": "MEMBER_ID",
+      "data_type": "string",
+      "semantic_type": "member_id",
+      "healthcare_type": "member_id",
+      "is_phi": false,
+      "cardinality": 10000,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MBR108399996",
+          "count": 1
+        },
+        {
+          "value": "MBR458153605",
+          "count": 1
+        },
+        {
+          "value": "MBR958872154",
+          "count": 1
+        },
+        {
+          "value": "MBR529151399",
+          "count": 1
+        },
+        {
+          "value": "MBR813219781",
+          "count": 1
+        },
+        {
+          "value": "MBR599277266",
+          "count": 1
+        },
+        {
+          "value": "MBR258453521",
+          "count": 1
+        },
+        {
+          "value": "MBR378304807",
+          "count": 1
+        },
+        {
+          "value": "MBR994310083",
+          "count": 1
+        },
+        {
+          "value": "MBR128955006",
+          "count": 1
+        }
+      ],
+      "description": "Unique health plan member identifier used for linking enrollment, claims, and encounters",
+      "sample_values": [
+        "MBR425545658",
+        "MBR877141624",
+        "MBR301185891",
+        "MBR245063079",
+        "MBR118313125"
+      ]
+    },
+    "FIRST_NAME": {
+      "column_name": "FIRST_NAME",
+      "data_type": "string",
+      "semantic_type": "name",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 96,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Barbara",
+          "count": 128
+        },
+        {
+          "value": "Michael",
+          "count": 125
+        },
+        {
+          "value": "Matthew",
+          "count": 123
+        },
+        {
+          "value": "Jason",
+          "count": 122
+        },
+        {
+          "value": "Patricia",
+          "count": 121
+        },
+        {
+          "value": "Sharon",
+          "count": 121
+        },
+        {
+          "value": "Jonathan",
+          "count": 121
+        },
+        {
+          "value": "Kathleen",
+          "count": 120
+        },
+        {
+          "value": "Gary",
+          "count": 119
+        },
+        {
+          "value": "Charles",
+          "count": 119
+        }
+      ],
+      "description": "Person name: FIRST_NAME",
+      "sample_values": [
+        "Brandon",
+        "Emma",
+        "Joshua",
+        "Ronald",
+        "David"
+      ]
+    },
+    "LAST_NAME": {
+      "column_name": "LAST_NAME",
+      "data_type": "string",
+      "semantic_type": "name",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 64,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Lewis",
+          "count": 178
+        },
+        {
+          "value": "Edwards",
+          "count": 178
+        },
+        {
+          "value": "Parker",
+          "count": 177
+        },
+        {
+          "value": "Evans",
+          "count": 171
+        },
+        {
+          "value": "Smith",
+          "count": 171
+        },
+        {
+          "value": "Cruz",
+          "count": 169
+        },
+        {
+          "value": "Wilson",
+          "count": 169
+        },
+        {
+          "value": "Jackson",
+          "count": 169
+        },
+        {
+          "value": "Reyes",
+          "count": 169
+        },
+        {
+          "value": "Campbell",
+          "count": 169
+        }
+      ],
+      "description": "Person name: LAST_NAME",
+      "sample_values": [
+        "King",
+        "Perez",
+        "Robinson",
+        "Torres",
+        "Reyes"
+      ]
+    },
+    "DATE_OF_BIRTH": {
+      "column_name": "DATE_OF_BIRTH",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 8287,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "1984-04-18",
+          "count": 5
+        },
+        {
+          "value": "1996-01-12",
+          "count": 5
+        },
+        {
+          "value": "1959-04-22",
+          "count": 5
+        },
+        {
+          "value": "1976-10-06",
+          "count": 4
+        },
+        {
+          "value": "1977-09-30",
+          "count": 4
+        },
+        {
+          "value": "1989-03-30",
+          "count": 4
+        },
+        {
+          "value": "1983-06-04",
+          "count": 4
+        },
+        {
+          "value": "1983-10-08",
+          "count": 4
+        },
+        {
+          "value": "1978-10-10",
+          "count": 4
+        },
+        {
+          "value": "1968-07-06",
+          "count": 4
+        }
+      ],
+      "description": "Date field: DATE_OF_BIRTH",
+      "sample_values": [
+        "2014-07-11",
+        "1941-03-08",
+        "1975-12-20",
+        "1955-01-04",
+        "1969-12-07"
+      ]
+    },
+    "GENDER": {
+      "column_name": "GENDER",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 2,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "F",
+          "count": 5023
+        },
+        {
+          "value": "M",
+          "count": 4977
+        }
+      ],
+      "description": "Field: GENDER",
+      "sample_values": [
+        "F",
+        "F"
+      ]
+    },
+    "RACE": {
+      "column_name": "RACE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 214,
+      "null_percentage": 2.14,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Unknown",
+          "count": 1280
+        },
+        {
+          "value": "Asian",
+          "count": 1262
+        },
+        {
+          "value": "White",
+          "count": 1260
+        },
+        {
+          "value": "Hispanic",
+          "count": 1225
+        },
+        {
+          "value": "Other",
+          "count": 1201
+        },
+        {
+          "value": "Native Hawaiian",
+          "count": 1198
+        },
+        {
+          "value": "Black",
+          "count": 1187
+        },
+        {
+          "value": "American Indian",
+          "count": 1173
+        }
+      ],
+      "description": "Field: RACE",
+      "sample_values": [
+        "American Indian",
+        "Other",
+        "Asian",
+        "Black",
+        "American Indian"
+      ]
+    },
+    "LANGUAGE": {
+      "column_name": "LANGUAGE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "English",
+          "count": 5979
+        },
+        {
+          "value": "Spanish",
+          "count": 1541
+        },
+        {
+          "value": "Chinese",
+          "count": 779
+        },
+        {
+          "value": "Vietnamese",
+          "count": 516
+        },
+        {
+          "value": "Other",
+          "count": 395
+        },
+        {
+          "value": "Tagalog",
+          "count": 326
+        },
+        {
+          "value": "Korean",
+          "count": 296
+        },
+        {
+          "value": "Russian",
+          "count": 168
+        }
+      ],
+      "description": "Field: LANGUAGE",
+      "sample_values": [
+        "English",
+        "English",
+        "Chinese",
+        "Spanish",
+        "Chinese"
+      ]
+    },
+    "ADDRESS": {
+      "column_name": "ADDRESS",
+      "data_type": "string",
+      "semantic_type": "address",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 9565,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2309 Park Dr",
+          "count": 3
+        },
+        {
+          "value": "7274 Park Dr",
+          "count": 3
+        },
+        {
+          "value": "3343 Park Dr",
+          "count": 3
+        },
+        {
+          "value": "6910 Oak Ave",
+          "count": 3
+        },
+        {
+          "value": "1357 Washington Ave",
+          "count": 3
+        },
+        {
+          "value": "2420 Pine Rd",
+          "count": 3
+        },
+        {
+          "value": "8552 Oak Ave",
+          "count": 3
+        },
+        {
+          "value": "1222 Main St",
+          "count": 3
+        },
+        {
+          "value": "1275 Valley Way",
+          "count": 3
+        },
+        {
+          "value": "9152 Main St",
+          "count": 3
+        }
+      ],
+      "description": "Geographic address: ADDRESS",
+      "sample_values": [
+        "8255 Lake Rd",
+        "6434 Pine Rd",
+        "7587 Elm Dr",
+        "2610 Elm Dr",
+        "4377 Maple Ln"
+      ]
+    },
+    "CITY": {
+      "column_name": "CITY",
+      "data_type": "string",
+      "semantic_type": "address",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Portland",
+          "count": 1345
+        },
+        {
+          "value": "Honolulu",
+          "count": 1294
+        },
+        {
+          "value": "Baltimore",
+          "count": 1255
+        },
+        {
+          "value": "Oakland",
+          "count": 1242
+        },
+        {
+          "value": "Tysons",
+          "count": 1223
+        },
+        {
+          "value": "Denver",
+          "count": 1221
+        },
+        {
+          "value": "LA",
+          "count": 1220
+        },
+        {
+          "value": "Atlanta",
+          "count": 1200
+        }
+      ],
+      "description": "Geographic address: CITY",
+      "sample_values": [
+        "Denver",
+        "LA",
+        "Honolulu",
+        "LA",
+        "Denver"
+      ]
+    },
+    "STATE": {
+      "column_name": "STATE",
+      "data_type": "string",
+      "semantic_type": "address",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 9,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "WA",
+          "count": 1167
+        },
+        {
+          "value": "VA",
+          "count": 1161
+        },
+        {
+          "value": "DC",
+          "count": 1147
+        },
+        {
+          "value": "CO",
+          "count": 1105
+        },
+        {
+          "value": "HI",
+          "count": 1103
+        },
+        {
+          "value": "GA",
+          "count": 1091
+        },
+        {
+          "value": "CA",
+          "count": 1088
+        },
+        {
+          "value": "OR",
+          "count": 1087
+        },
+        {
+          "value": "MD",
+          "count": 1051
+        }
+      ],
+      "description": "Geographic address: STATE",
+      "sample_values": [
+        "VA",
+        "CO",
+        "CA",
+        "CO",
+        "CO"
+      ]
+    },
+    "ZIP_CODE": {
+      "column_name": "ZIP_CODE",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 9406,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 10000.0,
+      "max_value": 99994.0,
+      "mean": 55358.9049,
+      "top_values": [
+        {
+          "value": "52034",
+          "count": 3
+        },
+        {
+          "value": "80668",
+          "count": 3
+        },
+        {
+          "value": "84725",
+          "count": 3
+        },
+        {
+          "value": "15269",
+          "count": 3
+        },
+        {
+          "value": "64322",
+          "count": 3
+        },
+        {
+          "value": "87843",
+          "count": 3
+        },
+        {
+          "value": "73472",
+          "count": 3
+        },
+        {
+          "value": "50395",
+          "count": 3
+        },
+        {
+          "value": "61745",
+          "count": 3
+        },
+        {
+          "value": "42946",
+          "count": 3
+        }
+      ],
+      "description": "Coded value: ZIP_CODE",
+      "sample_values": [
+        "56773",
+        "93506",
+        "61036",
+        "79998",
+        "41888"
+      ]
+    },
+    "PHONE": {
+      "column_name": "PHONE",
+      "data_type": "string",
+      "semantic_type": "text",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 9706,
+      "null_count": 294,
+      "null_percentage": 2.94,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "(470) 717-9004",
+          "count": 1
+        },
+        {
+          "value": "(240) 566-4441",
+          "count": 1
+        },
+        {
+          "value": "(433) 428-1387",
+          "count": 1
+        },
+        {
+          "value": "(318) 594-4114",
+          "count": 1
+        },
+        {
+          "value": "(378) 830-5930",
+          "count": 1
+        },
+        {
+          "value": "(686) 825-2193",
+          "count": 1
+        },
+        {
+          "value": "(772) 809-6198",
+          "count": 1
+        },
+        {
+          "value": "(592) 910-3503",
+          "count": 1
+        },
+        {
+          "value": "(479) 646-8956",
+          "count": 1
+        },
+        {
+          "value": "(631) 458-2341",
+          "count": 1
+        }
+      ],
+      "description": "Field: PHONE",
+      "sample_values": [
+        "(851) 549-2453",
+        "(280) 461-9885",
+        "(686) 825-2193",
+        "(785) 656-4732",
+        "(994) 267-9035"
+      ]
+    },
+    "EMAIL": {
+      "column_name": "EMAIL",
+      "data_type": "string",
+      "semantic_type": "email",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 9435,
+      "null_count": 493,
+      "null_percentage": 4.93,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "margaret.robinson17@email.com",
+          "count": 2
+        },
+        {
+          "value": "steven.williams83@email.com",
+          "count": 2
+        },
+        {
+          "value": "ronald.thomas96@email.com",
+          "count": 2
+        },
+        {
+          "value": "brandon.young77@email.com",
+          "count": 2
+        },
+        {
+          "value": "samuel.adams7@email.com",
+          "count": 2
+        },
+        {
+          "value": "matthew.stewart95@email.com",
+          "count": 2
+        },
+        {
+          "value": "raymond.thomas12@email.com",
+          "count": 2
+        },
+        {
+          "value": "emma.white30@email.com",
+          "count": 2
+        },
+        {
+          "value": "jason.edwards46@email.com",
+          "count": 2
+        },
+        {
+          "value": "paul.mitchell43@email.com",
+          "count": 2
+        }
+      ],
+      "description": "Email address: EMAIL",
+      "sample_values": [
+        "edward.williams88@email.com",
+        "george.garcia92@email.com",
+        "kathleen.young22@email.com",
+        "barbara.moore7@email.com",
+        "anthony.miller12@email.com"
+      ]
+    },
+    "KP_REGION": {
+      "column_name": "KP_REGION",
+      "data_type": "string",
+      "semantic_type": "kp_region",
+      "healthcare_type": "kp_region",
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "NW",
+          "count": 1335
+        },
+        {
+          "value": "SCAL",
+          "count": 1274
+        },
+        {
+          "value": "MID",
+          "count": 1271
+        },
+        {
+          "value": "CO",
+          "count": 1250
+        },
+        {
+          "value": "HI",
+          "count": 1222
+        },
+        {
+          "value": "NCAL",
+          "count": 1218
+        },
+        {
+          "value": "GA",
+          "count": 1217
+        },
+        {
+          "value": "MAS",
+          "count": 1213
+        }
+      ],
+      "description": "Geographic region or service area for the health plan",
+      "sample_values": [
+        "HI",
+        "SCAL",
+        "NCAL",
+        "MID",
+        "SCAL"
+      ]
+    },
+    "FACILITY": {
+      "column_name": "FACILITY",
+      "data_type": "string",
+      "semantic_type": "facility",
+      "healthcare_type": "facility",
+      "is_phi": false,
+      "cardinality": 26,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Mid-Atlantic Medical Center",
+          "count": 658
+        },
+        {
+          "value": "Moanalua Medical Center",
+          "count": 632
+        },
+        {
+          "value": "Capitol Hill Medical Center",
+          "count": 625
+        },
+        {
+          "value": "Burke Medical Center",
+          "count": 613
+        },
+        {
+          "value": "Town Center Medical Office",
+          "count": 612
+        },
+        {
+          "value": "Crescent Center",
+          "count": 605
+        },
+        {
+          "value": "Maui Lani Medical Office",
+          "count": 590
+        },
+        {
+          "value": "Tysons Corner Medical Center",
+          "count": 588
+        },
+        {
+          "value": "Westside Medical Center",
+          "count": 495
+        },
+        {
+          "value": "Interstate Medical Office",
+          "count": 450
+        }
+      ],
+      "description": "Healthcare facility where service was rendered",
+      "sample_values": [
+        "Town Center Medical Office",
+        "Town Center Medical Office",
+        "Riverside Medical Center",
+        "Riverside Medical Center",
+        "Tysons Corner Medical Center"
+      ]
+    },
+    "PLAN_TYPE": {
+      "column_name": "PLAN_TYPE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 6,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "EPO",
+          "count": 1732
+        },
+        {
+          "value": "HMO",
+          "count": 1700
+        },
+        {
+          "value": "PPO",
+          "count": 1692
+        },
+        {
+          "value": "HDHP",
+          "count": 1663
+        },
+        {
+          "value": "Medicaid",
+          "count": 1628
+        },
+        {
+          "value": "Medicare Advantage",
+          "count": 1585
+        }
+      ],
+      "description": "Field: PLAN_TYPE",
+      "sample_values": [
+        "Medicare Advantage",
+        "Medicare Advantage",
+        "Medicaid",
+        "HMO",
+        "Medicaid"
+      ]
+    },
+    "ENROLLMENT_DATE": {
+      "column_name": "ENROLLMENT_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 2507,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2021-04-08",
+          "count": 14
+        },
+        {
+          "value": "2020-07-12",
+          "count": 13
+        },
+        {
+          "value": "2022-04-16",
+          "count": 12
+        },
+        {
+          "value": "2021-07-20",
+          "count": 11
+        },
+        {
+          "value": "2019-06-29",
+          "count": 11
+        },
+        {
+          "value": "2023-08-13",
+          "count": 10
+        },
+        {
+          "value": "2024-05-22",
+          "count": 10
+        },
+        {
+          "value": "2024-10-20",
+          "count": 10
+        },
+        {
+          "value": "2024-01-29",
+          "count": 10
+        },
+        {
+          "value": "2022-08-15",
+          "count": 10
+        }
+      ],
+      "description": "Date field: ENROLLMENT_DATE",
+      "sample_values": [
+        "2018-05-16",
+        "2018-11-10",
+        "2024-02-03",
+        "2019-08-15",
+        "2023-04-06"
+      ]
+    },
+    "DISENROLLMENT_DATE": {
+      "column_name": "DISENROLLMENT_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 482,
+      "null_count": 9163,
+      "null_percentage": 91.63,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2025-12-25",
+          "count": 5
+        },
+        {
+          "value": "2025-12-19",
+          "count": 5
+        },
+        {
+          "value": "2024-10-16",
+          "count": 5
+        },
+        {
+          "value": "2024-05-03",
+          "count": 5
+        },
+        {
+          "value": "2024-08-05",
+          "count": 5
+        },
+        {
+          "value": "2024-09-03",
+          "count": 5
+        },
+        {
+          "value": "2024-06-23",
+          "count": 5
+        },
+        {
+          "value": "2024-08-31",
+          "count": 5
+        },
+        {
+          "value": "2024-07-10",
+          "count": 5
+        },
+        {
+          "value": "2024-07-05",
+          "count": 5
+        }
+      ],
+      "description": "Date field: DISENROLLMENT_DATE",
+      "sample_values": [
+        "2024-11-24",
+        "2024-11-21",
+        "2025-01-16",
+        "2024-03-20",
+        "2024-05-25"
+      ]
+    },
+    "PCP_NPI": {
+      "column_name": "PCP_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 500,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1000614068.0,
+      "max_value": 1997612044.0,
+      "mean": 1485466891.0178,
+      "top_values": [
+        {
+          "value": "1432311310",
+          "count": 36
+        },
+        {
+          "value": "1618702544",
+          "count": 35
+        },
+        {
+          "value": "1721218382",
+          "count": 32
+        },
+        {
+          "value": "1119540831",
+          "count": 32
+        },
+        {
+          "value": "1406919288",
+          "count": 31
+        },
+        {
+          "value": "1269953851",
+          "count": 31
+        },
+        {
+          "value": "1282116655",
+          "count": 31
+        },
+        {
+          "value": "1940992571",
+          "count": 30
+        },
+        {
+          "value": "1582177668",
+          "count": 30
+        },
+        {
+          "value": "1943520428",
+          "count": 30
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1385451171",
+        "1406919288",
+        "1690256940",
+        "1374745382",
+        "1149926919"
+      ]
+    },
+    "RISK_SCORE": {
+      "column_name": "RISK_SCORE",
+      "data_type": "float",
+      "semantic_type": "currency",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 431,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 0.2,
+      "max_value": 4.5,
+      "mean": 2.3324950000000033,
+      "top_values": [
+        {
+          "value": "1.93",
+          "count": 39
+        },
+        {
+          "value": "0.31",
+          "count": 37
+        },
+        {
+          "value": "3.33",
+          "count": 36
+        },
+        {
+          "value": "1.74",
+          "count": 35
+        },
+        {
+          "value": "2.86",
+          "count": 35
+        },
+        {
+          "value": "0.26",
+          "count": 35
+        },
+        {
+          "value": "3.8",
+          "count": 34
+        },
+        {
+          "value": "2.29",
+          "count": 34
+        },
+        {
+          "value": "2.0",
+          "count": 34
+        },
+        {
+          "value": "1.1",
+          "count": 33
+        }
+      ],
+      "description": "Monetary amount: RISK_SCORE",
+      "sample_values": [
+        "1.55",
+        "1.75",
+        "2.38",
+        "4.33",
+        "2.97"
+      ]
+    },
+    "CHRONIC_CONDITIONS": {
+      "column_name": "CHRONIC_CONDITIONS",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 7,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 0.0,
+      "max_value": 6.0,
+      "mean": 3.0291,
+      "top_values": [
+        {
+          "value": "6",
+          "count": 1474
+        },
+        {
+          "value": "5",
+          "count": 1464
+        },
+        {
+          "value": "3",
+          "count": 1443
+        },
+        {
+          "value": "2",
+          "count": 1433
+        },
+        {
+          "value": "1",
+          "count": 1424
+        },
+        {
+          "value": "0",
+          "count": 1385
+        },
+        {
+          "value": "4",
+          "count": 1377
+        }
+      ],
+      "description": "Coded value: CHRONIC_CONDITIONS",
+      "sample_values": [
+        "4",
+        "4",
+        "0",
+        "0",
+        "1"
+      ]
+    }
+  },
+  "dq_score": 85,
+  "profiled_at": "2026-04-02T01:48:52.182614",
+  "has_phi": true
+}

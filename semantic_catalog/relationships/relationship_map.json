@@ -1,0 +1,181 @@
+{
+  "detected_at": "2026-04-02T01:48:52.258640",
+  "total_relationships": 25,
+  "relationships": [
+    {
+      "source_table": "claims",
+      "target_table": "diagnoses",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "encounters",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "members",
+      "join_column": "member_id",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "prescriptions",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "referrals",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "diagnoses",
+      "target_table": "encounters",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "diagnoses",
+      "target_table": "members",
+      "join_column": "member_id",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "diagnoses",
+      "target_table": "prescriptions",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "diagnoses",
+      "target_table": "referrals",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "encounters",
+      "target_table": "members",
+      "join_column": "member_id",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "encounters",
+      "target_table": "prescriptions",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "encounters",
+      "target_table": "referrals",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "members",
+      "target_table": "prescriptions",
+      "join_column": "member_id",
+      "relationship_type": "one_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "members",
+      "target_table": "referrals",
+      "join_column": "member_id",
+      "relationship_type": "one_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "prescriptions",
+      "target_table": "referrals",
+      "join_column": "member_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "diagnoses",
+      "join_column": "encounter_id",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "encounters",
+      "join_column": "encounter_id",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "diagnoses",
+      "target_table": "encounters",
+      "join_column": "encounter_id",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "encounters",
+      "join_column": "rendering_npi",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "encounters",
+      "target_table": "members",
+      "join_column": "mrn",
+      "relationship_type": "many_to_many",
+      "is_fk": true
+    },
+    {
+      "source_table": "claims",
+      "target_table": "providers",
+      "join_column": "rendering_npi=npi",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "encounters",
+      "target_table": "providers",
+      "join_column": "rendering_npi=npi",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "prescriptions",
+      "target_table": "providers",
+      "join_column": "prescribing_npi=npi",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "referrals",
+      "target_table": "providers",
+      "join_column": "referring_npi=npi",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    },
+    {
+      "source_table": "diagnoses",
+      "target_table": "providers",
+      "join_column": "diagnosing_npi=npi",
+      "relationship_type": "many_to_one",
+      "is_fk": true
+    }
+  ]
+}

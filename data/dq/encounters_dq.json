@@ -1,0 +1,203 @@
+{
+  "table_name": "encounters",
+  "file_name": "encounters.csv",
+  "total_rows": 15000,
+  "total_columns": 18,
+  "checked_at": "2026-03-31T15:16:07.234799",
+  "column_checks": {
+    "ENCOUNTER_ID": {
+      "field_type": "encounter_id",
+      "completeness": 100.0,
+      "uniqueness": 99.99,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": [
+        "Uniqueness issues: 99.99% unique"
+      ]
+    },
+    "MEMBER_ID": {
+      "field_type": "member_id",
+      "completeness": 100.0,
+      "uniqueness": 51.68,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 85.5,
+      "issues": [
+        "Uniqueness issues: 51.68% unique"
+      ]
+    },
+    "MRN": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "SERVICE_DATE": {
+      "field_type": "service_date",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ADMIT_DATE": {
+      "field_type": "admit_date",
+      "completeness": 15.42,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 66.17,
+      "issues": [
+        "Low completeness: 15.42% non-null"
+      ]
+    },
+    "DISCHARGE_DATE": {
+      "field_type": "discharge_date",
+      "completeness": 15.42,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100.0,
+      "column_score": 66.17,
+      "issues": [
+        "Low completeness: 15.42% non-null"
+      ]
+    },
+    "RENDERING_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 10.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 73.0,
+      "issues": []
+    },
+    "SUPERVISING_NPI": {
+      "field_type": "npi",
+      "completeness": 29.89,
+      "uniqueness": 31.92,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 51.53,
+      "issues": [
+        "Low completeness: 29.89% non-null"
+      ]
+    },
+    "VISIT_TYPE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 0.04,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 70.01,
+      "issues": []
+    },
+    "DEPARTMENT": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "FACILITY": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "KP_REGION": {
+      "field_type": "kp_region",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PRIMARY_DIAGNOSIS": {
+      "field_type": "icd10",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DIAGNOSIS_DESCRIPTION": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "CHIEF_COMPLAINT": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DISPOSITION": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "LENGTH_OF_STAY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ENCOUNTER_STATUS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 0.02,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 70.01,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "ENCOUNTER_ID": 100.0,
+    "MEMBER_ID": 85.5,
+    "MRN": 100.0,
+    "SERVICE_DATE": 100.0,
+    "ADMIT_DATE": 66.17,
+    "DISCHARGE_DATE": 66.17,
+    "RENDERING_NPI": 73.0,
+    "SUPERVISING_NPI": 51.53,
+    "VISIT_TYPE": 70.01,
+    "DEPARTMENT": 100.0,
+    "FACILITY": 100.0,
+    "KP_REGION": 100.0,
+    "PRIMARY_DIAGNOSIS": 100.0,
+    "DIAGNOSIS_DESCRIPTION": 100.0,
+    "CHIEF_COMPLAINT": 100.0,
+    "DISPOSITION": 100.0,
+    "LENGTH_OF_STAY": 100.0,
+    "ENCOUNTER_STATUS": 70.01
+  },
+  "dq_score": 87.91,
+  "dq_grade": "C"
+}

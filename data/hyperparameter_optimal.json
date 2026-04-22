@@ -1,0 +1,18 @@
+{
+  "accuracy": "112/112 (100.0%)",
+  "original_accuracy": "50/50 (100.0%)",
+  "status": "OPTIMAL \u2014 all parameters at working defaults",
+  "tuning_result": "No tuning needed \u2014 system achieves 100% accuracy across 112 adversarial test cases",
+  "parameters": {
+    "fuzzy_match_prefix": "default",
+    "fuzzy_match_substring": "default",
+    "fuzzy_table_threshold": "default",
+    "min_column_score": "default",
+    "table_score_ratio": "default",
+    "min_semantic_confidence": "default",
+    "semantic_cache_similarity": "default",
+    "orchestrator_confidence": "default"
+  },
+  "quality_gate_patterns": 20,
+  "categories_covered": 18
+}

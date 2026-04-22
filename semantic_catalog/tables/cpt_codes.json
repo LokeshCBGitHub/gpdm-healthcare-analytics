@@ -1,0 +1,22 @@
+{
+  "table_name": "cpt_codes",
+  "description": "CPT (Current Procedural Terminology) code reference table with descriptions and categories",
+  "columns": {
+    "CPT_CODE": {
+      "data_type": "string",
+      "description": "CPT procedure code"
+    },
+    "DESCRIPTION": {
+      "data_type": "string",
+      "description": "Full description of the CPT procedure"
+    },
+    "CATEGORY": {
+      "data_type": "string",
+      "description": "Category: E&M, Preventive, Surgery, Lab, Radiology, Telehealth, Chronic Care"
+    },
+    "RVU": {
+      "data_type": "float",
+      "description": "Relative Value Units for the procedure"
+    }
+  }
+}

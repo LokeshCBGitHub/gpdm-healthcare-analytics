@@ -1,0 +1,235 @@
+{
+  "table_name": "members",
+  "file_name": "members.csv",
+  "total_rows": 10000,
+  "total_columns": 22,
+  "checked_at": "2026-03-31T15:16:07.424566",
+  "column_checks": {
+    "MRN": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "MEMBER_ID": {
+      "field_type": "member_id",
+      "completeness": 100.0,
+      "uniqueness": 100.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "FIRST_NAME": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "LAST_NAME": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DATE_OF_BIRTH": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "GENDER": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "RACE": {
+      "field_type": null,
+      "completeness": 97.86,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 99.14,
+      "issues": []
+    },
+    "LANGUAGE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ADDRESS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "CITY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "STATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ZIP_CODE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 94.06,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 98.22,
+      "issues": []
+    },
+    "PHONE": {
+      "field_type": null,
+      "completeness": 97.06,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 98.82,
+      "issues": []
+    },
+    "EMAIL": {
+      "field_type": null,
+      "completeness": 95.07,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 98.03,
+      "issues": []
+    },
+    "KP_REGION": {
+      "field_type": "kp_region",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "FACILITY": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PLAN_TYPE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ENROLLMENT_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DISENROLLMENT_DATE": {
+      "field_type": null,
+      "completeness": 8.37,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 63.35,
+      "issues": [
+        "Low completeness: 8.37% non-null"
+      ]
+    },
+    "PCP_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 5.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 71.5,
+      "issues": []
+    },
+    "RISK_SCORE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "CHRONIC_CONDITIONS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "MRN": 100.0,
+    "MEMBER_ID": 100.0,
+    "FIRST_NAME": 100.0,
+    "LAST_NAME": 100.0,
+    "DATE_OF_BIRTH": 100.0,
+    "GENDER": 100.0,
+    "RACE": 99.14,
+    "LANGUAGE": 100.0,
+    "ADDRESS": 100.0,
+    "CITY": 100.0,
+    "STATE": 100.0,
+    "ZIP_CODE": 98.22,
+    "PHONE": 98.82,
+    "EMAIL": 98.03,
+    "KP_REGION": 100.0,
+    "FACILITY": 100.0,
+    "PLAN_TYPE": 100.0,
+    "ENROLLMENT_DATE": 100.0,
+    "DISENROLLMENT_DATE": 63.35,
+    "PCP_NPI": 71.5,
+    "RISK_SCORE": 100.0,
+    "CHRONIC_CONDITIONS": 100.0
+  },
+  "dq_score": 96.78,
+  "dq_grade": "A"
+}

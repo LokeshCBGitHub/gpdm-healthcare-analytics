@@ -1,0 +1,17 @@
+{
+  "google": {
+    "client_id": "",
+    "client_secret": "",
+    "scopes": "openid email profile"
+  },
+  "microsoft": {
+    "client_id": "",
+    "client_secret": "",
+    "tenant_id": "common",
+    "scopes": "openid email profile User.Read"
+  },
+  "redirect_uri": "http://localhost:8787/auth/callback",
+  "org_name": "KP Healthcare",
+  "org_domain": "kp.org",
+  "allowed_domains": []
+}

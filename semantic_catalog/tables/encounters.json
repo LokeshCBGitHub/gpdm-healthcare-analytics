@@ -1,0 +1,1076 @@
+{
+  "table_name": "encounters",
+  "file_name": "encounters.csv",
+  "total_rows": 15000,
+  "total_columns": 18,
+  "table_purpose": "Patient encounters and visits",
+  "columns": {
+    "ENCOUNTER_ID": {
+      "column_name": "ENCOUNTER_ID",
+      "data_type": "string",
+      "semantic_type": "encounter_id",
+      "healthcare_type": "encounter_id",
+      "is_phi": false,
+      "cardinality": 14999,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "ENC36157198",
+          "count": 2
+        },
+        {
+          "value": "ENC71471932",
+          "count": 1
+        },
+        {
+          "value": "ENC58903752",
+          "count": 1
+        },
+        {
+          "value": "ENC60915933",
+          "count": 1
+        },
+        {
+          "value": "ENC88992800",
+          "count": 1
+        },
+        {
+          "value": "ENC29111987",
+          "count": 1
+        },
+        {
+          "value": "ENC62321663",
+          "count": 1
+        },
+        {
+          "value": "ENC12139506",
+          "count": 1
+        },
+        {
+          "value": "ENC84983631",
+          "count": 1
+        },
+        {
+          "value": "ENC18377048",
+          "count": 1
+        }
+      ],
+      "description": "Unique identifier for a patient-provider interaction or visit",
+      "sample_values": [
+        "ENC46626369",
+        "ENC37307709",
+        "ENC44537135",
+        "ENC61280783",
+        "ENC60634557"
+      ]
+    },
+    "MEMBER_ID": {
+      "column_name": "MEMBER_ID",
+      "data_type": "string",
+      "semantic_type": "member_id",
+      "healthcare_type": "member_id",
+      "is_phi": false,
+      "cardinality": 7752,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MBR321928178",
+          "count": 8
+        },
+        {
+          "value": "MBR712584240",
+          "count": 7
+        },
+        {
+          "value": "MBR738128949",
+          "count": 7
+        },
+        {
+          "value": "MBR501240640",
+          "count": 7
+        },
+        {
+          "value": "MBR621329869",
+          "count": 7
+        },
+        {
+          "value": "MBR718368392",
+          "count": 7
+        },
+        {
+          "value": "MBR988688565",
+          "count": 7
+        },
+        {
+          "value": "MBR903626844",
+          "count": 7
+        },
+        {
+          "value": "MBR761234581",
+          "count": 7
+        },
+        {
+          "value": "MBR978597635",
+          "count": 7
+        }
+      ],
+      "description": "Unique health plan member identifier used for linking enrollment, claims, and encounters",
+      "sample_values": [
+        "MBR685275153",
+        "MBR744199008",
+        "MBR272736330",
+        "MBR544903593",
+        "MBR367883354"
+      ]
+    },
+    "MRN": {
+      "column_name": "MRN",
+      "data_type": "string",
+      "semantic_type": "text",
+      "healthcare_type": null,
+      "is_phi": true,
+      "cardinality": 14992,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MRN8393139",
+          "count": 2
+        },
+        {
+          "value": "MRN4351913",
+          "count": 2
+        },
+        {
+          "value": "MRN9663804",
+          "count": 2
+        },
+        {
+          "value": "MRN2209485",
+          "count": 2
+        },
+        {
+          "value": "MRN8362990",
+          "count": 2
+        },
+        {
+          "value": "MRN8815030",
+          "count": 2
+        },
+        {
+          "value": "MRN5217780",
+          "count": 2
+        },
+        {
+          "value": "MRN1544462",
+          "count": 2
+        },
+        {
+          "value": "MRN6157813",
+          "count": 1
+        },
+        {
+          "value": "MRN4957789",
+          "count": 1
+        }
+      ],
+      "description": "Field: MRN",
+      "sample_values": [
+        "MRN4990817",
+        "MRN9747848",
+        "MRN4719834",
+        "MRN1524946",
+        "MRN9030383"
+      ]
+    },
+    "SERVICE_DATE": {
+      "column_name": "SERVICE_DATE",
+      "data_type": "date",
+      "semantic_type": "service_date",
+      "healthcare_type": "service_date",
+      "is_phi": false,
+      "cardinality": 1096,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2025-03-11",
+          "count": 29
+        },
+        {
+          "value": "2025-02-05",
+          "count": 27
+        },
+        {
+          "value": "2025-08-26",
+          "count": 27
+        },
+        {
+          "value": "2025-03-16",
+          "count": 26
+        },
+        {
+          "value": "2024-01-10",
+          "count": 25
+        },
+        {
+          "value": "2024-06-01",
+          "count": 25
+        },
+        {
+          "value": "2024-01-17",
+          "count": 24
+        },
+        {
+          "value": "2025-12-25",
+          "count": 24
+        },
+        {
+          "value": "2023-01-16",
+          "count": 24
+        },
+        {
+          "value": "2023-06-28",
+          "count": 24
+        }
+      ],
+      "description": "Date on which healthcare service was delivered",
+      "sample_values": [
+        "2025-09-12",
+        "2025-04-20",
+        "2025-04-13",
+        "2023-10-21",
+        "2023-11-29"
+      ]
+    },
+    "ADMIT_DATE": {
+      "column_name": "ADMIT_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 954,
+      "null_count": 12687,
+      "null_percentage": 84.58,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2024-04-14",
+          "count": 9
+        },
+        {
+          "value": "2024-09-06",
+          "count": 7
+        },
+        {
+          "value": "2024-01-01",
+          "count": 7
+        },
+        {
+          "value": "2025-02-05",
+          "count": 7
+        },
+        {
+          "value": "2024-01-23",
+          "count": 7
+        },
+        {
+          "value": "2024-02-04",
+          "count": 6
+        },
+        {
+          "value": "2024-11-28",
+          "count": 6
+        },
+        {
+          "value": "2025-11-13",
+          "count": 6
+        },
+        {
+          "value": "2025-07-17",
+          "count": 6
+        },
+        {
+          "value": "2023-08-06",
+          "count": 6
+        }
+      ],
+      "description": "Date field: ADMIT_DATE",
+      "sample_values": [
+        "2025-04-06",
+        "2025-08-09",
+        "2024-02-03",
+        "2025-01-11",
+        "2024-11-04"
+      ]
+    },
+    "DISCHARGE_DATE": {
+      "column_name": "DISCHARGE_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 962,
+      "null_count": 12687,
+      "null_percentage": 84.58,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2023-04-09",
+          "count": 7
+        },
+        {
+          "value": "2025-04-07",
+          "count": 7
+        },
+        {
+          "value": "2025-04-11",
+          "count": 7
+        },
+        {
+          "value": "2024-04-16",
+          "count": 7
+        },
+        {
+          "value": "2024-08-25",
+          "count": 7
+        },
+        {
+          "value": "2024-12-07",
+          "count": 6
+        },
+        {
+          "value": "2024-10-18",
+          "count": 6
+        },
+        {
+          "value": "2024-11-15",
+          "count": 6
+        },
+        {
+          "value": "2024-08-22",
+          "count": 6
+        },
+        {
+          "value": "2024-12-12",
+          "count": 6
+        }
+      ],
+      "description": "Date field: DISCHARGE_DATE",
+      "sample_values": [
+        "2023-10-05",
+        "2024-03-31",
+        "2025-12-28",
+        "2025-10-17",
+        "2024-08-02"
+      ]
+    },
+    "RENDERING_NPI": {
+      "column_name": "RENDERING_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 1500,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1000231520.0,
+      "max_value": 1998930676.0,
+      "mean": 1502959408.6222,
+      "top_values": [
+        {
+          "value": "1154267390",
+          "count": 23
+        },
+        {
+          "value": "1788582567",
+          "count": 23
+        },
+        {
+          "value": "1864200887",
+          "count": 23
+        },
+        {
+          "value": "1217581770",
+          "count": 21
+        },
+        {
+          "value": "1131746240",
+          "count": 20
+        },
+        {
+          "value": "1449580164",
+          "count": 20
+        },
+        {
+          "value": "1313789867",
+          "count": 20
+        },
+        {
+          "value": "1916947857",
+          "count": 20
+        },
+        {
+          "value": "1733697095",
+          "count": 20
+        },
+        {
+          "value": "1428978485",
+          "count": 19
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1794126041",
+        "1187914580",
+        "1698005286",
+        "1161084687",
+        "1199001271"
+      ]
+    },
+    "SUPERVISING_NPI": {
+      "column_name": "SUPERVISING_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 1431,
+      "null_count": 10517,
+      "null_percentage": 70.11,
+      "min_value": 1000231520.0,
+      "max_value": 1998930676.0,
+      "mean": 1504922171.4461298,
+      "top_values": [
+        {
+          "value": "1653436830",
+          "count": 9
+        },
+        {
+          "value": "1390562704",
+          "count": 9
+        },
+        {
+          "value": "1274503182",
+          "count": 8
+        },
+        {
+          "value": "1272991371",
+          "count": 8
+        },
+        {
+          "value": "1366934257",
+          "count": 8
+        },
+        {
+          "value": "1404406521",
+          "count": 8
+        },
+        {
+          "value": "1195621572",
+          "count": 8
+        },
+        {
+          "value": "1028111730",
+          "count": 8
+        },
+        {
+          "value": "1797386851",
+          "count": 7
+        },
+        {
+          "value": "1008197016",
+          "count": 7
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1683476390",
+        "1986421617",
+        "1822118222",
+        "1273357606",
+        "1792352633"
+      ]
+    },
+    "VISIT_TYPE": {
+      "column_name": "VISIT_TYPE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 6,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "OUTPATIENT",
+          "count": 5988
+        },
+        {
+          "value": "TELEHEALTH",
+          "count": 2925
+        },
+        {
+          "value": "INPATIENT",
+          "count": 2313
+        },
+        {
+          "value": "URGENT_CARE",
+          "count": 1525
+        },
+        {
+          "value": "EMERGENCY",
+          "count": 1483
+        },
+        {
+          "value": "HOME_HEALTH",
+          "count": 766
+        }
+      ],
+      "description": "Field: VISIT_TYPE",
+      "sample_values": [
+        "OUTPATIENT",
+        "INPATIENT",
+        "INPATIENT",
+        "OUTPATIENT",
+        "URGENT_CARE"
+      ]
+    },
+    "DEPARTMENT": {
+      "column_name": "DEPARTMENT",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 20,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Surgery",
+          "count": 814
+        },
+        {
+          "value": "Endocrinology",
+          "count": 811
+        },
+        {
+          "value": "Ophthalmology",
+          "count": 806
+        },
+        {
+          "value": "OB/GYN",
+          "count": 797
+        },
+        {
+          "value": "Orthopedics",
+          "count": 772
+        },
+        {
+          "value": "Rheumatology",
+          "count": 772
+        },
+        {
+          "value": "Nephrology",
+          "count": 762
+        },
+        {
+          "value": "Oncology",
+          "count": 759
+        },
+        {
+          "value": "Dermatology",
+          "count": 755
+        },
+        {
+          "value": "Pediatrics",
+          "count": 752
+        }
+      ],
+      "description": "Field: DEPARTMENT",
+      "sample_values": [
+        "Cardiology",
+        "Urology",
+        "Neurology",
+        "Pediatrics",
+        "Orthopedics"
+      ]
+    },
+    "FACILITY": {
+      "column_name": "FACILITY",
+      "data_type": "string",
+      "semantic_type": "facility",
+      "healthcare_type": "facility",
+      "is_phi": false,
+      "cardinality": 26,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Capitol Hill Medical Center",
+          "count": 966
+        },
+        {
+          "value": "Mid-Atlantic Medical Center",
+          "count": 964
+        },
+        {
+          "value": "Town Center Medical Office",
+          "count": 953
+        },
+        {
+          "value": "Crescent Center",
+          "count": 939
+        },
+        {
+          "value": "Moanalua Medical Center",
+          "count": 939
+        },
+        {
+          "value": "Maui Lani Medical Office",
+          "count": 934
+        },
+        {
+          "value": "Tysons Corner Medical Center",
+          "count": 934
+        },
+        {
+          "value": "Burke Medical Center",
+          "count": 925
+        },
+        {
+          "value": "Westside Medical Center",
+          "count": 653
+        },
+        {
+          "value": "Interstate Medical Office",
+          "count": 631
+        }
+      ],
+      "description": "Healthcare facility where service was rendered",
+      "sample_values": [
+        "Irvine Medical Center",
+        "Mid-Atlantic Medical Center",
+        "Fontana Medical Center",
+        "Westside Medical Center",
+        "Moanalua Medical Center"
+      ]
+    },
+    "KP_REGION": {
+      "column_name": "KP_REGION",
+      "data_type": "string",
+      "semantic_type": "kp_region",
+      "healthcare_type": "kp_region",
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "NW",
+          "count": 1909
+        },
+        {
+          "value": "MAS",
+          "count": 1900
+        },
+        {
+          "value": "GA",
+          "count": 1892
+        },
+        {
+          "value": "SCAL",
+          "count": 1891
+        },
+        {
+          "value": "MID",
+          "count": 1889
+        },
+        {
+          "value": "HI",
+          "count": 1873
+        },
+        {
+          "value": "NCAL",
+          "count": 1846
+        },
+        {
+          "value": "CO",
+          "count": 1800
+        }
+      ],
+      "description": "Geographic region or service area for the health plan",
+      "sample_values": [
+        "MAS",
+        "CO",
+        "SCAL",
+        "MID",
+        "MID"
+      ]
+    },
+    "PRIMARY_DIAGNOSIS": {
+      "column_name": "PRIMARY_DIAGNOSIS",
+      "data_type": "string",
+      "semantic_type": "icd10",
+      "healthcare_type": "icd10",
+      "is_phi": false,
+      "cardinality": 25,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "J06.9",
+          "count": 645
+        },
+        {
+          "value": "E66.01",
+          "count": 642
+        },
+        {
+          "value": "N39.0",
+          "count": 631
+        },
+        {
+          "value": "N18.3",
+          "count": 628
+        },
+        {
+          "value": "E78.5",
+          "count": 628
+        },
+        {
+          "value": "L30.9",
+          "count": 624
+        },
+        {
+          "value": "R51",
+          "count": 621
+        },
+        {
+          "value": "I25.10",
+          "count": 620
+        },
+        {
+          "value": "J18.9",
+          "count": 611
+        },
+        {
+          "value": "E03.9",
+          "count": 610
+        }
+      ],
+      "description": "ICD-10 diagnosis code indicating disease, condition, or health problem",
+      "sample_values": [
+        "E11.9",
+        "K58.9",
+        "N39.0",
+        "I48.91",
+        "I48.91"
+      ]
+    },
+    "DIAGNOSIS_DESCRIPTION": {
+      "column_name": "DIAGNOSIS_DESCRIPTION",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 25,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Acute upper respiratory infection",
+          "count": 645
+        },
+        {
+          "value": "Morbid obesity due to excess calories",
+          "count": 642
+        },
+        {
+          "value": "Urinary tract infection",
+          "count": 631
+        },
+        {
+          "value": "Chronic kidney disease, stage 3",
+          "count": 628
+        },
+        {
+          "value": "Hyperlipidemia, unspecified",
+          "count": 628
+        },
+        {
+          "value": "Dermatitis, unspecified",
+          "count": 624
+        },
+        {
+          "value": "Headache",
+          "count": 621
+        },
+        {
+          "value": "Atherosclerotic heart disease",
+          "count": 620
+        },
+        {
+          "value": "Pneumonia, unspecified organism",
+          "count": 611
+        },
+        {
+          "value": "Hypothyroidism, unspecified",
+          "count": 610
+        }
+      ],
+      "description": "Field: DIAGNOSIS_DESCRIPTION",
+      "sample_values": [
+        "Migraine, unspecified",
+        "Generalized anxiety disorder",
+        "Unspecified abdominal pain",
+        "Hyperlipidemia, unspecified",
+        "Acute upper respiratory infection"
+      ]
+    },
+    "CHIEF_COMPLAINT": {
+      "column_name": "CHIEF_COMPLAINT",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 20,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Fever",
+          "count": 796
+        },
+        {
+          "value": "Lab review",
+          "count": 777
+        },
+        {
+          "value": "Joint pain",
+          "count": 777
+        },
+        {
+          "value": "Eye irritation",
+          "count": 776
+        },
+        {
+          "value": "Abdominal pain",
+          "count": 772
+        },
+        {
+          "value": "Skin rash",
+          "count": 771
+        },
+        {
+          "value": "Shortness of breath",
+          "count": 760
+        },
+        {
+          "value": "Nausea",
+          "count": 759
+        },
+        {
+          "value": "Follow-up visit",
+          "count": 759
+        },
+        {
+          "value": "Routine checkup",
+          "count": 753
+        }
+      ],
+      "description": "Field: CHIEF_COMPLAINT",
+      "sample_values": [
+        "Ear pain",
+        "Lab review",
+        "Chest pain",
+        "Nausea",
+        "Skin rash"
+      ]
+    },
+    "DISPOSITION": {
+      "column_name": "DISPOSITION",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 6,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Discharged",
+          "count": 8966
+        },
+        {
+          "value": "Observation",
+          "count": 2619
+        },
+        {
+          "value": "Admitted",
+          "count": 2246
+        },
+        {
+          "value": "Transferred",
+          "count": 724
+        },
+        {
+          "value": "AMA",
+          "count": 298
+        },
+        {
+          "value": "Expired",
+          "count": 147
+        }
+      ],
+      "description": "Field: DISPOSITION",
+      "sample_values": [
+        "Discharged",
+        "Discharged",
+        "Observation",
+        "Discharged",
+        "Observation"
+      ]
+    },
+    "LENGTH_OF_STAY": {
+      "column_name": "LENGTH_OF_STAY",
+      "data_type": "integer",
+      "semantic_type": "code",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 15,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 0.0,
+      "max_value": 14.0,
+      "mean": 1.1504,
+      "top_values": [
+        {
+          "value": "0",
+          "count": 12687
+        },
+        {
+          "value": "2",
+          "count": 186
+        },
+        {
+          "value": "14",
+          "count": 186
+        },
+        {
+          "value": "4",
+          "count": 172
+        },
+        {
+          "value": "6",
+          "count": 169
+        },
+        {
+          "value": "3",
+          "count": 165
+        },
+        {
+          "value": "1",
+          "count": 165
+        },
+        {
+          "value": "5",
+          "count": 163
+        },
+        {
+          "value": "12",
+          "count": 162
+        },
+        {
+          "value": "11",
+          "count": 162
+        }
+      ],
+      "description": "Coded value: LENGTH_OF_STAY",
+      "sample_values": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    "ENCOUNTER_STATUS": {
+      "column_name": "ENCOUNTER_STATUS",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 3,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "COMPLETE",
+          "count": 12814
+        },
+        {
+          "value": "IN_PROGRESS",
+          "count": 1455
+        },
+        {
+          "value": "CANCELLED",
+          "count": 731
+        }
+      ],
+      "description": "Field: ENCOUNTER_STATUS",
+      "sample_values": [
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE"
+      ]
+    }
+  },
+  "dq_score": 85,
+  "profiled_at": "2026-04-02T01:48:52.051513",
+  "has_phi": true
+}

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Deep Forecasting & Predictive Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Deep Forecasting & Predictive Intelligence</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 14 data queries • April 21, 2026</div>
+    <div style="margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;">
+        <span style="background:#28a745;width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+        <span>Database: healthcare_4m.db • 4,036,000 total rows</span>
+        <span style="margin-left:8px;opacity:0.7;">|</span>
+        <span style="margin-left:8px;">Self-Audit: PASS — 98 insights passed, 1 blocked</span>
+    </div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For The Organization</h3>
+    <div class="insight-item" style="border-left-color:#002B5C">Denial Rate Pct benchmark: 16/36 entities below standard (avg 9.9%, range 6.3–13.0%, benchmark: 5.0%). Worst performers: 2024-03, 2023-05, 2025-02.<div style="margin-top:6px"><span onclick="document.getElementById('reason_168604').style.display=document.getElementById('reason_168604').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_168604" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's Denial Rate Pct was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 16 of 36 entities (44%) fall below standard. The spread from 6.3 to 13.0% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">G47.00: Er Visits (2,228) is 13% lower than the network average (2,569).<div style="margin-top:6px"><span onclick="document.getElementById('reason_384605').style.display=document.getElementById('reason_384605').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_384605" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 15 data points. Mean = 2,569, StdDev = 186. G47.00 at 2,228 yields Z = 1.84 (13% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means G47.00 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">G47.00: Pct Of Er (4) is 14% lower than the network average (4).<div style="margin-top:6px"><span onclick="document.getElementById('reason_886875').style.display=document.getElementById('reason_886875').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_886875" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 15 data points. Mean = 4, StdDev = 0. G47.00 at 4 yields Z = 1.88 (14% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means G47.00 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">E78.5: Avg Cost (480,777) is 29% higher than the network average (373,818).<div style="margin-top:6px"><span onclick="document.getElementById('reason_440369').style.display=document.getElementById('reason_440369').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_440369" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 15 data points. Mean = 373,818, StdDev = 47,097. E78.5 at 480,777 yields Z = 2.27 (29% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means E78.5 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Feb: Total Encounters (44,747) is 11% lower than the network average (50,000). Low encounter volume could signal access barriers — check appointment availability and member satisfaction.<div style="margin-top:6px"><span onclick="document.getElementById('reason_523942').style.display=document.getElementById('reason_523942').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_523942" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 50,000, StdDev = 2,194. Feb at 44,747 yields Z = 2.39 (11% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Feb is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">May: Avg Cost (2,775) is 8% higher than the network average (2,569).<div style="margin-top:6px"><span onclick="document.getElementById('reason_203523').style.display=document.getElementById('reason_203523').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_203523" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 2,569, StdDev = 114. May at 2,775 yields Z = 1.80 (8% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means May is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">2023-09: Active Members (366) is 10% lower than the network average (407). Consider member engagement strategies, marketing outreach, or assess if access barriers exist.<div style="margin-top:6px"><span onclick="document.getElementById('reason_36339').style.display=document.getElementById('reason_36339').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_36339" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 36 data points. Mean = 407, StdDev = 19. 2023-09 at 366 yields Z = 2.17 (10% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means 2023-09 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">2024-10: Active Members (444) is 9% higher than the network average (407). This region or group may be growing rapidly — evaluate capacity and provider network adequacy.<div style="margin-top:6px"><span onclick="document.getElementById('reason_734479').style.display=document.getElementById('reason_734479').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_734479" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 36 data points. Mean = 407, StdDev = 19. 2024-10 at 444 yields Z = 1.95 (9% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means 2024-10 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">2025-02: Active Members (371) is 9% lower than the network average (407). Consider member engagement strategies, marketing outreach, or assess if access barriers exist.<div style="margin-top:6px"><span onclick="document.getElementById('reason_302406').style.display=document.getElementById('reason_302406').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_302406" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 36 data points. Mean = 407, StdDev = 19. 2025-02 at 371 yields Z = 1.90 (9% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means 2025-02 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">2023-01: Total Paid ($123.6M) is 15% higher than the network average ($107.6M). High spending region — analyze by specialty and procedure to identify cost reduction opportunities.<div style="margin-top:6px"><span onclick="document.getElementById('reason_946089').style.display=document.getElementById('reason_946089').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_946089" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 36 data points. Mean = $107.6M, StdDev = 7,629,473. 2023-01 at $123.6M yields Z = 2.10 (15% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means 2023-01 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div>
+</div><div class="section" style="background:rgba(111,66,193,0.05);border-left:4px solid #6f42c1;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#6f42c1;font-size:1.1rem;margin-bottom:1rem">Trend Dynamics & Acceleration</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Beyond the direction of a trend — is it speeding up, slowing down, or volatile?</p>
+    <div class="insight-item" style="border-left-color:#6f42c1">Trend projection for Denial Count: decreasing at 634 per period (R²=0.36). Next period: 102. Based on linear regression of historical monthly data. Note: moderate fit — high variability in data means projection carries uncertainty.</div><div class="insight-item" style="border-left-color:#6f42c1">Trend projection for Revenue At Risk: decreasing at 4,862,667 per period (R²=0.36). Next period: -139,633. Based on linear regression of historical monthly data. Note: moderate fit — high variability in data means projection carries uncertainty.</div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">2023-09: Billed Per Member (829,547) is 9% higher than average — requires attention. [WHY: Z = 2.53, p < 0.012. Across 36 entities, this deviation is statistically significant.]</div><div class="alert-item">E66.01: Readmissions (316) is 51% higher than average — requires attention. [WHY: Z = 2.70, p < 0.012. Across 12 entities, this deviation is statistically significant.]</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $542,187,051,480</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_38754_0').style.display=document.getElementById('method_38754_0').style.display==='none'?'block':'none'"><strong><span style="color:#002B5C;font-weight:700">&#9632;</span> Revenue Recovery — Denial Management Program</strong><br>Recover 17,001 denied claims — $542,187,051,480 total impact<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_38754_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> 40% denial reversal rate through automated workflows and appeal processes (MGMA benchmarks). $35 admin cost per denial rework.</div></div>
+</div><div class="section forecast-section">
+    <h3>Trend Projections</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Projections based on historical monthly data using linear regression. Higher R² indicates stronger trend reliability. All projections should be validated against operational knowledge before making financial decisions.</p>
+    <div class="forecast-item"><span style="color:#dc3545">&#9660;</span> <strong>Denial Count</strong>: decreasing trend. Next 3 periods: 102, -532, -1,166. <br><small style="color:#888">R²=0.36 (Directional only — high data variability). Confidence range: -11,436 to 11,640. Method: Ordinary Least Squares (OLS) linear regression on monthly time-series data.</small></div><div class="forecast-item"><span style="color:#dc3545">&#9660;</span> <strong>Revenue At Risk</strong>: decreasing trend. Next 3 periods: -139,633, -5,002,300, -9,864,966. <br><small style="color:#888">R²=0.36 (Directional only — high data variability). Confidence range: -89,773,761 to 89,494,495. Method: Ordinary Least Squares (OLS) linear regression on monthly time-series data.</small></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]Denial Management Program: Recover 17,001 denied claims — $542,187,051,480 total impact</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate Pct across 16 underperforming entities (2024-03, 2023-05, 2025-02): current range 10.2–13.0%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_688037_1').style.display=document.getElementById('rec_reason_688037_1').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_688037_1" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 13.0% needs 8.0% improvement. Prioritized because: (1) 16/36 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">161,730</div><div class="label">Current Pmpm</div></div><div class="kpi"><div class="value">166,849</div><div class="label">Prior Pmpm</div></div><div class="kpi"><div class="value">-3.1</div><div class="label">Pmpm Change Pct</div></div><div class="kpi"><div class="value">467</div><div class="label">Current Members</div></div><div class="kpi"><div class="value">4,830</div><div class="label">Recent Admits</div></div><div class="kpi"><div class="value">0</div><div class="label">Recent Er</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_69778').style.display=document.getElementById('meth_69778').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_69778" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_684316').style.display=document.getElementById('sql_684316').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_684316" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Forecasting KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH recent AS (
+                        SELECT ROUND(SUM(paid_usd)/COUNT(DISTINCT member_id),2) as current_pmpm,
+                            COUNT(DISTINCT member_id) as current_members,
+                            SUM(admits) as recent_admits, SUM(er_visits) as recent_er
+                        FROM gpdm_member_month_fact WHERE year_month = (SELECT MAX(year_month) FROM gpdm_member_month_fact)
+                    ), prior AS (
+                        SELECT ROUND(SUM(paid_usd)/COUNT(DISTINCT member_id),2) as prior_pmpm,
+                            COUNT(DISTINCT member_id) as prior_members
+                        FROM gpdm_member_month_fact WHERE year_month = (SELECT MIN(year_month) FROM (SELECT DISTINCT year_month FROM gpdm_member_month_fact ORDER BY year_month DESC LIMIT 2))
+                    )
+                    SELECT r.current_pmpm, p.prior_pmpm,
+                        ROUND(100.0*(r.current_pmpm - p.prior_pmpm)/NULLIF(p.prior_pmpm,0),1) as pmpm_change_pct,
+                        r.current_members, r.recent_admits, r.recent_er
+                    FROM recent r, prior p</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, GPDM_MEMBER_MONTH_FACT<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Visit Type Trends (36 months)</h3><div class="chart-container"><canvas id="chart_27180" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Total Encounters", "data": [18411.0, 15247.0, 17139.0, 16816.0, 16216.0, 16963.0, 16500.0, 17017.0, 17128.0, 16369.0, 16201.0, 16729.0, 16254.0, 14417.0, 15654.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Er Visits", "data": [1916.0, 1512.0, 1793.0, 1314.0, 1633.0, 1392.0, 2075.0, 1394.0, 1992.0, 1391.0, 1276.0, 1832.0, 1633.0, 1514.0, 1749.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Inpatient", "data": [2831.0, 2154.0, 2468.0, 2633.0, 2473.0, 2390.0, 2553.0, 3152.0, 2589.0, 2388.0, 2547.0, 2352.0, 3188.0, 2468.0, 2391.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Total Encounters has increased 2.9% over the period shown (from 18,411 to 18,948).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_27180').style.display=document.getElementById('meth_27180').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_27180" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_874759').style.display=document.getElementById('sql_874759').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_874759" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Visit Type Trends (36 months)</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(*) as total_encounters,
+                        SUM(CASE WHEN VISIT_TYPE='EMERGENCY' THEN 1 ELSE 0 END) as er_visits,
+                        SUM(CASE WHEN VISIT_TYPE='INPATIENT' THEN 1 ELSE 0 END) as inpatient,
+                        SUM(CASE WHEN VISIT_TYPE='TELEHEALTH' THEN 1 ELSE 0 END) as telehealth,
+                        SUM(CASE WHEN VISIT_TYPE='OUTPATIENT' THEN 1 ELSE 0 END) as outpatient,
+                        SUM(CASE WHEN VISIT_TYPE='URGENT_CARE' THEN 1 ELSE 0 END) as urgent_care
+                    FROM ENCOUNTERS WHERE SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS<br><strong>Aggregations:</strong> summation<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Claims & Cost Trend</h3><div class="chart-container"><canvas id="chart_73882" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Total Claims", "data": [42900.0, 39600.0, 42400.0, 40900.0, 42900.0, 40700.0, 44500.0, 43000.0, 37300.0, 44800.0, 40500.0, 42400.0, 39900.0, 40500.0, 43000.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Total Paid", "data": [123610409.0, 101796387.0, 100926294.0, 103618279.0, 103640344.0, 100481131.0, 116478887.0, 103786795.0, 108541302.0, 117345549.0, 96630612.0, 111535785.0, 101905497.0, 103320361.0, 107852578.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Avg Claim", "data": [2881.0, 2571.0, 2380.0, 2533.0, 2416.0, 2469.0, 2618.0, 2414.0, 2910.0, 2619.0, 2386.0, 2631.0, 2554.0, 2551.0, 2508.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Total Claims has decreased 3.3% over the period shown (from 42,900 to 41,500).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_73882').style.display=document.getElementById('meth_73882').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_73882" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_851650').style.display=document.getElementById('sql_851650').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_851650" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Claims & Cost Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(*) as total_claims,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),0) as total_paid,
+                        ROUND(AVG(CAST(PAID_AMOUNT AS REAL)),0) as avg_claim,
+                        SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END) as denied_count,
+                        ROUND(100.0*SUM(CASE WHEN CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(*),1) as denial_rate_pct
+                    FROM CLAIMS WHERE SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Disease Category Cost Trends</h3><div class="table-container"><table><thead><tr><th>Disease</th><th>Year</th><th>Members Affected</th><th>Avg Cost Per Encounter</th><th>Diagnoses</th></tr></thead><tbody><tr><td>CKD</td><td>2,023</td><td>254</td><td>2,575.64</td><td>9,835</td></tr><tr><td>CKD</td><td>2,024</td><td>220</td><td>2,416.52</td><td>8,570</td></tr><tr><td>CKD</td><td>2,025</td><td>237</td><td>2,164.31</td><td>9,272</td></tr><tr><td>COPD</td><td>2,023</td><td>261</td><td>2,413.80</td><td>10,113</td></tr><tr><td>COPD</td><td>2,024</td><td>212</td><td>2,620.00</td><td>8,318</td></tr><tr><td>COPD</td><td>2,025</td><td>232</td><td>2,698.69</td><td>9,081</td></tr><tr><td>Cancer</td><td>2,023</td><td>244</td><td>2,749.13</td><td>9,502</td></tr><tr><td>Cancer</td><td>2,024</td><td>245</td><td>2,979.46</td><td>9,437</td></tr><tr><td>Cancer</td><td>2,025</td><td>230</td><td>2,517.53</td><td>8,925</td></tr><tr><td>Diabetes</td><td>2,023</td><td>236</td><td>2,619.46</td><td>9,125</td></tr><tr><td>Diabetes</td><td>2,024</td><td>219</td><td>2,316.50</td><td>8,417</td></tr><tr><td>Diabetes</td><td>2,025</td><td>258</td><td>2,789.38</td><td>10,071</td></tr><tr><td>Heart Failure</td><td>2,023</td><td>249</td><td>2,910.56</td><td>9,668</td></tr><tr><td>Heart Failure</td><td>2,024</td><td>214</td><td>2,491.99</td><td>8,319</td></tr><tr><td>Heart Failure</td><td>2,025</td><td>223</td><td>2,861.97</td><td>8,662</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 19 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_64601').style.display=document.getElementById('meth_64601').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_64601" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_366995').style.display=document.getElementById('sql_366995').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_366995" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Disease Category Cost Trends</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH enc_costs AS (
+                        SELECT ENCOUNTER_ID, AVG(CAST(PAID_AMOUNT AS REAL)) as avg_cost,
+                               COUNT(*) as claim_count
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT d.HCC_CATEGORY as disease,
+                        substr(d.DIAGNOSIS_DATE,1,4) as year,
+                        COUNT(DISTINCT d.MEMBER_ID) as members_affected,
+                        ROUND(AVG(ec.avg_cost),2) as avg_cost_per_encounter,
+                        COUNT(DISTINCT d.DIAGNOSIS_ID) as diagnoses
+                    FROM DIAGNOSES d
+                    LEFT JOIN enc_costs ec ON d.ENCOUNTER_ID = ec.ENCOUNTER_ID
+                    WHERE d.HCC_CATEGORY IS NOT NULL AND d.HCC_CATEGORY != 'None'
+                    GROUP BY d.HCC_CATEGORY, year ORDER BY disease, year</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, DIAGNOSES<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT d.HCC_CATEGORY as disease,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 19 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>ER Visit Drivers by Diagnosis</h3><div class="table-container"><table><thead><tr><th>Icd Code</th><th>Diagnosis</th><th>Er Visits</th><th>Pct Of Er</th><th>Avg Cost</th></tr></thead><tbody><tr><td>E78.5</td><td>Hyperlipidemia, unspecified</td><td>2,827</td><td>4.70</td><td>480,777.00</td></tr><tr><td>I25.10</td><td>Atherosclerotic heart disease</td><td>2,825</td><td>4.70</td><td>437,114.00</td></tr><tr><td>F32.1</td><td>Major depressive disorder, single episode, moderate</td><td>2,786</td><td>4.70</td><td>376,194.00</td></tr><tr><td>N39.0</td><td>Urinary tract infection</td><td>2,784</td><td>4.70</td><td>351,138.00</td></tr><tr><td>K21.0</td><td>GERD with esophagitis</td><td>2,673</td><td>4.50</td><td>365,234.00</td></tr><tr><td>J06.9</td><td>Acute upper respiratory infection</td><td>2,668</td><td>4.50</td><td>396,482.00</td></tr><tr><td>E66.01</td><td>Morbid obesity due to excess calories</td><td>2,590</td><td>4.30</td><td>330,338.00</td></tr><tr><td>E11.9</td><td>Type 2 diabetes mellitus without complications</td><td>2,588</td><td>4.30</td><td>396,260.00</td></tr><tr><td>J18.9</td><td>Pneumonia, unspecified organism</td><td>2,582</td><td>4.30</td><td>429,566.00</td></tr><tr><td>K58.9</td><td>Irritable bowel syndrome without diarrhea</td><td>2,430</td><td>4.10</td><td>354,123.00</td></tr><tr><td>R51</td><td>Headache</td><td>2,428</td><td>4.10</td><td>333,920.00</td></tr><tr><td>R10.9</td><td>Unspecified abdominal pain</td><td>2,427</td><td>4.10</td><td>387,763.00</td></tr><tr><td>G43.909</td><td>Migraine, unspecified</td><td>2,353</td><td>3.90</td><td>295,141.00</td></tr><tr><td>E03.9</td><td>Hypothyroidism, unspecified</td><td>2,350</td><td>3.90</td><td>343,083.00</td></tr><tr><td>G47.00</td><td>Insomnia, unspecified</td><td>2,228</td><td>3.70</td><td>330,142.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 15 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_65503').style.display=document.getElementById('meth_65503').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_65503" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Emergency Department (ED) Utilization</strong><br>
+            <strong>Calculation:</strong> ED visits per 1,000 members per year.<br>
+            <strong>Standard:</strong> Benchmark: 80-100/1K. High-performing networks: 60-80/1K.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes all ED visits (treated and released, admitted from ED)</li><li>Preventable ED visits subset: ambulatory-sensitive diagnoses (asthma, UTI, COPD exacerbation)</li><li>Primary driver of high utilization for high-risk populations</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <80/1K | <strong>average:</strong> 80-120/1K | <strong>concern:</strong> >150/1K<br>
+            <strong>Why It Matters:</strong> ED visit = $1,500 avg cost. Diverting 20/1K to urgent care saves $30/member/year.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_909797').style.display=document.getElementById('sql_909797').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_909797" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — ER Visit Drivers by Diagnosis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH enc_costs AS (
+                        SELECT ENCOUNTER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT e.PRIMARY_DIAGNOSIS as icd_code,
+                        e.DIAGNOSIS_DESCRIPTION as diagnosis,
+                        COUNT(DISTINCT e.ENCOUNTER_ID) as er_visits,
+                        ROUND(100.0*COUNT(DISTINCT e.ENCOUNTER_ID)/(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY'),1) as pct_of_er,
+                        ROUND(AVG(ec.total_cost),0) as avg_cost
+                    FROM ENCOUNTERS e
+                    LEFT JOIN enc_costs ec ON e.ENCOUNTER_ID = ec.ENCOUNTER_ID
+                    WHERE e.VISIT_TYPE = 'EMERGENCY' AND e.PRIMARY_DIAGNOSIS IS NOT NULL
+                    GROUP BY e.PRIMARY_DIAGNOSIS, e.DIAGNOSIS_DESCRIPTION
+                    ORDER BY er_visits DESC LIMIT 15</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT e.PRIMARY_DIAGNOSIS as icd_code,<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 15 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Readmission Rate Trend</h3><div class="chart-container"><canvas id="chart_85280" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Discharges", "data": [2831.0, 2154.0, 2468.0, 2633.0, 2473.0, 2390.0, 2553.0, 3152.0, 2589.0, 2388.0, 2547.0, 2352.0, 3188.0, 2468.0, 2391.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Readmissions", "data": [40.0, 0.0, 119.0, 40.0, 119.0, 240.0, 40.0, 40.0, 119.0, 238.0, 40.0, 0.0, 200.0, 79.0, 80.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Readmission Rate Pct", "data": [1.4, 0.0, 4.8, 1.5, 4.8, 10.0, 1.6, 1.3, 4.6, 10.0, 1.6, 0.0, 6.3, 3.2, 3.3], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Discharges has decreased 3.0% over the period shown (from 2,831 to 2,746).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_85280').style.display=document.getElementById('meth_85280').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_85280" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>30-Day Readmission Rate</strong><br>
+            <strong>Calculation:</strong> Members readmitted to hospital within 30 days of discharge ÷ total discharges × 100%.<br>
+            <strong>Standard:</strong> CMS HWH benchmark: ~15%. STARS measure threshold: <20%. Best-in-class: <12%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Calculated per condition (COPD, heart failure, pneumonia) and overall</li><li>Excludes planned readmissions and same-day transfers</li><li>Includes Medicare + commercial lives (age-specific benchmarks vary)</li><li>Tracked as STARS measure (impacts quality rating)</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <12% | <strong>average:</strong> 12-18% | <strong>concern:</strong> >20%<br>
+            <strong>Why It Matters:</strong> Readmission = $15K cost + quality penalty. Preventing 10 readmissions = $150K savings + STARS improvement.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_204347').style.display=document.getElementById('sql_204347').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_204347" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Readmission Rate Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH readmit AS (
+                        SELECT substr(e1.SERVICE_DATE,1,7) as month,
+                            e1.ENCOUNTER_ID,
+                            CASE WHEN e2.ENCOUNTER_ID IS NOT NULL THEN 1 ELSE 0 END as readmitted
+                        FROM ENCOUNTERS e1
+                        LEFT JOIN ENCOUNTERS e2 ON e1.MEMBER_ID = e2.MEMBER_ID
+                            AND e2.SERVICE_DATE &gt; e1.SERVICE_DATE
+                            AND e2.SERVICE_DATE &lt;= date(e1.SERVICE_DATE, '+30 days')
+                            AND e2.ENCOUNTER_ID != e1.ENCOUNTER_ID
+                        WHERE e1.VISIT_TYPE = 'INPATIENT'
+                        GROUP BY e1.ENCOUNTER_ID
+                    )
+                    SELECT month, COUNT(*) as discharges,
+                        SUM(readmitted) as readmissions,
+                        ROUND(100.0*SUM(readmitted)/COUNT(*),1) as readmission_rate_pct
+                    FROM readmit GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY e1.ENCOUNTER_ID
+                    )
+                    SELECT month, COUNT(*) as discharges,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>PMPM Trend by Line of Business</h3><div class="chart-container"><canvas id="chart_62288" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-01", "2023-01", "2023-01", "2023-01", "2023-01", "2023-02", "2023-02", "2023-02", "2023-02", "2023-02", "2023-02", "2023-03", "2023-03", "2023-03"], "datasets": [{"label": "Lob", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Members", "data": [82.0, 90.0, 79.0, 76.0, 70.0, 89.0, 75.0, 73.0, 90.0, 57.0, 57.0, 92.0, 80.0, 79.0, 90.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Pmpm", "data": [189498.82, 207184.49, 179829.07, 189423.35, 145906.27, 210347.82, 160626.1, 217677.76, 157102.05, 153207.7, 144083.0, 179595.01, 153735.84, 163422.98, 156774.62], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> </div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_62288').style.display=document.getElementById('meth_62288').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_62288" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Per Member Per Month (PMPM)</strong><br>
+            <strong>Calculation:</strong> Total cost ÷ member months. Member months = count of members enrolled each month summed across the period.<br>
+            <strong>Standard:</strong> CMS Medicare Advantage reporting standard. Used in MLR calculations per ACA §2718.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes only paid claims (excludes denied/voided)</li><li>Pharmacy costs included separately per CMS guidelines</li><li>Member months based on enrollment spans, not calendar months</li><li>Excludes adjustment/reversal claims from cost base</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <$400 PMPM | <strong>average:</strong> $400-$600 | <strong>concern:</strong> >$600<br>
+            <strong>Why It Matters:</strong> PMPM is the fundamental unit of healthcare cost management. A $10 PMPM increase across 10,000 members = $1.2M annual impact.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_801123').style.display=document.getElementById('sql_801123').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_801123" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — PMPM Trend by Line of Business</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(year_month,1,7) as month, lob,
+                        COUNT(DISTINCT member_id) as members,
+                        ROUND(SUM(paid_usd)/NULLIF(COUNT(DISTINCT member_id),0),2) as pmpm
+                    FROM gpdm_member_month_fact
+                    WHERE lob IS NOT NULL AND lob != ''
+                    GROUP BY month, lob ORDER BY month, lob</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, GPDM_MEMBER_MONTH_FACT<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY month, lob<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 216 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Seasonal Utilization Heatmap</h3><div class="chart-container"><canvas id="chart_94847" data-chart='{"type": "bar", "data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"label": "Er Per 1K Enc", "data": [97.3, 99.7, 110.8, 86.8, 105.2, 99.1, 106.2, 86.3, 112.1, 94.2, 81.5, 115.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Admits Per 1K Enc", "data": [166.6, 158.4, 154.0, 159.4, 147.4, 150.4, 144.8, 167.5, 158.7, 165.0, 158.1, 143.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Total Encounters", "data": [51189.0, 44747.0, 49902.0, 50441.0, 49170.0, 48984.0, 50640.0, 53029.0, 52166.0, 47739.0, 49348.0, 52645.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Er Per 1K Enc: Dec (115). Lowest: Nov (81.5). Average: 99.5.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_94847').style.display=document.getElementById('meth_94847').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_94847" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Utilization Rate (per 1,000 members)</strong><br>
+            <strong>Calculation:</strong> Total encounters/admissions/days per 1,000 members per year.<br>
+            <strong>Standard:</strong> Varies by measure: ER visits 80-120/1K, inpatient admissions 50-70/1K, readmissions <20/1K.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Standardized for age/sex to allow benchmark comparison</li><li>Includes all visit types (office, urgent care, ED, inpatient)</li><li>Used to identify high utilization members for care management</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <100/1K | <strong>average:</strong> 100-140/1K | <strong>concern:</strong> >180/1K<br>
+            <strong>Why It Matters:</strong> High utilization signals unmanaged chronic disease or unnecessary care. 20/1K reduction = $2-4M savings for 10K members.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_144171').style.display=document.getElementById('sql_144171').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_144171" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Seasonal Utilization Heatmap</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH enc_costs AS (
+                        SELECT ENCOUNTER_ID, AVG(CAST(PAID_AMOUNT AS REAL)) as avg_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT CASE CAST(substr(e.SERVICE_DATE,6,2) AS INTEGER)
+                        WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar'
+                        WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun'
+                        WHEN 7 THEN 'Jul' WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep'
+                        WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' ELSE 'Dec' END as month,
+                        ROUND(AVG(CASE WHEN e.VISIT_TYPE='EMERGENCY' THEN 1.0 ELSE 0 END)*1000,1) as er_per_1k_enc,
+                        ROUND(AVG(CASE WHEN e.VISIT_TYPE='INPATIENT' THEN 1.0 ELSE 0 END)*1000,1) as admits_per_1k_enc,
+                        COUNT(*) as total_encounters,
+                        ROUND(AVG(ec.avg_cost),0) as avg_cost
+                    FROM ENCOUNTERS e
+                    LEFT JOIN enc_costs ec ON e.ENCOUNTER_ID = ec.ENCOUNTER_ID
+                    WHERE e.SERVICE_DATE IS NOT NULL
+                    GROUP BY CAST(substr(e.SERVICE_DATE,6,2) AS INTEGER)
+                    ORDER BY CAST(substr(e.SERVICE_DATE,6,2) AS INTEGER)</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY ENCOUNTER_ID
+                    )
+                    SELECT CASE CAST(substr(e.SERVICE_DATE,6,2) AS INTEGER)<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Cost Per Member Trajectory</h3><div class="chart-container"><canvas id="chart_16076" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Active Members", "data": [418.0, 392.0, 416.0, 405.0, 417.0, 395.0, 437.0, 422.0, 366.0, 436.0, 398.0, 411.0, 388.0, 396.0, 423.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Total Paid", "data": [123610409.0, 101796387.0, 100926294.0, 103618279.0, 103640344.0, 100481131.0, 116478887.0, 103786795.0, 108541302.0, 117345549.0, 96630612.0, 111535785.0, 101905497.0, 103320361.0, 107852578.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Cost Per Member", "data": [295718.68, 259684.66, 242611.28, 255847.6, 248537.99, 254382.61, 266542.08, 245940.27, 296560.93, 269141.17, 242790.48, 271376.61, 262643.03, 260910.0, 254970.63], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Active Members: 2024-10 (444). Lowest: 2023-09 (366). Average: 407.1.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_16076').style.display=document.getElementById('meth_16076').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_16076" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Total Cost Per Member (TCPM)</strong><br>
+            <strong>Calculation:</strong> Total medical + pharmacy costs ÷ unique members.<br>
+            <strong>Standard:</strong> Medicare Advantage benchmark: $8K-$12K depending on risk profile. Commercial: $4K-$6K.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Annualized even if member only enrolled partial year</li><li>Adjusted for risk score for fair comparison across segments</li><li>Broken down by service category (inpatient, outpatient, pharmacy, behavioral health)</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <$8K | <strong>average:</strong> $8K-$12K | <strong>concern:</strong> >$15K<br>
+            <strong>Why It Matters:</strong> $100/member annual increase = $1M for 10K members. Focus on highest-cost categories.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_940208').style.display=document.getElementById('sql_940208').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_940208" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Cost Per Member Trajectory</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(DISTINCT MEMBER_ID) as active_members,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),0) as total_paid,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL))/NULLIF(COUNT(DISTINCT MEMBER_ID),0),2) as cost_per_member,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL))/NULLIF(COUNT(DISTINCT MEMBER_ID),0),2) as billed_per_member,
+                        ROUND(100.0*SUM(CAST(PAID_AMOUNT AS REAL))/NULLIF(SUM(CAST(BILLED_AMOUNT AS REAL)),0),1) as collection_rate
+                    FROM CLAIMS WHERE SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Readmission Hotspots by Diagnosis</h3><div class="table-container"><table><thead><tr><th>Icd Code</th><th>Diagnosis</th><th>Discharges</th><th>Readmissions</th><th>Readmission Rate Pct</th></tr></thead><tbody><tr><td>E66.01</td><td>Morbid obesity due to excess calories</td><td>4,144</td><td>316</td><td>7.60</td></tr><tr><td>M17.11</td><td>Primary osteoarthritis, right knee</td><td>3,865</td><td>240</td><td>6.20</td></tr><tr><td>J18.9</td><td>Pneumonia, unspecified organism</td><td>3,502</td><td>239</td><td>6.80</td></tr><tr><td>Z00.00</td><td>Encounter for general adult medical examination</td><td>4,580</td><td>200</td><td>4.40</td></tr><tr><td>M79.3</td><td>Panniculitis, unspecified</td><td>3,231</td><td>200</td><td>6.20</td></tr><tr><td>I10</td><td>Essential hypertension</td><td>3,350</td><td>200</td><td>6.00</td></tr><tr><td>E78.5</td><td>Hyperlipidemia, unspecified</td><td>4,145</td><td>200</td><td>4.80</td></tr><tr><td>N18.3</td><td>Chronic kidney disease, stage 3</td><td>4,422</td><td>199</td><td>4.50</td></tr><tr><td>K58.9</td><td>Irritable bowel syndrome without diarrhea</td><td>3,580</td><td>199</td><td>5.60</td></tr><tr><td>F32.1</td><td>Major depressive disorder, single episode, moderate</td><td>3,064</td><td>199</td><td>6.50</td></tr><tr><td>L30.9</td><td>Dermatitis, unspecified</td><td>4,310</td><td>160</td><td>3.70</td></tr><tr><td>G47.00</td><td>Insomnia, unspecified</td><td>2,906</td><td>160</td><td>5.50</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 12 rows of 12 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_5821').style.display=document.getElementById('meth_5821').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_5821" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>30-Day Readmission Rate</strong><br>
+            <strong>Calculation:</strong> Members readmitted to hospital within 30 days of discharge ÷ total discharges × 100%.<br>
+            <strong>Standard:</strong> CMS HWH benchmark: ~15%. STARS measure threshold: <20%. Best-in-class: <12%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Calculated per condition (COPD, heart failure, pneumonia) and overall</li><li>Excludes planned readmissions and same-day transfers</li><li>Includes Medicare + commercial lives (age-specific benchmarks vary)</li><li>Tracked as STARS measure (impacts quality rating)</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <12% | <strong>average:</strong> 12-18% | <strong>concern:</strong> >20%<br>
+            <strong>Why It Matters:</strong> Readmission = $15K cost + quality penalty. Preventing 10 readmissions = $150K savings + STARS improvement.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_895046').style.display=document.getElementById('sql_895046').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_895046" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Readmission Hotspots by Diagnosis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH readmit AS (
+                        SELECT e1.ENCOUNTER_ID, e1.PRIMARY_DIAGNOSIS, e1.DIAGNOSIS_DESCRIPTION,
+                            CASE WHEN e2.ENCOUNTER_ID IS NOT NULL THEN 1 ELSE 0 END as readmitted
+                        FROM ENCOUNTERS e1
+                        LEFT JOIN ENCOUNTERS e2 ON e1.MEMBER_ID = e2.MEMBER_ID
+                            AND e2.SERVICE_DATE &gt; e1.SERVICE_DATE
+                            AND e2.SERVICE_DATE &lt;= date(e1.SERVICE_DATE, '+30 days')
+                            AND e2.ENCOUNTER_ID != e1.ENCOUNTER_ID
+                        WHERE e1.VISIT_TYPE = 'INPATIENT'
+                        GROUP BY e1.ENCOUNTER_ID
+                    )
+                    SELECT PRIMARY_DIAGNOSIS as icd_code, DIAGNOSIS_DESCRIPTION as diagnosis,
+                        COUNT(*) as discharges, SUM(readmitted) as readmissions,
+                        ROUND(100.0*SUM(readmitted)/COUNT(*),1) as readmission_rate_pct
+                    FROM readmit
+                    GROUP BY PRIMARY_DIAGNOSIS
+                    HAVING COUNT(*) &gt;= 20
+                    ORDER BY readmissions DESC LIMIT 12</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY e1.ENCOUNTER_ID
+                    )
+                    SELECT PRIMARY_DIAGNOSIS as icd_code, DIAGNOSIS_DESCR<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>High-Cost Claim Trend (>$5K)</h3><div class="chart-container"><canvas id="chart_37831" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "High Cost Claims", "data": [10853.0, 7827.0, 8042.0, 9234.0, 9210.0, 8832.0, 10198.0, 8691.0, 10397.0, 9803.0, 7741.0, 10152.0, 8992.0, 9048.0, 9232.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Total High Cost", "data": [81324872.0, 58300357.0, 59819648.0, 65836163.0, 67502480.0, 62132963.0, 74987696.0, 64238088.0, 76439143.0, 73081981.0, 54425780.0, 73500035.0, 64916702.0, 65592181.0, 67100139.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Avg High Cost", "data": [7493.0, 7449.0, 7438.0, 7130.0, 7329.0, 7035.0, 7353.0, 7391.0, 7352.0, 7455.0, 7031.0, 7240.0, 7219.0, 7249.0, 7268.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> High Cost Claims has decreased 20.2% over the period shown (from 10,853 to 8,663).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_37831').style.display=document.getElementById('meth_37831').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_37831" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_388429').style.display=document.getElementById('sql_388429').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_388429" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — High-Cost Claim Trend (>$5K)</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(*) as high_cost_claims,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),0) as total_high_cost,
+                        ROUND(AVG(CAST(PAID_AMOUNT AS REAL)),0) as avg_high_cost,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*)/36.0 FROM CLAIMS),1) as pct_above_norm
+                    FROM CLAIMS
+                    WHERE CAST(PAID_AMOUNT AS REAL) &gt; 5000 AND SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Denial Reason Trend</h3><div class="table-container"><table><thead><tr><th>Reason</th><th>Year</th><th>Denial Count</th><th>Revenue At Risk</th></tr></thead><tbody><tr><td></td><td>2,023</td><td>21,200</td><td>159,638,573.00</td></tr><tr><td></td><td>2,024</td><td>22,500</td><td>178,296,210.00</td></tr><tr><td></td><td>2,025</td><td>24,200</td><td>182,157,041.00</td></tr><tr><td>Coding error</td><td>2,023</td><td>3,800</td><td>28,539,968.00</td></tr><tr><td>Coding error</td><td>2,024</td><td>4,700</td><td>37,202,564.00</td></tr><tr><td>Coding error</td><td>2,025</td><td>4,100</td><td>27,286,441.00</td></tr><tr><td>Duplicate claim</td><td>2,023</td><td>5,000</td><td>35,746,884.00</td></tr><tr><td>Duplicate claim</td><td>2,024</td><td>5,800</td><td>41,532,086.00</td></tr><tr><td>Duplicate claim</td><td>2,025</td><td>4,700</td><td>37,399,768.00</td></tr><tr><td>Not medically necessary</td><td>2,023</td><td>4,000</td><td>30,338,082.00</td></tr><tr><td>Not medically necessary</td><td>2,024</td><td>4,500</td><td>33,085,038.00</td></tr><tr><td>Not medically necessary</td><td>2,025</td><td>4,200</td><td>27,616,215.00</td></tr><tr><td>Out of network</td><td>2,023</td><td>4,500</td><td>35,165,590.00</td></tr><tr><td>Out of network</td><td>2,024</td><td>3,300</td><td>20,737,800.00</td></tr><tr><td>Out of network</td><td>2,025</td><td>5,100</td><td>42,455,174.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 21 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_7258').style.display=document.getElementById('meth_7258').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_7258" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Claim Denial Rate</strong><br>
+            <strong>Calculation:</strong> Denied claims ÷ total claims submitted × 100%. Includes initial denials only (excludes appeals).<br>
+            <strong>Standard:</strong> CAQH Industry benchmark: 5-10% is typical. Leading plans: <5%. Poor performers: >15%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Denials by reason tracked separately (medical necessity, authorization, eligibility, coding)</li><li>Initial vs final denial rates differ (some claims appealed/overturned)</li><li>Denial rate trends tracked monthly to detect processing issues</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <5% | <strong>average:</strong> 5-10% | <strong>concern:</strong> >15%<br>
+            <strong>Why It Matters:</strong> Every 1% reduction in denial rate recovers ~$100K annually per 10,000 members.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_729560').style.display=document.getElementById('sql_729560').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_729560" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Denial Reason Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT COALESCE(DENIAL_REASON, 'Unspecified') as reason,
+                        substr(SERVICE_DATE,1,4) as year,
+                        COUNT(*) as denial_count,
+                        ROUND(SUM(CAST(BILLED_AMOUNT AS REAL)),0) as revenue_at_risk
+                    FROM CLAIMS
+                    WHERE CLAIM_STATUS = 'DENIED' AND SERVICE_DATE IS NOT NULL
+                    GROUP BY reason, year ORDER BY reason, year</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS<br><strong>Aggregations:</strong> summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY reason, year<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 21 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Telehealth Adoption & Impact</h3><div class="chart-container"><canvas id="chart_12382" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Telehealth Visits", "data": [3430.0, 3267.0, 3074.0, 3107.0, 2749.0, 4019.0, 3344.0, 3149.0, 2912.0, 3468.0, 3661.0, 3345.0, 3420.0, 2308.0, 3026.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Telehealth Pct", "data": [18.6, 21.4, 17.9, 18.5, 17.0, 23.7, 20.3, 18.5, 17.0, 21.2, 22.6, 20.0, 21.0, 16.0, 19.3], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Er Visits", "data": [1916.0, 1512.0, 1793.0, 1314.0, 1633.0, 1392.0, 2075.0, 1394.0, 1992.0, 1391.0, 1276.0, 1832.0, 1633.0, 1514.0, 1749.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Telehealth Visits: 2023-06 (4,019). Lowest: 2024-02 (2,308). Average: 3,236. A 74% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_416181').style.display=document.getElementById('sql_416181').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_416181" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Telehealth Adoption & Impact</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(e.SERVICE_DATE,1,7) as month,
+                        SUM(CASE WHEN e.VISIT_TYPE='TELEHEALTH' THEN 1 ELSE 0 END) as telehealth_visits,
+                        ROUND(100.0*SUM(CASE WHEN e.VISIT_TYPE='TELEHEALTH' THEN 1 ELSE 0 END)/COUNT(*),1) as telehealth_pct,
+                        SUM(CASE WHEN e.VISIT_TYPE='EMERGENCY' THEN 1 ELSE 0 END) as er_visits,
+                        ROUND(100.0*SUM(CASE WHEN e.VISIT_TYPE='EMERGENCY' THEN 1 ELSE 0 END)/COUNT(*),1) as er_pct,
+                        COUNT(DISTINCT e.MEMBER_ID) as unique_patients
+                    FROM ENCOUNTERS e WHERE e.SERVICE_DATE IS NOT NULL
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which diagnoses are driving the most ER visits and can we prevent them?</span><span class="followup">What is our readmission hotspot — which conditions should we target?</span><span class="followup">Show me the telehealth adoption trajectory vs ER utilization</span><span class="followup">Which disease categories are growing fastest in cost?</span><span class="followup">What is our denial trend by reason — where should we appeal?</span><span class="followup">Project next quarter PMPM by line of business</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

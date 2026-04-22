@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Provider Network Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Provider Network Intelligence</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 7 data queries • April 21, 2026</div>
+    <div style="margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;">
+        <span style="background:#28a745;width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+        <span>Database: healthcare_4m.db • 4,036,000 total rows</span>
+        <span style="margin-left:8px;opacity:0.7;">|</span>
+        <span style="margin-left:8px;">Self-Audit: PASS — 33 insights passed, 0 blocked</span>
+    </div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For The Organization</h3>
+    <div class="insight-item" style="border-left-color:#002B5C">Denial Rate benchmark: 3/10 entities below standard (avg 9.6%, range 8.8–11.6%, benchmark: 5.0%). Worst performers: OB/GYN, Radiology, Nephrology.<div style="margin-top:6px"><span onclick="document.getElementById('reason_157855').style.display=document.getElementById('reason_157855').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_157855" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's Denial Rate was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 3 of 10 entities (30%) fall below standard. The spread from 8.8 to 11.6% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cardiology: Providers (368) is 14% higher than the network average (323). Well-staffed specialty — ensure panel sizes are optimized to avoid provider burnout.<div style="margin-top:6px"><span onclick="document.getElementById('reason_662544').style.display=document.getElementById('reason_662544').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_662544" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 323, StdDev = 17. Cardiology at 368 yields Z = 2.62 (14% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cardiology is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Radiology: Avg Panel (1,177) is 9% lower than the network average (1,288). Smaller panels allow more face-time per patient — assess if this translates to better outcomes.<div style="margin-top:6px"><span onclick="document.getElementById('reason_2687').style.display=document.getElementById('reason_2687').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_2687" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 1,288, StdDev = 55. Radiology at 1,177 yields Z = 2.01 (9% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Radiology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cardiology: Providers (92) is 13% higher than the network average (82). Well-staffed specialty — ensure panel sizes are optimized to avoid provider burnout.<div style="margin-top:6px"><span onclick="document.getElementById('reason_858919').style.display=document.getElementById('reason_858919').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_858919" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 82, StdDev = 4. Cardiology at 92 yields Z = 2.41 (13% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cardiology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Nephrology: Avg Claim Cost (2,738) is 4% higher than the network average (2,627). Claims costs above average may indicate complex cases, high-cost procedures, or inefficient provider contracts.<div style="margin-top:6px"><span onclick="document.getElementById('reason_698159').style.display=document.getElementById('reason_698159').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_698159" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 2,627, StdDev = 60. Nephrology at 2,738 yields Z = 1.85 (4% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Nephrology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cardiology: Total Claims (91,900) is 12% higher than the network average (81,870). High claim volume — ensure adequate staffing for claims processing and review for potential fraud patterns.<div style="margin-top:6px"><span onclick="document.getElementById('reason_889535').style.display=document.getElementById('reason_889535').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_889535" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 81,870, StdDev = 4,241. Cardiology at 91,900 yields Z = 2.36 (12% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cardiology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">OB/GYN: Denial Rate (12) is 21% higher than the network average (10). Elevated denial rate means lost revenue and member frustration. Review coding accuracy and pre-authorization processes.<div style="margin-top:6px"><span onclick="document.getElementById('reason_419856').style.display=document.getElementById('reason_419856').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_419856" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 10 data points. Mean = 10, StdDev = 1. OB/GYN at 12 yields Z = 2.41 (21% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means OB/GYN is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Under 500: Providers (972) is 19% lower than the network average (1,200). Potential network gap — assess if member demand is being met or if recruitment is needed.<div style="margin-top:6px"><span onclick="document.getElementById('reason_325248').style.display=document.getElementById('reason_325248').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_325248" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 5 data points. Mean = 1,200, StdDev = 118. Under 500 at 972 yields Z = 1.93 (19% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Under 500 is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">NW: Members (26,700) is 7% higher than the network average (25,000). This region or group may be growing rapidly — evaluate capacity and provider network adequacy.<div style="margin-top:6px"><span onclick="document.getElementById('reason_318856').style.display=document.getElementById('reason_318856').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_318856" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 25,000, StdDev = 791. NW at 26,700 yields Z = 2.15 (7% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means NW is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cardiology: Provider Count (320) is 23% higher than the network average (259).<div style="margin-top:6px"><span onclick="document.getElementById('reason_846988').style.display=document.getElementById('reason_846988').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_846988" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 20 data points. Mean = 259, StdDev = 29. Cardiology at 320 yields Z = 2.10 (23% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cardiology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">Cardiology: Providers (368) is 14% higher than average — requires attention. [WHY: Z = 2.62, p < 0.012. Across 12 entities, this deviation is statistically significant.]</div><div class="alert-item">Neurology: Avg Panel Size (1,524) is 16% higher than average — requires attention. [WHY: Z = 2.87, p < 0.012. Across 20 entities, this deviation is statistically significant.]</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $53,300</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_74907_0').style.display=document.getElementById('method_74907_0').style.display==='none'?'block':'none'"><strong><span style="color:#28a745;font-weight:700">&#9632;</span> Cost Reduction — ER Diversion Program</strong><br>Divert 41 ER visits to urgent care/telehealth — saves $53,300/year<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_74907_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> ER visit avg cost $1,500, urgent care $200, telehealth $75 (HCUP national statistics). 15% diversion rate is conservative industry benchmark.</div></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]ER Diversion Program: Divert 41 ER visits to urgent care/telehealth — saves $53,300/year</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate across 3 underperforming entities (OB/GYN, Radiology, Nephrology): current range 10.1–11.6%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_412535_1').style.display=document.getElementById('rec_reason_412535_1').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_412535_1" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 11.6% needs 6.6% improvement. Prioritized because: (1) 3/10 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">5,188</div><div class="label">Active Providers</div></div><div class="kpi"><div class="value">2,484</div><div class="label">Physician Count</div></div><div class="kpi"><div class="value">612</div><div class="label">Do Count</div></div><div class="kpi"><div class="value">564</div><div class="label">Pa Count</div></div><div class="kpi"><div class="value">804</div><div class="label">Rn Count</div></div><div class="kpi"><div class="value">4,232</div><div class="label">Accepting New</div></div><div class="kpi"><div class="value">81.6</div><div class="label">Accepting Pct</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_6881').style.display=document.getElementById('meth_6881').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_6881" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Provider Network & Workforce Analytics</strong><br>
+            <strong>Calculation:</strong> Provider counts by type (MD/DO/PA/RN), panel size analysis, capacity = panel_size vs benchmark (2,000 for PCP, 3,000+ for specialist). Provider-to-member ratio per 1K members.<br>
+            <strong>Standard:</strong> CMS Network Adequacy standards, NCQA Provider Directory accuracy, state licensure compliance requirements<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active providers only (STATUS=ACTIVE) for capacity calculations</li><li>Panel over-capacity: >2,500 for PCP, may indicate burnout risk</li><li>New patient acceptance required for network adequacy</li><li>Provider tenure bands: <3 years (new), 3-10 (experienced), 10+ (senior)</li></ul>
+            <strong>Thresholds:</strong> <strong>PCP panel target:</strong> 1,800-2,200 | <strong>Provider:member ratio:</strong> ≥1:1,500 | <strong>Accepting new patients:</strong> ≥70%<br>
+            <strong>Why It Matters:</strong> Provider network adequacy directly affects member access, satisfaction, and retention. Over-paneled providers face burnout and quality risk. Under-staffed regions create access gaps driving ER utilization.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_155478').style.display=document.getElementById('sql_155478').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_155478" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Provider Network KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT
+                        (SELECT COUNT(*) FROM PROVIDERS WHERE STATUS='ACTIVE') as active_providers,
+                        (SELECT COUNT(*) FROM PROVIDERS WHERE PROVIDER_TYPE='MD') as physician_count,
+                        (SELECT COUNT(*) FROM PROVIDERS WHERE PROVIDER_TYPE='DO') as do_count,
+                        (SELECT COUNT(*) FROM PROVIDERS WHERE PROVIDER_TYPE='PA') as pa_count,
+                        (SELECT COUNT(*) FROM PROVIDERS WHERE PROVIDER_TYPE='RN') as rn_count,
+                        (SELECT COUNT(*) FROM PROVIDERS WHERE ACCEPTS_NEW_PATIENTS='Y') as accepting_new,
+                        ROUND(100.0*(SELECT COUNT(*) FROM PROVIDERS WHERE ACCEPTS_NEW_PATIENTS='Y')/NULLIF((SELECT COUNT(*) FROM PROVIDERS WHERE STATUS='ACTIVE'),0),1) as accepting_pct
+                    LIMIT 1</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Aggregations:</strong> rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Specialty Distribution</h3><div class="chart-container"><canvas id="chart_67031" data-chart='{"type": "bar", "data": {"labels": ["Cardiology", "ENT", "Emergency Medicine", "Radiology", "Rheumatology", "Orthopedics", "OB/GYN", "Oncology", "Pediatrics", "Internal Medicine", "Surgery", "Nephrology"], "datasets": [{"label": "Providers", "data": [368.0, 336.0, 336.0, 332.0, 324.0, 320.0, 316.0, 316.0, 312.0, 308.0, 308.0, 304.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Panel", "data": [1267.0, 1277.0, 1293.0, 1177.0, 1283.0, 1324.0, 1204.0, 1316.0, 1356.0, 1352.0, 1356.0, 1253.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-cost specialty: Cardiology at 368. Lowest: Nephrology at 304. Highest volume: Pediatrics (1,356 Avg Panel). Compare cost per encounter across specialties to identify candidates for value-based contracts.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_449209').style.display=document.getElementById('sql_449209').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_449209" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Specialty Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT SPECIALTY, COUNT(*) as providers,
+                        ROUND(AVG(CAST(PANEL_SIZE AS REAL)),0) as avg_panel
+                    FROM PROVIDERS GROUP BY SPECIALTY ORDER BY providers DESC LIMIT 12</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY SPECIALTY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Provider Performance</h3><div class="table-container"><table><thead><tr><th>Specialty</th><th>Providers</th><th>Avg Claim Cost</th><th>Total Claims</th><th>Denial Rate</th></tr></thead><tbody><tr><td>Cardiology</td><td>92</td><td>2,552.19</td><td>91,900</td><td>9.00</td></tr><tr><td>ENT</td><td>84</td><td>2,632.84</td><td>86,600</td><td>9.90</td></tr><tr><td>Oncology</td><td>79</td><td>2,540.50</td><td>82,500</td><td>9.50</td></tr><tr><td>Radiology</td><td>83</td><td>2,645.03</td><td>82,500</td><td>10.10</td></tr><tr><td>Emergency Medicine</td><td>84</td><td>2,670.26</td><td>81,100</td><td>8.80</td></tr><tr><td>Orthopedics</td><td>80</td><td>2,616.42</td><td>80,700</td><td>8.80</td></tr><tr><td>Rheumatology</td><td>81</td><td>2,675.60</td><td>80,200</td><td>9.50</td></tr><tr><td>Nephrology</td><td>76</td><td>2,738.22</td><td>77,900</td><td>10.10</td></tr><tr><td>OB/GYN</td><td>79</td><td>2,551.03</td><td>77,700</td><td>11.60</td></tr><tr><td>Internal Medicine</td><td>77</td><td>2,646.29</td><td>77,600</td><td>8.90</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 10 rows of 10 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_325191').style.display=document.getElementById('sql_325191').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_325191" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Provider Performance</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT p.SPECIALTY,
+                        COUNT(DISTINCT p.NPI) as providers,
+                        ROUND(AVG(CAST(c.PAID_AMOUNT AS REAL)),2) as avg_claim_cost,
+                        COUNT(c.CLAIM_ID) as total_claims,
+                        ROUND(100.0*SUM(CASE WHEN c.CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(c.CLAIM_ID),1) as denial_rate
+                    FROM PROVIDERS p JOIN CLAIMS c ON p.NPI = c.RENDERING_NPI
+                    GROUP BY p.SPECIALTY ORDER BY total_claims DESC LIMIT 10</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY p.SPECIALTY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 10 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Panel Size Distribution</h3><div class="chart-container"><canvas id="chart_2172" data-chart='{"type": "bar", "data": {"labels": ["Under 500", "500-999", "1000-1499", "1500-1999", "2000+"], "datasets": [{"label": "Providers", "data": [972.0, 1232.0, 1248.0, 1316.0, 1232.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Providers: 1500-1999 (1,316). Lowest: Under 500 (972). Average: 1,200.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_2172').style.display=document.getElementById('meth_2172').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_2172" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Provider Network & Workforce Analytics</strong><br>
+            <strong>Calculation:</strong> Provider counts by type (MD/DO/PA/RN), panel size analysis, capacity = panel_size vs benchmark (2,000 for PCP, 3,000+ for specialist). Provider-to-member ratio per 1K members.<br>
+            <strong>Standard:</strong> CMS Network Adequacy standards, NCQA Provider Directory accuracy, state licensure compliance requirements<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active providers only (STATUS=ACTIVE) for capacity calculations</li><li>Panel over-capacity: >2,500 for PCP, may indicate burnout risk</li><li>New patient acceptance required for network adequacy</li><li>Provider tenure bands: <3 years (new), 3-10 (experienced), 10+ (senior)</li></ul>
+            <strong>Thresholds:</strong> <strong>PCP panel target:</strong> 1,800-2,200 | <strong>Provider:member ratio:</strong> ≥1:1,500 | <strong>Accepting new patients:</strong> ≥70%<br>
+            <strong>Why It Matters:</strong> Provider network adequacy directly affects member access, satisfaction, and retention. Over-paneled providers face burnout and quality risk. Under-staffed regions create access gaps driving ER utilization.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_260014').style.display=document.getElementById('sql_260014').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_260014" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Panel Size Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT CASE
+                        WHEN CAST(PANEL_SIZE AS INTEGER) &lt; 500 THEN 'Under 500'
+                        WHEN CAST(PANEL_SIZE AS INTEGER) &lt; 1000 THEN '500-999'
+                        WHEN CAST(PANEL_SIZE AS INTEGER) &lt; 1500 THEN '1000-1499'
+                        WHEN CAST(PANEL_SIZE AS INTEGER) &lt; 2000 THEN '1500-1999'
+                        ELSE '2000+' END as panel_tier,
+                        COUNT(*) as providers
+                    FROM PROVIDERS GROUP BY panel_tier ORDER BY MIN(CAST(PANEL_SIZE AS INTEGER))</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Grouping:</strong> GROUP BY panel_tier<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Regional Provider Density</h3><div class="chart-container"><canvas id="chart_93995" data-chart='{"type": "bar", "data": {"labels": ["CO", "NW", "MAS", "NCAL", "SCAL", "MID", "HI", "GA"], "datasets": [{"label": "Providers", "data": [652.0, 724.0, 664.0, 700.0, 832.0, 808.0, 784.0, 836.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Members", "data": [25000.0, 26700.0, 24260.0, 24360.0, 25480.0, 25420.0, 24440.0, 24340.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Members Per Provider", "data": [38.0, 37.0, 37.0, 35.0, 31.0, 31.0, 31.0, 29.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Largest region: GA (836 members), smallest: CO (652). Regional Members ranges from 24,260 (MAS) to 26,700 (NW), a spread of 2,440. Investigate whether variation reflects acuity differences or operational inefficiency.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_337866').style.display=document.getElementById('sql_337866').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_337866" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Regional Provider Density</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT p.KP_REGION, COUNT(DISTINCT p.NPI) as providers,
+                        (SELECT COUNT(DISTINCT m.MEMBER_ID) FROM MEMBERS m WHERE m.KP_REGION = p.KP_REGION) as members,
+                        ROUND(1.0*(SELECT COUNT(DISTINCT m.MEMBER_ID) FROM MEMBERS m WHERE m.KP_REGION = p.KP_REGION)/COUNT(DISTINCT p.NPI),0) as members_per_provider
+                    FROM PROVIDERS p GROUP BY p.KP_REGION ORDER BY members_per_provider DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY p.KP_REGION<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Providers by Specialty</h3><div class="table-container"><table><thead><tr><th>Specialty</th><th>Provider Count</th><th>Avg Panel Size</th><th>Total Panel</th><th>Accepting New</th><th>Accepting Pct</th></tr></thead><tbody><tr><td>Cardiology</td><td>320</td><td>1,283.00</td><td>410,408.00</td><td>224</td><td>70.00</td></tr><tr><td>ENT</td><td>300</td><td>1,305.00</td><td>391,516.00</td><td>212</td><td>70.70</td></tr><tr><td>Rheumatology</td><td>300</td><td>1,293.00</td><td>388,024.00</td><td>184</td><td>61.30</td></tr><tr><td>Orthopedics</td><td>288</td><td>1,344.00</td><td>387,040.00</td><td>196</td><td>68.10</td></tr><tr><td>Emergency Medicine</td><td>276</td><td>1,293.00</td><td>356,760.00</td><td>232</td><td>84.10</td></tr><tr><td>Internal Medicine</td><td>272</td><td>1,346.00</td><td>366,056.00</td><td>200</td><td>73.50</td></tr><tr><td>Nephrology</td><td>272</td><td>1,286.00</td><td>349,796.00</td><td>200</td><td>73.50</td></tr><tr><td>OB/GYN</td><td>268</td><td>1,245.00</td><td>333,696.00</td><td>188</td><td>70.10</td></tr><tr><td>Pediatrics</td><td>264</td><td>1,351.00</td><td>356,564.00</td><td>176</td><td>66.70</td></tr><tr><td>Radiology</td><td>264</td><td>1,207.00</td><td>318,564.00</td><td>180</td><td>68.20</td></tr><tr><td>Surgery</td><td>260</td><td>1,309.00</td><td>340,288.00</td><td>196</td><td>75.40</td></tr><tr><td>Oncology</td><td>256</td><td>1,347.00</td><td>344,884.00</td><td>180</td><td>70.30</td></tr><tr><td>Gastroenterology</td><td>248</td><td>1,356.00</td><td>336,288.00</td><td>156</td><td>62.90</td></tr><tr><td>Urology</td><td>248</td><td>1,389.00</td><td>344,468.00</td><td>184</td><td>74.20</td></tr><tr><td>Psychiatry</td><td>244</td><td>1,385.00</td><td>338,028.00</td><td>200</td><td>82.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 20 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_814388').style.display=document.getElementById('sql_814388').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_814388" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Providers by Specialty</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT SPECIALTY,
+                        COUNT(DISTINCT NPI) as provider_count,
+                        ROUND(AVG(CAST(PANEL_SIZE AS REAL)),0) as avg_panel_size,
+                        SUM(CAST(PANEL_SIZE AS REAL)) as total_panel,
+                        COUNT(DISTINCT CASE WHEN ACCEPTS_NEW_PATIENTS='Y' THEN NPI END) as accepting_new,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN ACCEPTS_NEW_PATIENTS='Y' THEN NPI END)/NULLIF(COUNT(DISTINCT NPI),0),1) as accepting_pct
+                    FROM PROVIDERS WHERE STATUS='ACTIVE'
+                    GROUP BY SPECIALTY ORDER BY provider_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY SPECIALTY<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 20 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Panel Capacity Analysis</h3><div class="chart-container"><canvas id="chart_98748" data-chart='{"type": "bar", "data": {"labels": ["Under-capacity (1-999)", "Full (1500-1999)", "Over-capacity (2000+)", "Healthy (1000-1499)"], "datasets": [{"label": "Provider Count", "data": [1888.0, 1156.0, 1088.0, 1056.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Provider Count: Under-capacity (1-999) (1,888). Lowest: Healthy (1000-1499) (1,056). Average: 1,297. A 79% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_98748').style.display=document.getElementById('meth_98748').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_98748" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Provider Network & Workforce Analytics</strong><br>
+            <strong>Calculation:</strong> Provider counts by type (MD/DO/PA/RN), panel size analysis, capacity = panel_size vs benchmark (2,000 for PCP, 3,000+ for specialist). Provider-to-member ratio per 1K members.<br>
+            <strong>Standard:</strong> CMS Network Adequacy standards, NCQA Provider Directory accuracy, state licensure compliance requirements<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active providers only (STATUS=ACTIVE) for capacity calculations</li><li>Panel over-capacity: >2,500 for PCP, may indicate burnout risk</li><li>New patient acceptance required for network adequacy</li><li>Provider tenure bands: <3 years (new), 3-10 (experienced), 10+ (senior)</li></ul>
+            <strong>Thresholds:</strong> <strong>PCP panel target:</strong> 1,800-2,200 | <strong>Provider:member ratio:</strong> ≥1:1,500 | <strong>Accepting new patients:</strong> ≥70%<br>
+            <strong>Why It Matters:</strong> Provider network adequacy directly affects member access, satisfaction, and retention. Over-paneled providers face burnout and quality risk. Under-staffed regions create access gaps driving ER utilization.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_568901').style.display=document.getElementById('sql_568901').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_568901" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Panel Capacity Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH panel_dist AS (
+                        SELECT CASE
+                            WHEN CAST(PANEL_SIZE AS INTEGER) &gt;= 2000 THEN 'Over-capacity (2000+)'
+                            WHEN CAST(PANEL_SIZE AS INTEGER) &gt;= 1500 THEN 'Full (1500-1999)'
+                            WHEN CAST(PANEL_SIZE AS INTEGER) &gt;= 1000 THEN 'Healthy (1000-1499)'
+                            WHEN CAST(PANEL_SIZE AS INTEGER) &gt; 0 THEN 'Under-capacity (1-999)'
+                            ELSE 'No panel' END as panel_tier,
+                            COUNT(DISTINCT NPI) as provider_count
+                        FROM PROVIDERS WHERE STATUS='ACTIVE'
+                        GROUP BY panel_tier
+                    )
+                    SELECT panel_tier, provider_count
+                    FROM panel_dist ORDER BY provider_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting)<br><strong>Grouping:</strong> GROUP BY panel_tier
+                    )
+                    SELECT panel_tier, provider_count
+                    FROM<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which specialties need more providers?</span><span class="followup">Show me provider cost efficiency rankings</span><span class="followup">Which providers have the best outcomes?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

@@ -1,0 +1,734 @@
+{
+  "table_name": "diagnoses",
+  "file_name": "diagnoses.csv",
+  "total_rows": 5000,
+  "total_columns": 13,
+  "table_purpose": "Diagnosis or condition records",
+  "columns": {
+    "DIAGNOSIS_ID": {
+      "column_name": "DIAGNOSIS_ID",
+      "data_type": "string",
+      "semantic_type": "text",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 5000,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "DX6329156",
+          "count": 1
+        },
+        {
+          "value": "DX4203418",
+          "count": 1
+        },
+        {
+          "value": "DX9592462",
+          "count": 1
+        },
+        {
+          "value": "DX7881430",
+          "count": 1
+        },
+        {
+          "value": "DX6297773",
+          "count": 1
+        },
+        {
+          "value": "DX6920596",
+          "count": 1
+        },
+        {
+          "value": "DX8362722",
+          "count": 1
+        },
+        {
+          "value": "DX2700242",
+          "count": 1
+        },
+        {
+          "value": "DX2442557",
+          "count": 1
+        },
+        {
+          "value": "DX5972162",
+          "count": 1
+        }
+      ],
+      "description": "Field: DIAGNOSIS_ID",
+      "sample_values": [
+        "DX5499327",
+        "DX6182910",
+        "DX5780252",
+        "DX3765031",
+        "DX9028953"
+      ]
+    },
+    "MEMBER_ID": {
+      "column_name": "MEMBER_ID",
+      "data_type": "string",
+      "semantic_type": "member_id",
+      "healthcare_type": "member_id",
+      "is_phi": false,
+      "cardinality": 3953,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MBR829346909",
+          "count": 5
+        },
+        {
+          "value": "MBR396249563",
+          "count": 4
+        },
+        {
+          "value": "MBR863424463",
+          "count": 4
+        },
+        {
+          "value": "MBR181670236",
+          "count": 4
+        },
+        {
+          "value": "MBR772678518",
+          "count": 4
+        },
+        {
+          "value": "MBR174450030",
+          "count": 4
+        },
+        {
+          "value": "MBR238599988",
+          "count": 4
+        },
+        {
+          "value": "MBR330543110",
+          "count": 4
+        },
+        {
+          "value": "MBR160592724",
+          "count": 4
+        },
+        {
+          "value": "MBR186139695",
+          "count": 4
+        }
+      ],
+      "description": "Unique health plan member identifier used for linking enrollment, claims, and encounters",
+      "sample_values": [
+        "MBR280239941",
+        "MBR676163486",
+        "MBR272817576",
+        "MBR369671059",
+        "MBR558851932"
+      ]
+    },
+    "ENCOUNTER_ID": {
+      "column_name": "ENCOUNTER_ID",
+      "data_type": "string",
+      "semantic_type": "encounter_id",
+      "healthcare_type": "encounter_id",
+      "is_phi": false,
+      "cardinality": 3101,
+      "null_count": 1508,
+      "null_percentage": 30.16,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "ENC87207876",
+          "count": 4
+        },
+        {
+          "value": "ENC16177791",
+          "count": 4
+        },
+        {
+          "value": "ENC31769322",
+          "count": 4
+        },
+        {
+          "value": "ENC90345012",
+          "count": 3
+        },
+        {
+          "value": "ENC89698344",
+          "count": 3
+        },
+        {
+          "value": "ENC23118828",
+          "count": 3
+        },
+        {
+          "value": "ENC49686673",
+          "count": 3
+        },
+        {
+          "value": "ENC77437460",
+          "count": 3
+        },
+        {
+          "value": "ENC54866742",
+          "count": 3
+        },
+        {
+          "value": "ENC93087085",
+          "count": 3
+        }
+      ],
+      "description": "Unique identifier for a patient-provider interaction or visit",
+      "sample_values": [
+        "ENC72726246",
+        "ENC33617931",
+        "ENC25929819",
+        "ENC88776040",
+        "ENC58692949"
+      ]
+    },
+    "ICD10_CODE": {
+      "column_name": "ICD10_CODE",
+      "data_type": "string",
+      "semantic_type": "icd10",
+      "healthcare_type": "icd10",
+      "is_phi": false,
+      "cardinality": 25,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "M54.5",
+          "count": 221
+        },
+        {
+          "value": "R51",
+          "count": 217
+        },
+        {
+          "value": "I48.91",
+          "count": 213
+        },
+        {
+          "value": "M17.11",
+          "count": 213
+        },
+        {
+          "value": "J06.9",
+          "count": 209
+        },
+        {
+          "value": "F32.1",
+          "count": 208
+        },
+        {
+          "value": "G47.00",
+          "count": 208
+        },
+        {
+          "value": "F41.1",
+          "count": 206
+        },
+        {
+          "value": "I25.10",
+          "count": 205
+        },
+        {
+          "value": "E78.5",
+          "count": 204
+        }
+      ],
+      "description": "ICD-10 diagnosis code indicating disease, condition, or health problem",
+      "sample_values": [
+        "F32.1",
+        "G43.909",
+        "J06.9",
+        "L30.9",
+        "G43.909"
+      ]
+    },
+    "ICD10_DESCRIPTION": {
+      "column_name": "ICD10_DESCRIPTION",
+      "data_type": "string",
+      "semantic_type": "icd10",
+      "healthcare_type": "icd10",
+      "is_phi": false,
+      "cardinality": 25,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Low back pain",
+          "count": 221
+        },
+        {
+          "value": "Headache",
+          "count": 217
+        },
+        {
+          "value": "Unspecified atrial fibrillation",
+          "count": 213
+        },
+        {
+          "value": "Primary osteoarthritis, right knee",
+          "count": 213
+        },
+        {
+          "value": "Acute upper respiratory infection",
+          "count": 209
+        },
+        {
+          "value": "Major depressive disorder, single episode, moderate",
+          "count": 208
+        },
+        {
+          "value": "Insomnia, unspecified",
+          "count": 208
+        },
+        {
+          "value": "Generalized anxiety disorder",
+          "count": 206
+        },
+        {
+          "value": "Atherosclerotic heart disease",
+          "count": 205
+        },
+        {
+          "value": "Hyperlipidemia, unspecified",
+          "count": 204
+        }
+      ],
+      "description": "ICD-10 diagnosis code indicating disease, condition, or health problem",
+      "sample_values": [
+        "Panniculitis, unspecified",
+        "Essential hypertension",
+        "Headache",
+        "Morbid obesity due to excess calories",
+        "Panniculitis, unspecified"
+      ]
+    },
+    "DIAGNOSIS_TYPE": {
+      "column_name": "DIAGNOSIS_TYPE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 4,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "DISCHARGE",
+          "count": 1254
+        },
+        {
+          "value": "ADMITTING",
+          "count": 1252
+        },
+        {
+          "value": "SECONDARY",
+          "count": 1250
+        },
+        {
+          "value": "PRIMARY",
+          "count": 1244
+        }
+      ],
+      "description": "Field: DIAGNOSIS_TYPE",
+      "sample_values": [
+        "SECONDARY",
+        "DISCHARGE",
+        "PRIMARY",
+        "SECONDARY"
+      ]
+    },
+    "DIAGNOSIS_DATE": {
+      "column_name": "DIAGNOSIS_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 1084,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2024-03-27",
+          "count": 15
+        },
+        {
+          "value": "2025-01-17",
+          "count": 13
+        },
+        {
+          "value": "2024-07-28",
+          "count": 12
+        },
+        {
+          "value": "2023-03-25",
+          "count": 12
+        },
+        {
+          "value": "2023-09-16",
+          "count": 12
+        },
+        {
+          "value": "2024-05-17",
+          "count": 11
+        },
+        {
+          "value": "2023-09-07",
+          "count": 11
+        },
+        {
+          "value": "2025-01-05",
+          "count": 11
+        },
+        {
+          "value": "2025-05-19",
+          "count": 11
+        },
+        {
+          "value": "2023-04-08",
+          "count": 11
+        }
+      ],
+      "description": "Date field: DIAGNOSIS_DATE",
+      "sample_values": [
+        "2023-12-18",
+        "2024-02-07",
+        "2024-08-09",
+        "2025-07-04",
+        "2024-01-14"
+      ]
+    },
+    "RESOLVED_DATE": {
+      "column_name": "RESOLVED_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 667,
+      "null_count": 3071,
+      "null_percentage": 61.42,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2025-11-21",
+          "count": 11
+        },
+        {
+          "value": "2024-08-07",
+          "count": 10
+        },
+        {
+          "value": "2025-01-30",
+          "count": 8
+        },
+        {
+          "value": "2024-05-08",
+          "count": 8
+        },
+        {
+          "value": "2025-08-01",
+          "count": 7
+        },
+        {
+          "value": "2024-12-08",
+          "count": 7
+        },
+        {
+          "value": "2025-09-02",
+          "count": 7
+        },
+        {
+          "value": "2025-01-20",
+          "count": 7
+        },
+        {
+          "value": "2025-09-21",
+          "count": 7
+        },
+        {
+          "value": "2025-10-23",
+          "count": 7
+        }
+      ],
+      "description": "Date field: RESOLVED_DATE",
+      "sample_values": [
+        "2024-12-08",
+        "2025-03-26",
+        "2024-12-07",
+        "2025-04-03",
+        "2024-08-05"
+      ]
+    },
+    "IS_CHRONIC": {
+      "column_name": "IS_CHRONIC",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 2,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "N",
+          "count": 3221
+        },
+        {
+          "value": "Y",
+          "count": 1779
+        }
+      ],
+      "description": "Field: IS_CHRONIC",
+      "sample_values": [
+        "N",
+        "N"
+      ]
+    },
+    "SEVERITY": {
+      "column_name": "SEVERITY",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 4,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MODERATE",
+          "count": 1306
+        },
+        {
+          "value": "MILD",
+          "count": 1241
+        },
+        {
+          "value": "CRITICAL",
+          "count": 1234
+        },
+        {
+          "value": "SEVERE",
+          "count": 1219
+        }
+      ],
+      "description": "Field: SEVERITY",
+      "sample_values": [
+        "MODERATE",
+        "SEVERE",
+        "MILD",
+        "SEVERE"
+      ]
+    },
+    "DIAGNOSING_NPI": {
+      "column_name": "DIAGNOSING_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 5000,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1000005210.0,
+      "max_value": 1999955581.0,
+      "mean": 1499680370.9596,
+      "top_values": [
+        {
+          "value": "1331945985",
+          "count": 1
+        },
+        {
+          "value": "1870892745",
+          "count": 1
+        },
+        {
+          "value": "1619786358",
+          "count": 1
+        },
+        {
+          "value": "1537734745",
+          "count": 1
+        },
+        {
+          "value": "1909495473",
+          "count": 1
+        },
+        {
+          "value": "1759305116",
+          "count": 1
+        },
+        {
+          "value": "1413683455",
+          "count": 1
+        },
+        {
+          "value": "1218568534",
+          "count": 1
+        },
+        {
+          "value": "1796086380",
+          "count": 1
+        },
+        {
+          "value": "1266596530",
+          "count": 1
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1471975604",
+        "1217185513",
+        "1802862061",
+        "1511235041",
+        "1658664695"
+      ]
+    },
+    "HCC_CODE": {
+      "column_name": "HCC_CODE",
+      "data_type": "string",
+      "semantic_type": "hcc",
+      "healthcare_type": "hcc",
+      "is_phi": false,
+      "cardinality": 189,
+      "null_count": 3022,
+      "null_percentage": 60.44,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "HCC132",
+          "count": 19
+        },
+        {
+          "value": "HCC42",
+          "count": 19
+        },
+        {
+          "value": "HCC59",
+          "count": 18
+        },
+        {
+          "value": "HCC141",
+          "count": 18
+        },
+        {
+          "value": "HCC138",
+          "count": 18
+        },
+        {
+          "value": "HCC82",
+          "count": 18
+        },
+        {
+          "value": "HCC15",
+          "count": 18
+        },
+        {
+          "value": "HCC110",
+          "count": 17
+        },
+        {
+          "value": "HCC46",
+          "count": 17
+        },
+        {
+          "value": "HCC151",
+          "count": 17
+        }
+      ],
+      "description": "Hierarchical Condition Category for risk adjustment",
+      "sample_values": [
+        "HCC186",
+        "HCC114",
+        "HCC170",
+        "HCC178",
+        "HCC22"
+      ]
+    },
+    "HCC_CATEGORY": {
+      "column_name": "HCC_CATEGORY",
+      "data_type": "string",
+      "semantic_type": "hcc",
+      "healthcare_type": "hcc",
+      "is_phi": false,
+      "cardinality": 7,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Mental Health",
+          "count": 761
+        },
+        {
+          "value": "Cancer",
+          "count": 724
+        },
+        {
+          "value": "CKD",
+          "count": 720
+        },
+        {
+          "value": "Diabetes",
+          "count": 718
+        },
+        {
+          "value": "COPD",
+          "count": 715
+        },
+        {
+          "value": "Heart Failure",
+          "count": 692
+        },
+        {
+          "value": "None",
+          "count": 670
+        }
+      ],
+      "description": "Hierarchical Condition Category for risk adjustment",
+      "sample_values": [
+        "Cancer",
+        "CKD",
+        "Heart Failure",
+        "Diabetes",
+        "COPD"
+      ]
+    }
+  },
+  "dq_score": 85,
+  "profiled_at": "2026-04-02T01:48:51.900444",
+  "has_phi": false
+}

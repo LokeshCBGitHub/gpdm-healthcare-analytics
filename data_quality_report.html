@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Data Quality Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #002B5C 0%, #004B87 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .score-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .overall-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #E74C3C;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .score-status {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #E74C3C;
+        }
+
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .status-item {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            text-align: center;
+            border-top: 3px solid #002B5C;
+        }
+
+        .status-item strong {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-item.pass strong { color: #27AE60; }
+        .status-item.warn strong { color: #F39C12; }
+        .status-item.fail strong { color: #E74C3C; }
+
+        .status-item span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .category-scores {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .category-scores h2 {
+            color: #002B5C;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #002B5C;
+            padding-bottom: 0.5rem;
+        }
+
+        .category-score {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #002B5C;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-bar {
+            background-color: #e0e0e0;
+            border-radius: 0.25rem;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .score-value {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .recommendations {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .recommendations h2 {
+            color: #002B5C;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #002B5C;
+            padding-bottom: 0.5rem;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .results-section h2 {
+            color: #002B5C;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #002B5C;
+            padding-bottom: 0.5rem;
+        }
+
+        .check-result {
+            transition: all 0.2s ease;
+        }
+
+        .check-result:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        table th {
+            background-color: #f0f0f0;
+            padding: 0.5rem;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .footer {
+            text-align: center;
+            color: #999;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare Data Quality Report</h1>
+            <p>Comprehensive data quality assessment based on Tuva Project framework</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Generated: 2026-04-21T12:45:04.316286</p>
+        </div>
+
+        <div class="score-card">
+            <div class="overall-score">
+                <div class="score-circle">0</div>
+                <div class="score-status">Poor</div>
+            </div>
+            <div>
+                <h3 style="color: #002B5C; margin-bottom: 1rem;">Check Summary</h3>
+                <div class="status-summary">
+                    <div class="status-item pass">
+                        <strong>0</strong>
+                        <span>Passed</span>
+                    </div>
+                    <div class="status-item warn">
+                        <strong>0</strong>
+                        <span>Warnings</span>
+                    </div>
+                    <div class="status-item fail">
+                        <strong>0</strong>
+                        <span>Failed</span>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                    <strong>Total Checks:</strong> 0
+                </p>
+            </div>
+        </div>
+
+        <div class="category-scores">
+            <h2>Category Scores</h2>
+            
+        </div>
+
+        <div class="recommendations">
+            <h2>Recommendations & Priority Actions</h2>
+            <div style="background-color: #D5F4E6; border-left: 4px solid #27AE60; padding: 1rem; border-radius: 0.25rem;"><h4 style="margin: 0 0 0.5rem 0; color: #1E8449;">Data Quality Status</h4><p style="margin: 0;">Your dataset has passed all critical checks. Continue monitoring for data quality issues.</p></div>
+        </div>
+
+        <div class="results-section">
+            <h2>Detailed Check Results</h2>
+            
+        </div>
+
+        <div class="footer">
+            <p>This report was generated by the Healthcare Data Quality Engine.</p>
+            <p>For remediation assistance, review the SQL queries and sample records for each failed check.</p>
+        </div>
+    </div>
+</body>
+</html>
+        

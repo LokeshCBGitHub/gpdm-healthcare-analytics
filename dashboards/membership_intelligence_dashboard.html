@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Membership & Engagement Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Membership & Engagement Intelligence</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 11 data queries • April 21, 2026</div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For Your Organization</h3>
+    <div class="insight-item">Medicare Advantage: Low Risk (264) is 16% lower than the network average (313).</div><div class="insight-item">Medicaid: Moderate Risk (361) is 9% lower than the network average (395).</div><div class="insight-item">EPO: Very High Risk (624) is 7% higher than the network average (581).</div><div class="insight-item">18-29: Avg Chronic (3) is 3% higher than the network average (3). Members managing multiple conditions need coordinated care. Consider disease management programs and care navigators.</div>
+</div><div class="section" style="background:rgba(230,126,34,0.05);border-left:4px solid #e67e22;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#e67e22;font-size:1.1rem;margin-bottom:1rem">Cross-Dimensional Analysis & Root Causes</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Relationships discovered across multiple data dimensions. These insights connect dots that single-query analysis cannot reveal.</p>
+    <div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for Medicare Advantage: Low Risk is unusually low (16% from average). Contributing factors: Very High Risk is below average (5% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for 2021-02: Enrollments is unusually low (22% from average). Contributing factors: Net Change is below average (18% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for 2022-12: Enrollments is unusually low (24% from average). Contributing factors: Net Change is below average (21% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Root-cause hypothesis for 2024-03: Net Change is unusually low (31% from average). Contributing factors: Disenrollments is elevated (391% from average); Enrollments is below average (13% from average). </div><div class="insight-item" style="border-left-color:#e67e22">Aggregation bias detected in Count: Simple average (138.9) differs 37% from population-weighted average (190.7). Segments 18-44, 18-44 and 0-17, 0-17 have dramatically different profiles (106% spread). The headline number masks important segment differences — break this metric down by segment for accurate analysis.</div>
+</div><div class="section" style="background:rgba(44,62,80,0.05);border-left:4px solid #2c3e50;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#2c3e50;font-size:1.1rem;margin-bottom:1rem">Statistical Significance</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Not every difference is meaningful. These tests distinguish signal from noise.</p>
+    <div class="insight-item" style="border-left-color:#2c3e50">Statistically significant variation in Pct Of Total: 45-64 (33.0) vs Under 18 (5.1), difference of 27.9 (z=4.3, p<0.05). This gap is unlikely due to random variation alone — it reflects a genuine structural difference between these entities.</div>
+</div><div class="section" style="background:rgba(111,66,193,0.05);border-left:4px solid #6f42c1;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#6f42c1;font-size:1.1rem;margin-bottom:1rem">Trend Dynamics & Acceleration</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Beyond the direction of a trend — is it speeding up, slowing down, or volatile?</p>
+    <div class="insight-item" style="border-left-color:#6f42c1">Trend projection for Disenrollments: increasing at 0 per period (R²=0.36). Next period: 18. Based on linear regression of historical monthly data. Note: moderate fit — high variability in data means projection carries uncertainty.</div><div class="insight-item" style="border-left-color:#6f42c1">High volatility in Enrollments: period-over-period changes vary by 9070% (CV). This makes trend-based forecasting unreliable for this metric. Consider using range-based scenarios rather than point estimates for planning.</div>
+</div><div class="section forecast-section">
+    <h3>Trend Projections</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Projections based on historical monthly data using linear regression. Higher R² indicates stronger trend reliability. All projections should be validated against operational knowledge before making financial decisions.</p>
+    <div class="forecast-item"><span style="color:#28a745">&#9650;</span> <strong>Disenrollments</strong>: increasing trend. Next 3 periods: 18, 19, 19. <br><small style="color:#888">R²=0.36 (Directional only — high data variability). Confidence range: -2 to 39. Method: Ordinary Least Squares (OLS) linear regression on monthly time-series data.</small></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">0</div><div class="label">Total Active</div></div><div class="kpi"><div class="value">4.8</div><div class="label">Avg Tenure Years</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_98857').style.display=document.getElementById('meth_98857').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_98857" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_714322').style.display=document.getElementById('sql_714322').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_714322" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Membership KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH active_members AS (
+                        SELECT COUNT(DISTINCT MEMBER_ID) as total_active,
+                            SUM(CASE WHEN ENROLLMENT_DATE &gt;= date('now', '-12 months') THEN 1 ELSE 0 END) as new_enrollees,
+                            SUM(CASE WHEN DISENROLLMENT_DATE IS NOT NULL AND DISENROLLMENT_DATE &gt;= date('now', '-12 months') THEN 1 ELSE 0 END) as disenrollees
+                        FROM MEMBERS
+                        WHERE DISENROLLMENT_DATE IS NULL OR DISENROLLMENT_DATE &gt; date('now')
+                    ),
+                    tenure_avg AS (
+                        SELECT ROUND(AVG(CAST((julianday('now') - julianday(ENROLLMENT_DATE))/365.25 AS REAL)),1) as avg_tenure_years
+                        FROM MEMBERS
+                    )
+                    SELECT am.total_active, am.new_enrollees, am.disenrollees,
+                        ta.avg_tenure_years,
+                        ROUND((am.new_enrollees - am.disenrollees)/CAST(am.total_active AS REAL)*100,2) as net_growth_rate_pct
+                    FROM active_members am, tenure_avg ta</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Risk Profile by Plan</h3><div class="chart-container"><canvas id="chart_14939" data-chart='{"type": "bar", "data": {"labels": ["EPO", "HDHP", "HMO", "Medicaid", "Medicare Advantage", "PPO"], "datasets": [{"label": "Low Risk", "data": [338.0, 315.0, 323.0, 311.0, 264.0, 326.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Moderate Risk", "data": [390.0, 406.0, 412.0, 361.0, 394.0, 409.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "High Risk", "data": [380.0, 364.0, 385.0, 389.0, 377.0, 369.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Low Risk: EPO (338). Lowest: Medicare Advantage (264). Average: 312.8.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_261819').style.display=document.getElementById('sql_261819').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_261819" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Risk Profile by Plan</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT PLAN_TYPE,
+                        COUNT(DISTINCT CASE WHEN CAST(RISK_SCORE AS REAL) &lt; 1.0 THEN MEMBER_ID END) as low_risk,
+                        COUNT(DISTINCT CASE WHEN CAST(RISK_SCORE AS REAL) &gt;= 1.0 AND CAST(RISK_SCORE AS REAL) &lt; 2.0 THEN MEMBER_ID END) as moderate_risk,
+                        COUNT(DISTINCT CASE WHEN CAST(RISK_SCORE AS REAL) &gt;= 2.0 AND CAST(RISK_SCORE AS REAL) &lt; 3.0 THEN MEMBER_ID END) as high_risk,
+                        COUNT(DISTINCT CASE WHEN CAST(RISK_SCORE AS REAL) &gt;= 3.0 THEN MEMBER_ID END) as very_high_risk
+                    FROM MEMBERS
+                    GROUP BY PLAN_TYPE ORDER BY PLAN_TYPE</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> distinct counts (no double-counting)<br><strong>Grouping:</strong> GROUP BY PLAN_TYPE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Member Demographics Deep Dive</h3><div class="table-container"><table><thead><tr><th>Age Group</th><th>Gender</th><th>Race</th><th>Count</th></tr></thead><tbody><tr><td>0-17</td><td>F</td><td></td><td>7</td></tr><tr><td>0-17</td><td>F</td><td>American Indian</td><td>32</td></tr><tr><td>0-17</td><td>F</td><td>Asian</td><td>24</td></tr><tr><td>0-17</td><td>F</td><td>Black</td><td>27</td></tr><tr><td>0-17</td><td>F</td><td>Hispanic</td><td>28</td></tr><tr><td>0-17</td><td>F</td><td>Native Hawaiian</td><td>30</td></tr><tr><td>0-17</td><td>F</td><td>Other</td><td>42</td></tr><tr><td>0-17</td><td>F</td><td>Unknown</td><td>29</td></tr><tr><td>0-17</td><td>F</td><td>White</td><td>26</td></tr><tr><td>0-17</td><td>M</td><td></td><td>3</td></tr><tr><td>0-17</td><td>M</td><td>American Indian</td><td>46</td></tr><tr><td>0-17</td><td>M</td><td>Asian</td><td>35</td></tr><tr><td>0-17</td><td>M</td><td>Black</td><td>32</td></tr><tr><td>0-17</td><td>M</td><td>Hispanic</td><td>30</td></tr><tr><td>0-17</td><td>M</td><td>Native Hawaiian</td><td>27</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 72 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_723242').style.display=document.getElementById('sql_723242').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_723242" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Member Demographics Deep Dive</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH age_calc AS (
+                        SELECT CASE
+                            WHEN CAST((julianday('now') - julianday(DATE_OF_BIRTH))/365.25 AS INTEGER) &lt; 18 THEN '0-17'
+                            WHEN CAST((julianday('now') - julianday(DATE_OF_BIRTH))/365.25 AS INTEGER) &lt; 45 THEN '18-44'
+                            WHEN CAST((julianday('now') - julianday(DATE_OF_BIRTH))/365.25 AS INTEGER) &lt; 65 THEN '45-64'
+                            ELSE '65+' END as age_group,
+                            GENDER, RACE, COUNT(DISTINCT MEMBER_ID) as count
+                        FROM MEMBERS
+                        GROUP BY age_group, GENDER, RACE
+                    )
+                    SELECT age_group, GENDER, RACE, count
+                    FROM age_calc ORDER BY age_group, GENDER</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> distinct counts (no double-counting)<br><strong>Grouping:</strong> GROUP BY age_group, GENDER, RACE
+                    )
+                    SELECT age_group, GENDER, RACE, count<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 72 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Geographic Distribution</h3><div class="chart-container"><canvas id="chart_46639" data-chart='{"type": "bar", "data": {"labels": ["WA", "VA", "DC", "CO", "HI", "GA", "CA", "OR", "MD"], "datasets": [{"label": "Member Count", "data": [1167.0, 1161.0, 1147.0, 1105.0, 1103.0, 1091.0, 1088.0, 1087.0, 1051.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Region Count", "data": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [11.7, 11.6, 11.5, 11.1, 11.0, 10.9, 10.9, 10.9, 10.5], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Member Count: WA (1,167). Lowest: MD (1,051). Average: 1,111.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_46639').style.display=document.getElementById('meth_46639').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_46639" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_98815').style.display=document.getElementById('sql_98815').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_98815" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Geographic Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT STATE,
+                        COUNT(DISTINCT MEMBER_ID) as member_count,
+                        COUNT(DISTINCT KP_REGION) as region_count,
+                        ROUND(100.0*COUNT(DISTINCT MEMBER_ID)/(SELECT COUNT(*) FROM MEMBERS),1) as pct
+                    FROM MEMBERS GROUP BY STATE ORDER BY member_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY STATE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 9 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Enrollment & Disenrollment Trend</h3><div class="chart-container"><canvas id="chart_34584" data-chart='{"type": "line", "data": {"labels": ["2018-01", "2018-02", "2018-03", "2018-04", "2018-05", "2018-06", "2018-07", "2018-08", "2018-09", "2018-10", "2018-11", "2018-12", "2019-01", "2019-02", "2019-03"], "datasets": [{"label": "Enrollments", "data": [114.0, 117.0, 108.0, 119.0, 119.0, 109.0, 132.0, 122.0, 133.0, 104.0, 114.0, 116.0, 123.0, 97.0, 105.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Disenrollments", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Net Change", "data": [114.0, 117.0, 108.0, 119.0, 119.0, 109.0, 132.0, 122.0, 133.0, 104.0, 114.0, 116.0, 123.0, 97.0, 105.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Enrollments has increased 14.0% over the period shown (from 114 to 130).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_34584').style.display=document.getElementById('meth_34584').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_34584" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Disenrollment / Member Churn</strong><br>
+            <strong>Calculation:</strong> Members disenrolled in period ÷ average enrollment × 100%.<br>
+            <strong>Standard:</strong> Involuntary churn (coverage loss): 3-5% typical. Voluntary churn (satisfaction): <2% best-in-class.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Disenrollment by reason tracked (coverage loss, voluntary switch, age-off, deceased)</li><li>Exit surveys identify satisfaction drivers</li><li>High churn in specific segments signals product/service issues</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <5% annual | <strong>average:</strong> 5-10% annual | <strong>concern:</strong> >10% annual<br>
+            <strong>Why It Matters:</strong> Replacing lost member costs 10x acquisition cost. 1% churn reduction = $800K saved for 10K members.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_938766').style.display=document.getElementById('sql_938766').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_938766" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Enrollment & Disenrollment Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH monthly_changes AS (
+                        SELECT substr(ENROLLMENT_DATE,1,7) as month,
+                            COUNT(*) as new_enrollments
+                        FROM MEMBERS
+                        WHERE ENROLLMENT_DATE IS NOT NULL
+                        GROUP BY month
+                    ),
+                    disenroll_monthly AS (
+                        SELECT substr(DISENROLLMENT_DATE,1,7) as month,
+                            COUNT(*) as disenrollments
+                        FROM MEMBERS
+                        WHERE DISENROLLMENT_DATE IS NOT NULL
+                        GROUP BY month
+                    )
+                    SELECT COALESCE(me.month, md.month) as month,
+                        COALESCE(me.new_enrollments,0) as enrollments,
+                        COALESCE(md.disenrollments,0) as disenrollments,
+                        COALESCE(me.new_enrollments,0) - COALESCE(md.disenrollments,0) as net_change
+                    FROM monthly_changes me
+                    LEFT JOIN disenroll_monthly md ON me.month = md.month
+                    ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY month
+                    ),
+                    disenroll_monthly AS (
+                        SELECT substr(D<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 84 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">3,333</div><div class="label">High Risk Members</div></div><div class="kpi"><div class="value">33.3</div><div class="label">Pct Of Pop</div></div><div class="kpi"><div class="value">3.5</div><div class="label">Avg Risk</div><div class="subtitle-text">1.0 = average acuity | High acuity — care management recommended</div></div><div class="kpi"><div class="value">4</div><div class="label">Avg Conditions</div></div><div class="kpi"><div class="value">2,576</div><div class="label">Avg Annual Cost</div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_436708').style.display=document.getElementById('sql_436708').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_436708" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — High-Risk Member Identification</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT COUNT(DISTINCT MEMBER_ID) as high_risk_members,
+                        ROUND(100.0*COUNT(DISTINCT MEMBER_ID)/(SELECT COUNT(DISTINCT MEMBER_ID) FROM MEMBERS),1) as pct_of_pop,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_conditions,
+                        ROUND(AVG(CAST((SELECT AVG(CAST(PAID_AMOUNT AS REAL)) FROM CLAIMS c WHERE c.MEMBER_ID = m.MEMBER_ID) AS REAL)),2) as avg_annual_cost
+                    FROM MEMBERS m
+                    WHERE CAST(RISK_SCORE AS REAL) &gt; 2.5 AND CAST(CHRONIC_CONDITIONS AS REAL) &gt; 1</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">968</div><div class="label">Engaged Members</div></div><div class="kpi"><div class="value">-968</div><div class="label">Care Gap Members</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_67517').style.display=document.getElementById('meth_67517').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_67517" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_72595').style.display=document.getElementById('sql_72595').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_72595" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Member Engagement Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH recent_encounters AS (
+                        SELECT COUNT(DISTINCT MEMBER_ID) as engaged_members
+                        FROM ENCOUNTERS
+                        WHERE SERVICE_DATE &gt; date('now', '-6 months')
+                    ),
+                    all_active AS (
+                        SELECT COUNT(DISTINCT MEMBER_ID) as active_members
+                        FROM MEMBERS
+                        WHERE DISENROLLMENT_DATE IS NULL OR DISENROLLMENT_DATE &gt; date('now')
+                    )
+                    SELECT re.engaged_members,
+                        aa.active_members - re.engaged_members as care_gap_members,
+                        ROUND(100.0*re.engaged_members/NULLIF(aa.active_members,0),1) as engagement_rate_pct
+                    FROM recent_encounters re, all_active aa</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, ENCOUNTERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">10,000</div><div class="label">Total Members</div><div class="subtitle-text">10,000 lives covered. Mid-size plan — network adequacy standards apply.</div></div><div class="kpi"><div class="value">8</div><div class="label">Regions</div><div class="subtitle-text">Operating across 8 service areas</div></div><div class="kpi"><div class="value">6</div><div class="label">Plan Types</div></div><div class="kpi"><div class="value">2.3</div><div class="label">Avg Risk Score</div><div class="subtitle-text">1.0 = average acuity | High acuity — care management recommended</div></div><div class="kpi"><div class="value">3</div><div class="label">Avg Chronic Conditions</div><div class="subtitle-text">3.0 conditions avg — intensive care coordination required</div></div><div class="kpi"><div class="value">4,381</div><div class="label">Avg Cost Per Member</div><div class="subtitle-text">Industry avg: $4,500-6,000/year | Below average — efficient</div></div><div class="kpi"><div class="value">9,163</div><div class="label">Active Members</div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_801467').style.display=document.getElementById('sql_801467').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_801467" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Population KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost, COUNT(*) as claims
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT COUNT(*) as total_members,
+                        COUNT(DISTINCT m.KP_REGION) as regions,
+                        COUNT(DISTINCT m.PLAN_TYPE) as plan_types,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk_score,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic_conditions,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        SUM(CASE WHEN m.DISENROLLMENT_DATE = '' OR m.DISENROLLMENT_DATE IS NULL THEN 1 ELSE 0 END) as active_members
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT COUNT(*) as total_members,
+                        C<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Age Distribution with Risk & Cost</h3><div class="chart-container"><canvas id="chart_69393" data-chart='{"type": "bar", "data": {"labels": ["Under 18", "18-29", "30-44", "45-64", "65+"], "datasets": [{"label": "Members", "data": [506.0, 1181.0, 2690.0, 3301.0, 2322.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Total", "data": [5.1, 11.8, 26.9, 33.0, 23.2], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.41, 2.37, 2.33, 2.3, 2.35], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-risk age cohort: 45-64 with Pct Of Total of 33 vs lowest Under 18 at 5.1. Largest cohort: 45-64 (3,301 members). Age drives 60-80% of total cost — deploy chronic disease management for 45+ and wellness programs for younger cohorts.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_7357').style.display=document.getElementById('sql_7357').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_7357" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Age Distribution with Risk & Cost</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT m.*,
+                            CASE
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 18 THEN 'Under 18'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 30 THEN '18-29'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 45 THEN '30-44'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 65 THEN '45-64'
+                                ELSE '65+' END as age_group,
+                            (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 as age
+                        FROM MEMBERS m
+                    )
+                    SELECT a.age_group, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct_of_total,
+                        ROUND(AVG(CAST(a.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(a.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member
+                    FROM aged a LEFT JOIN member_costs mc ON a.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY a.age_group ORDER BY MIN(a.age)</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT m.*,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Gender Distribution</h3><div class="chart-container"><canvas id="chart_98379" data-chart='{"type": "doughnut", "data": {"labels": ["F", "M"], "datasets": [{"label": "Members", "data": [5023.0, 4977.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [50.2, 49.8], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.32, 2.34], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> F members lead at 5,023 (Members), while M has 4,977. Risk profile: F has the highest Pct at 50.2, M lowest at 49.8. Review gender-specific preventive care coverage (mammography, prostate screening, cardiovascular risk) to ensure equitable program design.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_915261').style.display=document.getElementById('sql_915261').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_915261" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Gender Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT GENDER, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic
+                    FROM MEMBERS GROUP BY GENDER ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY GENDER<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 2 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">What is driving member disenrollment?</span><span class="followup">Which members are highest risk and should we target for care management?</span><span class="followup">Show me enrollment trends by plan type</span><span class="followup">What is our geographic footprint and where should we expand?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Appointment Access & Patient Experience</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Appointment Access & Patient Experience</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 10 data queries • April 21, 2026</div>
+    <div style="margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;">
+        <span style="background:#28a745;width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+        <span>Database: healthcare_demo_71k_backup.db • 70,864 total rows</span>
+        <span style="margin-left:8px;opacity:0.7;">|</span>
+        <span style="margin-left:8px;">Self-Audit: PASS — 55 insights passed, 1 blocked</span>
+    </div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For The Organization</h3>
+    <div class="insight-item" style="border-left-color:#002B5C">Access KPIs — No Show Rate Pct: 21.2% (Needs Improvement). 324% worse the good benchmark of 5.0%.</div><div class="insight-item" style="border-left-color:#002B5C">No Shows benchmark: 12/12 entities below standard (avg 49.4%, range 39.0–56.0%, benchmark: 5.0%). Worst performers: Cardiology, Pediatrics, Dermatology.<div style="margin-top:6px"><span onclick="document.getElementById('reason_425062').style.display=document.getElementById('reason_425062').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_425062" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's No Shows was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 12 of 12 entities (100%) fall below standard. The spread from 39.0 to 56.0% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">No Show Rate Pct benchmark: 8/8 entities below standard (avg 21.2%, range 16.4–24.5%, benchmark: 5.0%). Worst performers: MAS, NCAL, CO.<div style="margin-top:6px"><span onclick="document.getElementById('reason_519747').style.display=document.getElementById('reason_519747').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_519747" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's No Show Rate Pct was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 8 of 8 entities (100%) fall below standard. The spread from 16.4 to 24.5% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">No Show Rate Pct benchmark: 12/25 entities below standard (avg 12.0%, range 0.0–32.5%, benchmark: 5.0%). Worst performers: 2023-07, 2023-02, 2023-01.<div style="margin-top:6px"><span onclick="document.getElementById('reason_169988').style.display=document.getElementById('reason_169988').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_169988" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's No Show Rate Pct was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 12 of 25 entities (48%) fall below standard. The spread from 0.0 to 32.5% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">ANNUAL_WELLNESS: Completed (57) is 23% lower than the network average (74).<div style="margin-top:6px"><span onclick="document.getElementById('reason_124301').style.display=document.getElementById('reason_124301').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_124301" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 74, StdDev = 8. ANNUAL_WELLNESS at 57 yields Z = 2.14 (23% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means ANNUAL_WELLNESS is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">ANNUAL_WELLNESS: Completion Rate Pct (17) is 20% lower than the network average (21).<div style="margin-top:6px"><span onclick="document.getElementById('reason_126916').style.display=document.getElementById('reason_126916').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_126916" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 21, StdDev = 2. ANNUAL_WELLNESS at 17 yields Z = 2.04 (20% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means ANNUAL_WELLNESS is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">PCP_VISIT: Scheduled Count (1) is 83% lower than the network average (6).<div style="margin-top:6px"><span onclick="document.getElementById('reason_860372').style.display=document.getElementById('reason_860372').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_860372" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 6, StdDev = 2. PCP_VISIT at 1 yields Z = 2.06 (83% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means PCP_VISIT is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">PCP_VISIT: Avg Wait Days (1) is 93% lower than the network average (15).<div style="margin-top:6px"><span onclick="document.getElementById('reason_183992').style.display=document.getElementById('reason_183992').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_183992" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 15, StdDev = 6. PCP_VISIT at 1 yields Z = 2.32 (93% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means PCP_VISIT is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">LAB_WORK: Min Wait Days (3) is 243% higher than the network average (1).<div style="margin-top:6px"><span onclick="document.getElementById('reason_80321').style.display=document.getElementById('reason_80321').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_80321" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 1, StdDev = 1. LAB_WORK at 3 yields Z = 2.02 (243% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means LAB_WORK is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">PCP_VISIT: Max Wait Days (1) is 97% lower than the network average (32).<div style="margin-top:6px"><span onclick="document.getElementById('reason_766767').style.display=document.getElementById('reason_766767').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_766767" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 8 data points. Mean = 32, StdDev = 12. PCP_VISIT at 1 yields Z = 2.57 (97% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means PCP_VISIT is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div>
+</div><div class="section" style="background:rgba(111,66,193,0.05);border-left:4px solid #6f42c1;padding:1.5rem;border-radius:6px;margin-bottom:1.5rem">
+    <h3 style="color:#6f42c1;font-size:1.1rem;margin-bottom:1rem">Trend Dynamics & Acceleration</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem">Beyond the direction of a trend — is it speeding up, slowing down, or volatile?</p>
+    <div class="insight-item" style="border-left-color:#6f42c1">Trend projection for Total Appts: decreasing at 10 per period (R²=0.77). Next period: -22. Based on linear regression of historical monthly data.</div><div class="insight-item" style="border-left-color:#6f42c1">Trend projection for Completed: decreasing at 3 per period (R²=0.71). Next period: -15. Based on linear regression of historical monthly data.</div><div class="insight-item" style="border-left-color:#6f42c1">Trend projection for No Show Rate Pct: decreasing at 2 per period (R²=0.75). Next period: -8. Based on linear regression of historical monthly data.</div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">PCP_VISIT: Max Wait Days (1) is 97% lower than average — requires attention. [WHY: Z = 2.57, p < 0.012. Across 8 entities, this deviation is statistically significant.]</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $48,100</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_2155_0').style.display=document.getElementById('method_2155_0').style.display==='none'?'block':'none'"><strong><span style="color:#28a745;font-weight:700">&#9632;</span> Cost Reduction — ER Diversion Program</strong><br>Divert 37 ER visits to urgent care/telehealth — saves $48,100/year<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_2155_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> ER visit avg cost $1,500, urgent care $200, telehealth $75 (HCUP national statistics). 15% diversion rate is conservative industry benchmark.</div></div>
+</div><div class="section forecast-section">
+    <h3>Trend Projections</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Projections based on historical monthly data using linear regression. Higher R² indicates stronger trend reliability. All projections should be validated against operational knowledge before making financial decisions.</p>
+    <div class="forecast-item"><span style="color:#dc3545">&#9660;</span> <strong>Total Appts</strong>: decreasing trend. Next 3 periods: -22, -33, -43. <br><small style="color:#888">R²=0.77 (High reliability). Confidence range: -114 to 69. Method: Ordinary Least Squares (OLS) linear regression on monthly time-series data.</small></div><div class="forecast-item"><span style="color:#dc3545">&#9660;</span> <strong>Completed</strong>: decreasing trend. Next 3 periods: -15, -18, -21. <br><small style="color:#888">R²=0.71 (High reliability). Confidence range: -45 to 15. Method: Ordinary Least Squares (OLS) linear regression on monthly time-series data.</small></div><div class="forecast-item"><span style="color:#dc3545">&#9660;</span> <strong>No Show Rate Pct</strong>: decreasing trend. Next 3 periods: -8, -9, -11. <br><small style="color:#888">R²=0.75 (High reliability). Confidence range: -22 to 6. Method: Ordinary Least Squares (OLS) linear regression on monthly time-series data.</small></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]ER Diversion Program: Divert 37 ER visits to urgent care/telehealth — saves $48,100/year</div><div class="rec-item"><strong>Initiative:</strong> Improve No Show Count for Access KPIs: reduce from 593.0% toward 5.0% (industry good).</div><div class="rec-item"><strong>Initiative:</strong> Improve No Show Rate Pct for Access KPIs: reduce from 21.2% toward 5.0% (industry good).</div><div class="rec-item"><strong>Initiative:</strong> Improve No Shows across 12 underperforming entities (Cardiology, Pediatrics, Dermatology): current range 39.0–56.0%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_972226_3').style.display=document.getElementById('rec_reason_972226_3').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_972226_3" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 56.0% needs 51.0% improvement. Prioritized because: (1) 12/12 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div><div class="rec-item"><strong>Initiative:</strong> Improve No Show Rate Pct across 8 underperforming entities (MAS, NCAL, CO): current range 16.4–24.5%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_190652_4').style.display=document.getElementById('rec_reason_190652_4').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_190652_4" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 24.5% needs 19.5% improvement. Prioritized because: (1) 8/8 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">2,800</div><div class="label">Total Appointments</div></div><div class="kpi"><div class="value">593</div><div class="label">No Show Count</div></div><div class="kpi"><div class="value">630</div><div class="label">Cancelled Count</div></div><div class="kpi"><div class="value">589</div><div class="label">Completed Count</div></div><div class="kpi"><div class="value">21.2</div><div class="label">No Show Rate Pct</div></div><div class="kpi"><div class="value">37</div><div class="label">Avg Duration Min</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_3920').style.display=document.getElementById('meth_3920').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_3920" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Appointment Access & Patient Experience Analytics</strong><br>
+            <strong>Calculation:</strong> No-show rate = NO_SHOW / total appointments × 100. Cancellation rate = CANCELLED / total × 100. Wait time = days between scheduling and appointment date. Completion rate = COMPLETED / total.<br>
+            <strong>Standard:</strong> CMS Patient Experience (CAHPS), NCQA Access & Availability, HEDIS timeliness measures<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>No-show rate target <10% industry standard</li><li>Cancellation rate tracked separately from no-shows</li><li>PCP visits vs specialist tracked for access balance</li><li>Wait time measured for SCHEDULED appointments only</li></ul>
+            <strong>Thresholds:</strong> <strong>No-show target:</strong> <10% | <strong>Cancellation target:</strong> <15% | <strong>PCP wait time:</strong> ≤7 days | <strong>Specialist wait time:</strong> ≤14 days<br>
+            <strong>Why It Matters:</strong> No-shows cost the healthcare system $150B+ annually. Each unfilled slot represents lost revenue and delayed care. High cancellation rates indicate scheduling process friction or patient barriers.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_717063').style.display=document.getElementById('sql_717063').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_717063" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Access KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT COUNT(DISTINCT APPOINTMENT_ID) as total_appointments,
+                        COUNT(DISTINCT CASE WHEN STATUS='NO_SHOW' THEN APPOINTMENT_ID END) as no_show_count,
+                        COUNT(DISTINCT CASE WHEN STATUS='CANCELLED' THEN APPOINTMENT_ID END) as cancelled_count,
+                        COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN APPOINTMENT_ID END) as completed_count,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN STATUS='NO_SHOW' THEN APPOINTMENT_ID END)/NULLIF(COUNT(DISTINCT APPOINTMENT_ID),0),1) as no_show_rate_pct,
+                        ROUND(AVG(CAST(DURATION_MINUTES AS REAL)),0) as avg_duration_min
+                    FROM appointments</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Appointment Type Distribution</h3><div class="chart-container"><canvas id="chart_12479" data-chart='{"type": "bar", "data": {"labels": ["SPECIALIST", "TELEHEALTH", "FOLLOW_UP", "URGENT", "PCP_VISIT", "IMAGING", "ANNUAL_WELLNESS", "LAB_WORK"], "datasets": [{"label": "Count", "data": [380.0, 370.0, 357.0, 351.0, 341.0, 340.0, 339.0, 322.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [13.6, 13.2, 12.8, 12.5, 12.2, 12.1, 12.1, 11.5], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Completed", "data": [75.0, 75.0, 79.0, 86.0, 74.0, 74.0, 57.0, 69.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Count: SPECIALIST (380). Lowest: LAB_WORK (322). Average: 350.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_12479').style.display=document.getElementById('meth_12479').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_12479" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Appointment Access & Patient Experience Analytics</strong><br>
+            <strong>Calculation:</strong> No-show rate = NO_SHOW / total appointments × 100. Cancellation rate = CANCELLED / total × 100. Wait time = days between scheduling and appointment date. Completion rate = COMPLETED / total.<br>
+            <strong>Standard:</strong> CMS Patient Experience (CAHPS), NCQA Access & Availability, HEDIS timeliness measures<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>No-show rate target <10% industry standard</li><li>Cancellation rate tracked separately from no-shows</li><li>PCP visits vs specialist tracked for access balance</li><li>Wait time measured for SCHEDULED appointments only</li></ul>
+            <strong>Thresholds:</strong> <strong>No-show target:</strong> <10% | <strong>Cancellation target:</strong> <15% | <strong>PCP wait time:</strong> ≤7 days | <strong>Specialist wait time:</strong> ≤14 days<br>
+            <strong>Why It Matters:</strong> No-shows cost the healthcare system $150B+ annually. Each unfilled slot represents lost revenue and delayed care. High cancellation rates indicate scheduling process friction or patient barriers.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_602979').style.display=document.getElementById('sql_602979').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_602979" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Appointment Type Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT APPOINTMENT_TYPE, COUNT(*) as count,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM appointments),1) as pct,
+                        COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN APPOINTMENT_ID END) as completed,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN APPOINTMENT_ID END)/NULLIF(COUNT(*),0),1) as completion_rate_pct
+                    FROM appointments GROUP BY APPOINTMENT_TYPE ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY APPOINTMENT_TYPE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>No-Show & Cancellation Analysis</h3><div class="table-container"><table><thead><tr><th>Department</th><th>Status</th><th>Count</th><th>Pct</th></tr></thead><tbody><tr><td>Pediatrics</td><td>CANCELLED</td><td>63</td><td>5.20</td></tr><tr><td>Cardiology</td><td>CANCELLED</td><td>60</td><td>4.90</td></tr><tr><td>Dermatology</td><td>CANCELLED</td><td>59</td><td>4.80</td></tr><tr><td>Cardiology</td><td>NO_SHOW</td><td>56</td><td>4.60</td></tr><tr><td>General Surgery</td><td>CANCELLED</td><td>56</td><td>4.60</td></tr><tr><td>Pediatrics</td><td>NO_SHOW</td><td>55</td><td>4.50</td></tr><tr><td>Dermatology</td><td>NO_SHOW</td><td>54</td><td>4.40</td></tr><tr><td>Laboratory</td><td>CANCELLED</td><td>54</td><td>4.40</td></tr><tr><td>Family Medicine</td><td>CANCELLED</td><td>51</td><td>4.20</td></tr><tr><td>Family Medicine</td><td>NO_SHOW</td><td>51</td><td>4.20</td></tr><tr><td>Psychiatry</td><td>NO_SHOW</td><td>51</td><td>4.20</td></tr><tr><td>Pulmonology</td><td>CANCELLED</td><td>51</td><td>4.20</td></tr><tr><td>Radiology</td><td>NO_SHOW</td><td>51</td><td>4.20</td></tr><tr><td>Emergency Medicine</td><td>CANCELLED</td><td>50</td><td>4.10</td></tr><tr><td>Emergency Medicine</td><td>NO_SHOW</td><td>50</td><td>4.10</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 24 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_69250').style.display=document.getElementById('meth_69250').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_69250" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Appointment Access & Patient Experience Analytics</strong><br>
+            <strong>Calculation:</strong> No-show rate = NO_SHOW / total appointments × 100. Cancellation rate = CANCELLED / total × 100. Wait time = days between scheduling and appointment date. Completion rate = COMPLETED / total.<br>
+            <strong>Standard:</strong> CMS Patient Experience (CAHPS), NCQA Access & Availability, HEDIS timeliness measures<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>No-show rate target <10% industry standard</li><li>Cancellation rate tracked separately from no-shows</li><li>PCP visits vs specialist tracked for access balance</li><li>Wait time measured for SCHEDULED appointments only</li></ul>
+            <strong>Thresholds:</strong> <strong>No-show target:</strong> <10% | <strong>Cancellation target:</strong> <15% | <strong>PCP wait time:</strong> ≤7 days | <strong>Specialist wait time:</strong> ≤14 days<br>
+            <strong>Why It Matters:</strong> No-shows cost the healthcare system $150B+ annually. Each unfilled slot represents lost revenue and delayed care. High cancellation rates indicate scheduling process friction or patient barriers.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_497033').style.display=document.getElementById('sql_497033').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_497033" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — No-Show & Cancellation Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH issue_analysis AS (
+                        SELECT DEPARTMENT, STATUS,
+                            COUNT(DISTINCT APPOINTMENT_ID) as count
+                        FROM appointments
+                        WHERE STATUS IN ('NO_SHOW','CANCELLED')
+                        GROUP BY DEPARTMENT, STATUS
+                    )
+                    SELECT DEPARTMENT, STATUS, count,
+                        ROUND(100.0*count/(SELECT COUNT(*) FROM appointments WHERE STATUS IN ('NO_SHOW','CANCELLED')),1) as pct
+                    FROM issue_analysis ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY DEPARTMENT, STATUS
+                    )
+                    SELECT DEPARTMENT, STATUS, count,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 24 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Wait Time Analysis</h3><div class="chart-container"><canvas id="chart_72740" data-chart='{"type": "bar", "data": {"labels": ["TELEHEALTH", "LAB_WORK", "FOLLOW_UP", "URGENT", "ANNUAL_WELLNESS", "IMAGING", "SPECIALIST", "PCP_VISIT"], "datasets": [{"label": "Scheduled Count", "data": [5.0, 5.0, 8.0, 8.0, 9.0, 5.0, 6.0, 1.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Wait Days", "data": [23.6, 19.6, 18.4, 16.1, 15.8, 15.2, 13.2, 1.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Min Wait Days", "data": [1.0, 3.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Scheduled Count: ANNUAL_WELLNESS (9). Lowest: PCP_VISIT (1). Average: 5.9. A 800% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_72740').style.display=document.getElementById('meth_72740').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_72740" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Appointment Access & Patient Experience Analytics</strong><br>
+            <strong>Calculation:</strong> No-show rate = NO_SHOW / total appointments × 100. Cancellation rate = CANCELLED / total × 100. Wait time = days between scheduling and appointment date. Completion rate = COMPLETED / total.<br>
+            <strong>Standard:</strong> CMS Patient Experience (CAHPS), NCQA Access & Availability, HEDIS timeliness measures<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>No-show rate target <10% industry standard</li><li>Cancellation rate tracked separately from no-shows</li><li>PCP visits vs specialist tracked for access balance</li><li>Wait time measured for SCHEDULED appointments only</li></ul>
+            <strong>Thresholds:</strong> <strong>No-show target:</strong> <10% | <strong>Cancellation target:</strong> <15% | <strong>PCP wait time:</strong> ≤7 days | <strong>Specialist wait time:</strong> ≤14 days<br>
+            <strong>Why It Matters:</strong> No-shows cost the healthcare system $150B+ annually. Each unfilled slot represents lost revenue and delayed care. High cancellation rates indicate scheduling process friction or patient barriers.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_868501').style.display=document.getElementById('sql_868501').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_868501" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Wait Time Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH wait_times AS (
+                        SELECT APPOINTMENT_TYPE,
+                            CAST((julianday(APPOINTMENT_DATE) - julianday('now')) AS INTEGER) as days_until_appt
+                        FROM appointments
+                        WHERE STATUS='SCHEDULED' AND APPOINTMENT_DATE &gt;= date('now')
+                    )
+                    SELECT APPOINTMENT_TYPE,
+                        COUNT(*) as scheduled_count,
+                        ROUND(AVG(CAST(days_until_appt AS REAL)),1) as avg_wait_days,
+                        MIN(days_until_appt) as min_wait_days,
+                        MAX(days_until_appt) as max_wait_days
+                    FROM wait_times GROUP BY APPOINTMENT_TYPE ORDER BY avg_wait_days DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY APPOINTMENT_TYPE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Department Utilization</h3><div class="table-container"><table><thead><tr><th>Department</th><th>Total Appts</th><th>Completed</th><th>No Shows</th><th>Completion Rate Pct</th><th>Avg Duration Min</th></tr></thead><tbody><tr><td>General Surgery</td><td>248</td><td>50</td><td>46</td><td>20.20</td><td>36.00</td></tr><tr><td>Laboratory</td><td>247</td><td>63</td><td>41</td><td>25.50</td><td>35.00</td></tr><tr><td>Emergency Medicine</td><td>247</td><td>51</td><td>50</td><td>20.60</td><td>38.00</td></tr><tr><td>Pulmonology</td><td>239</td><td>39</td><td>49</td><td>16.30</td><td>37.00</td></tr><tr><td>Family Medicine</td><td>239</td><td>53</td><td>51</td><td>22.20</td><td>39.00</td></tr><tr><td>Pediatrics</td><td>235</td><td>44</td><td>55</td><td>18.70</td><td>37.00</td></tr><tr><td>Dermatology</td><td>231</td><td>40</td><td>54</td><td>17.30</td><td>38.00</td></tr><tr><td>Internal Medicine</td><td>230</td><td>54</td><td>50</td><td>23.50</td><td>37.00</td></tr><tr><td>Psychiatry</td><td>228</td><td>51</td><td>51</td><td>22.40</td><td>38.00</td></tr><tr><td>Radiology</td><td>220</td><td>51</td><td>51</td><td>23.20</td><td>37.00</td></tr><tr><td>Cardiology</td><td>220</td><td>41</td><td>56</td><td>18.60</td><td>37.00</td></tr><tr><td>Orthopedics</td><td>216</td><td>52</td><td>39</td><td>24.10</td><td>38.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 12 rows of 12 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_36135').style.display=document.getElementById('meth_36135').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_36135" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Utilization Rate (per 1,000 members)</strong><br>
+            <strong>Calculation:</strong> Total encounters/admissions/days per 1,000 members per year.<br>
+            <strong>Standard:</strong> Varies by measure: ER visits 80-120/1K, inpatient admissions 50-70/1K, readmissions <20/1K.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Standardized for age/sex to allow benchmark comparison</li><li>Includes all visit types (office, urgent care, ED, inpatient)</li><li>Used to identify high utilization members for care management</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <100/1K | <strong>average:</strong> 100-140/1K | <strong>concern:</strong> >180/1K<br>
+            <strong>Why It Matters:</strong> High utilization signals unmanaged chronic disease or unnecessary care. 20/1K reduction = $2-4M savings for 10K members.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_485557').style.display=document.getElementById('sql_485557').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_485557" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Department Utilization</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT DEPARTMENT,
+                        COUNT(DISTINCT APPOINTMENT_ID) as total_appts,
+                        COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN APPOINTMENT_ID END) as completed,
+                        COUNT(DISTINCT CASE WHEN STATUS='NO_SHOW' THEN APPOINTMENT_ID END) as no_shows,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN APPOINTMENT_ID END)/NULLIF(COUNT(DISTINCT APPOINTMENT_ID),0),1) as completion_rate_pct,
+                        ROUND(AVG(CAST(DURATION_MINUTES AS REAL)),0) as avg_duration_min
+                    FROM appointments GROUP BY DEPARTMENT ORDER BY total_appts DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY DEPARTMENT<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Regional Access Patterns</h3><div class="chart-container"><canvas id="chart_83677" data-chart='{"type": "bar", "data": {"labels": ["NCAL", "SCAL", "MAS", "NW", "MID", "CO", "GA", "HI"], "datasets": [{"label": "Appointment Count", "data": [500.0, 450.0, 400.0, 350.0, 350.0, 300.0, 250.0, 200.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Member Count", "data": [1218.0, 1274.0, 1213.0, 1335.0, 1271.0, 1250.0, 1217.0, 1222.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Appts Per 1K Members", "data": [410.5, 353.2, 329.8, 262.2, 275.4, 240.0, 205.4, 163.7], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Largest region: NCAL (500 members), smallest: HI (200). Regional Member Count ranges from 1,213 (MAS) to 1,335 (NW), a spread of 122. Investigate whether variation reflects acuity differences or operational inefficiency.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_83677').style.display=document.getElementById('meth_83677').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_83677" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Appointment Access & Patient Experience Analytics</strong><br>
+            <strong>Calculation:</strong> No-show rate = NO_SHOW / total appointments × 100. Cancellation rate = CANCELLED / total × 100. Wait time = days between scheduling and appointment date. Completion rate = COMPLETED / total.<br>
+            <strong>Standard:</strong> CMS Patient Experience (CAHPS), NCQA Access & Availability, HEDIS timeliness measures<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>No-show rate target <10% industry standard</li><li>Cancellation rate tracked separately from no-shows</li><li>PCP visits vs specialist tracked for access balance</li><li>Wait time measured for SCHEDULED appointments only</li></ul>
+            <strong>Thresholds:</strong> <strong>No-show target:</strong> <10% | <strong>Cancellation target:</strong> <15% | <strong>PCP wait time:</strong> ≤7 days | <strong>Specialist wait time:</strong> ≤14 days<br>
+            <strong>Why It Matters:</strong> No-shows cost the healthcare system $150B+ annually. Each unfilled slot represents lost revenue and delayed care. High cancellation rates indicate scheduling process friction or patient barriers.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_455276').style.display=document.getElementById('sql_455276').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_455276" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Regional Access Patterns</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_counts AS (
+                        SELECT KP_REGION, COUNT(*) as member_count
+                        FROM MEMBERS GROUP BY KP_REGION
+                    )
+                    SELECT a.KP_REGION,
+                        COUNT(DISTINCT a.APPOINTMENT_ID) as appointment_count,
+                        mc.member_count,
+                        ROUND(1000.0*COUNT(DISTINCT a.APPOINTMENT_ID)/NULLIF(mc.member_count,0),1) as appts_per_1k_members,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN a.STATUS='NO_SHOW' THEN a.APPOINTMENT_ID END)/NULLIF(COUNT(DISTINCT a.APPOINTMENT_ID),0),1) as no_show_rate_pct
+                    FROM appointments a
+                    LEFT JOIN member_counts mc ON a.KP_REGION = mc.KP_REGION
+                    GROUP BY a.KP_REGION ORDER BY appointment_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, APPOINTMENTS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY KP_REGION
+                    )
+                    SELECT a.KP_REGION,
+                        COUNT(DISTINCT<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Appointment Trend</h3><div class="chart-container"><canvas id="chart_8669" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2025-06", "2025-07", "2025-08"], "datasets": [{"label": "Total Appts", "data": [197.0, 194.0, 211.0, 226.0, 222.0, 198.0, 154.0, 223.0, 190.0, 180.0, 184.0, 210.0, 31.0, 24.0, 41.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Completed", "data": [46.0, 44.0, 52.0, 74.0, 53.0, 45.0, 29.0, 53.0, 45.0, 45.0, 49.0, 54.0, 0.0, 0.0, 0.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "No Show Rate Pct", "data": [26.9, 27.3, 23.2, 22.6, 23.9, 23.7, 32.5, 23.8, 26.3, 22.2, 22.8, 24.8, 0.0, 0.0, 0.0], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Total Appts has decreased 99.5% over the period shown (from 197 to 1). Projection: decreasing trend continuing at 10.3 per period (R²=0.77).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_8669').style.display=document.getElementById('meth_8669').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_8669" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_716790').style.display=document.getElementById('sql_716790').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_716790" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Appointment Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(APPOINTMENT_DATE,1,7) as month,
+                        COUNT(*) as total_appts,
+                        COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN APPOINTMENT_ID END) as completed,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN STATUS='NO_SHOW' THEN APPOINTMENT_ID END)/NULLIF(COUNT(*),0),1) as no_show_rate_pct
+                    FROM appointments
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> APPOINTMENTS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 25 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">1,499</div><div class="label">Total Refs</div></div><div class="kpi"><div class="value">442</div><div class="label">Completed</div></div><div class="kpi"><div class="value">512</div><div class="label">Approved</div></div><div class="kpi"><div class="value">71</div><div class="label">Denied</div></div><div class="kpi"><div class="value">76</div><div class="label">Cancelled</div></div><div class="kpi"><div class="value">29.5</div><div class="label">Completion Rate Pct</div></div><div class="kpi"><div class="value">31.8</div><div class="label">Avg Days To Appt</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_47176').style.display=document.getElementById('meth_47176').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_47176" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_500102').style.display=document.getElementById('sql_500102').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_500102" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referral KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH ref_stats AS (
+                        SELECT COUNT(DISTINCT REFERRAL_ID) as total_refs,
+                            COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN REFERRAL_ID END) as completed,
+                            COUNT(DISTINCT CASE WHEN STATUS='APPROVED' THEN REFERRAL_ID END) as approved,
+                            COUNT(DISTINCT CASE WHEN STATUS='DENIED' THEN REFERRAL_ID END) as denied,
+                            COUNT(DISTINCT CASE WHEN STATUS='CANCELLED' THEN REFERRAL_ID END) as cancelled
+                        FROM REFERRALS
+                    ),
+                    appt_lag AS (
+                        SELECT AVG(CAST((julianday(APPOINTMENT_DATE) - julianday(REFERRAL_DATE)) AS REAL)) as avg_days_to_appt
+                        FROM REFERRALS
+                        WHERE APPOINTMENT_DATE IS NOT NULL
+                    )
+                    SELECT rs.total_refs,
+                        rs.completed,
+                        rs.approved,
+                        rs.denied,
+                        rs.cancelled,
+                        ROUND(100.0*rs.completed/NULLIF(rs.total_refs,0),1) as completion_rate_pct,
+                        ROUND(al.avg_days_to_appt,1) as avg_days_to_appt
+                    FROM ref_stats rs, appt_lag al</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Referrals by Specialty</h3><div class="chart-container"><canvas id="chart_34139" data-chart='{"type": "bar", "data": {"labels": ["Urology", "Pulmonology", "Surgery", "Cardiology", "Nephrology", "ENT", "Oncology", "OB/GYN", "Psychiatry", "Rheumatology", "Orthopedics", "Neurology", "Internal Medicine", "Pediatrics", "Endocrinology"], "datasets": [{"label": "Ref Count", "data": [92.0, 90.0, 87.0, 86.0, 82.0, 80.0, 80.0, 77.0, 77.0, 77.0, 74.0, 73.0, 72.0, 71.0, 70.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Approved", "data": [32.0, 34.0, 37.0, 28.0, 32.0, 21.0, 30.0, 20.0, 25.0, 31.0, 25.0, 31.0, 22.0, 22.0, 19.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Completed", "data": [24.0, 28.0, 24.0, 31.0, 16.0, 24.0, 25.0, 21.0, 25.0, 27.0, 21.0, 21.0, 24.0, 18.0, 27.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-cost specialty: Urology at 92. Lowest: Dermatology at 58. Highest volume: Surgery (37 Approved). Compare cost per encounter across specialties to identify candidates for value-based contracts.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_34139').style.display=document.getElementById('meth_34139').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_34139" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_970765').style.display=document.getElementById('sql_970765').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_970765" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referrals by Specialty</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH spec_stats AS (
+                        SELECT SPECIALTY, COUNT(DISTINCT REFERRAL_ID) as ref_count,
+                            COUNT(DISTINCT CASE WHEN STATUS='APPROVED' THEN REFERRAL_ID END) as approved,
+                            COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN REFERRAL_ID END) as completed
+                        FROM REFERRALS GROUP BY SPECIALTY
+                    )
+                    SELECT SPECIALTY, ref_count, approved, completed,
+                        ROUND(100.0*approved/NULLIF(ref_count,0),1) as approval_rate_pct,
+                        ROUND(100.0*completed/NULLIF(ref_count,0),1) as completion_rate_pct
+                    FROM spec_stats ORDER BY ref_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY SPECIALTY
+                    )
+                    SELECT SPECIALTY, ref_count, approved, completed,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 20 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Referral Status Funnel</h3><div class="chart-container"><canvas id="chart_47431" data-chart='{"type": "doughnut", "data": {"labels": ["APPROVED", "COMPLETED", "PENDING", "CANCELLED", "DENIED", "EXPIRED"], "datasets": [{"label": "Count", "data": [512.0, 442.0, 334.0, 76.0, 71.0, 65.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [34.1, 29.5, 22.3, 5.1, 4.7, 4.3], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Count: APPROVED (512). Lowest: EXPIRED (65). Average: 250. A 688% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_47431').style.display=document.getElementById('meth_47431').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_47431" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_403237').style.display=document.getElementById('sql_403237').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_403237" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referral Status Funnel</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT STATUS, COUNT(*) as count,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM REFERRALS),1) as pct
+                    FROM REFERRALS GROUP BY STATUS ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> rounding for precision<br><strong>Grouping:</strong> GROUP BY STATUS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which departments have highest no-show rates?</span><span class="followup">What is average wait time by appointment type?</span><span class="followup">Which regions have poorest access?</span><span class="followup">What can we do to reduce no-shows?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

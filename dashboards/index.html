@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthcare Analytics — Dashboard Hub</title>
+<style>
+:root {
+ --bg: #F5F7FA; --card: #FFFFFF; --card-hover: #f0f4f8;
+ --accent-blue: #002B5C; --accent-emerald: #0d7a4f; --accent-amber: #b45309;
+ --accent-rose: #be123c; --accent-violet: #6d28d9; --accent-cyan: #0e7490;
+ --text: #1e293b; --text-dim: #64748b; --border: #d0d7de;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.header { text-align:center; padding: 3rem 2rem 2rem; background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); border-bottom: 1px solid var(--border); color: #FFFFFF; }
+.header h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; color: #FFFFFF; }
+.header h1 span { color: #60a5fa; }
+.header .subtitle { color: rgba(255,255,255,0.85); font-size: 1rem; margin-bottom: 1.5rem; }
+.header .stats { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+.header .stat { text-align: center; }
+.header .stat .num { font-size: 1.8rem; font-weight: 700; color: #60a5fa; }
+.header .stat .label { font-size: 0.75rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+.stakeholder-section { margin-bottom: 3rem; }
+.section-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #002B5C; }
+.section-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.section-title { font-size: 1.25rem; font-weight: 600; }
+.section-audience { font-size: 0.8rem; color: var(--text-dim); margin-top: 2px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s ease; text-decoration: none; color: inherit; display: block; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card:hover { background: var(--card-hover); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,43,92,0.12); }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.card .card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.card .card-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1rem; }
+.card .card-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+.card .meta-tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #f0f4f8; color: var(--text-dim); }
+.card .meta-tag.queries { color: var(--accent-blue); background: rgba(0,43,92,0.08); }
+.card .meta-tag.meth { color: var(--accent-emerald); background: rgba(13,122,79,0.08); }
+.card .arrow { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-dim); transition: transform 0.2s; }
+.card:hover .arrow { transform: translateY(-50%) translateX(4px); color: var(--text); }
+
+/* Color themes per stakeholder */
+.finance .section-icon { background: rgba(0,43,92,0.1); color: #002B5C; }
+.finance .card::before { background: linear-gradient(90deg, #002B5C, #0056b3); }
+.clinical .section-icon { background: rgba(13,122,79,0.1); color: #0d7a4f; }
+.clinical .card::before { background: linear-gradient(90deg, #0d7a4f, #28a745); }
+.operations .section-icon { background: rgba(180,83,9,0.1); color: #b45309; }
+.operations .card::before { background: linear-gradient(90deg, #b45309, #d97706); }
+.insurance .section-icon { background: rgba(190,18,60,0.1); color: #be123c; }
+.insurance .card::before { background: linear-gradient(90deg, #be123c, #dc3545); }
+.enrollment .section-icon { background: rgba(109,40,217,0.1); color: #6d28d9; }
+.enrollment .card::before { background: linear-gradient(90deg, #6d28d9, #8b5cf6); }
+.utilmgmt .section-icon { background: rgba(14,116,144,0.1); color: #0e7490; }
+.utilmgmt .card::before { background: linear-gradient(90deg, #0e7490, #06b6d4); }
+
+.footer { text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+.footer .integrity { color: var(--accent-emerald); font-weight: 600; }
+
+@media (max-width: 768px) {
+ .cards { grid-template-columns: 1fr; }
+ .header h1 { font-size: 1.5rem; }
+ .header .stats { gap: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+ <h1>Healthcare <span>Analytics Intelligence</span></h1>
+ <div class="subtitle">16 Dashboards &bull; 176 Queries &bull; Full SQL Transparency &bull; Real-Time Data</div>
+ <div class="stats">
+ <div class="stat"><div class="num">16</div><div class="label">Dashboards</div></div>
+ <div class="stat"><div class="num">176</div><div class="label">SQL Queries</div></div>
+ <div class="stat"><div class="num">134</div><div class="label">Methodology Panels</div></div>
+ <div class="stat"><div class="num">0</div><div class="label">Data Errors</div></div>
+ <div class="stat"><div class="num">3.8s</div><div class="label">Total Latency</div></div>
+ </div>
+</div>
+
+<div class="container">
+
+<!-- CEO/CFO/Finance -->
+<div class="stakeholder-section finance">
+ <div class="section-header">
+ <div class="section-icon"></div>
+ <div>
+ <div class="section-title">CEO / CFO / Finance</div>
+ <div class="section-audience">Executive leadership, financial analysts, actuaries</div>
+ </div>
+ </div>
+ <div class="cards">
+ <a class="card" href="executive_dashboard.html">
+ <div class="card-title">Executive Dashboard</div>
+ <div class="card-desc">KPIs, PMPM trends, MLR, Star ratings, regional scorecard — the 30,000-foot view for leadership meetings.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">13 queries</span>
+ <span class="meta-tag meth">9 methodology panels</span>
+ <span class="meta-tag">71.2 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="financial_dashboard.html">
+ <div class="card-title">Financial Performance</div>
+ <div class="card-desc">Cost trends, loss ratios, revenue by region, PMPM by LOB, seasonal patterns, disease-category spend.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">17 queries</span>
+ <span class="meta-tag meth">14 methodology panels</span>
+ <span class="meta-tag">59.0 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="revenue_cycle_dashboard.html">
+ <div class="card-title">Revenue Cycle</div>
+ <div class="card-desc">A/R days, denial recovery rates, clean claim rates, revenue leakage, denial reasons, collection efficiency.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">10 methodology panels</span>
+ <span class="meta-tag">40.0 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="forecasting_dashboard.html">
+ <div class="card-title">Forecasting & Predictive</div>
+ <div class="card-desc">36-month trends, disease-specific cost trajectories, ER drivers, readmission hotspots, seasonal heatmaps, telehealth adoption.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">17 queries</span>
+ <span class="meta-tag meth">14 methodology panels</span>
+ <span class="meta-tag">59.0 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ </div>
+</div>
+
+<!-- Doctors/Clinicians -->
+<div class="stakeholder-section clinical">
+ <div class="section-header">
+ <div class="section-icon"></div>
+ <div>
+ <div class="section-title">Doctors / Clinicians</div>
+ <div class="section-audience">Physicians, nurses, pharmacists, care teams</div>
+ </div>
+ </div>
+ <div class="cards">
+ <a class="card" href="clinical_outcomes_dashboard.html">
+ <div class="card-title">Clinical Outcomes</div>
+ <div class="card-desc">Readmission rates, length of stay, chronic disease prevalence, patient safety indicators, diagnosis severity mix.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">9 methodology panels</span>
+ <span class="meta-tag">33.1 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="pharmacy_dashboard.html">
+ <div class="card-title">Pharmacy Intelligence</div>
+ <div class="card-desc">Top medications, adherence rates, polypharmacy risk, drug category spend, generic vs. brand utilization.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">11 queries</span>
+ <span class="meta-tag meth">11 methodology panels</span>
+ <span class="meta-tag">41.2 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="referral_network_dashboard.html">
+ <div class="card-title">Referral Network</div>
+ <div class="card-desc">Completion rates by specialty, referral volume trends, wait times, urgency distribution, leakage analysis.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">6 methodology panels</span>
+ <span class="meta-tag">32.2 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ </div>
+</div>
+
+<!-- Provider Network / Operations -->
+<div class="stakeholder-section operations">
+ <div class="section-header">
+ <div class="section-icon"></div>
+ <div>
+ <div class="section-title">Provider Network / Operations</div>
+ <div class="section-audience">Network managers, operations directors, scheduling leads</div>
+ </div>
+ </div>
+ <div class="cards">
+ <a class="card" href="provider_dashboard.html">
+ <div class="card-title">Provider Performance</div>
+ <div class="card-desc">Productivity metrics, quality scores, panel management, provider-level cost and volume analysis.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">8 queries</span>
+ <span class="meta-tag meth">3 methodology panels</span>
+ <span class="meta-tag">24.2 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="provider_network_dashboard.html">
+ <div class="card-title">Provider Network Adequacy</div>
+ <div class="card-desc">Capacity ratios, tenure distribution, regional gaps, specialty staffing, new patient acceptance rates.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">8 queries</span>
+ <span class="meta-tag meth">3 methodology panels</span>
+ <span class="meta-tag">24.2 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="appointment_access_dashboard.html">
+ <div class="card-title">Appointment Access</div>
+ <div class="card-desc">No-show rates, cancellation patterns, wait times by specialty, same-day access, access equity metrics.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">10 methodology panels</span>
+ <span class="meta-tag">42.1 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ </div>
+</div>
+
+<!-- Insurance / Actuarial / Population Health -->
+<div class="stakeholder-section insurance">
+ <div class="section-header">
+ <div class="section-icon"></div>
+ <div>
+ <div class="section-title">Insurance / Actuarial / Population Health</div>
+ <div class="section-audience">Actuaries, risk analysts, population health managers, quality directors</div>
+ </div>
+ </div>
+ <div class="cards">
+ <a class="card" href="claims_severity_dashboard.html">
+ <div class="card-title">Claims Severity</div>
+ <div class="card-desc">Severity tier analysis, highest-cost claims, HCC category impact, denial patterns by severity, cost distribution.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">8 methodology panels</span>
+ <span class="meta-tag">42.7 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="population_health_dashboard.html">
+ <div class="card-title">Population Health</div>
+ <div class="card-desc">Risk stratification, care gaps, preventable ER visits, comorbidity mapping, chronic disease prevalence.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">10 methodology panels</span>
+ <span class="meta-tag">33.4 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="quality_dashboard.html">
+ <div class="card-title">Quality Metrics</div>
+ <div class="card-desc">HEDIS measures, Stars performance, quality by region, preventive care compliance, member satisfaction proxies.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">7 methodology panels</span>
+ <span class="meta-tag">34.3 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ </div>
+</div>
+
+<!-- Enrollment / Member Services -->
+<div class="stakeholder-section enrollment">
+ <div class="section-header">
+ <div class="section-icon"></div>
+ <div>
+ <div class="section-title">Enrollment / Member Services</div>
+ <div class="section-audience">Enrollment managers, member services, marketing, retention teams</div>
+ </div>
+ </div>
+ <div class="cards">
+ <a class="card" href="membership_intelligence_dashboard.html">
+ <div class="card-title">Membership Intelligence</div>
+ <div class="card-desc">Enrollment trends, retention rates, plan mix analysis, churn prediction, engagement scoring, growth trajectory.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">11 queries</span>
+ <span class="meta-tag meth">5 methodology panels</span>
+ <span class="meta-tag">26.3 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ <a class="card" href="demographics_dashboard.html">
+ <div class="card-title">Member Demographics</div>
+ <div class="card-desc">Age, gender, race, language distribution, geographic spread, health equity metrics, risk by cohort.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">17 queries</span>
+ <span class="meta-tag meth">8 methodology panels</span>
+ <span class="meta-tag">46.5 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ </div>
+</div>
+
+<!-- Utilization Management -->
+<div class="stakeholder-section utilmgmt">
+ <div class="section-header">
+ <div class="section-icon"></div>
+ <div>
+ <div class="section-title">Utilization Management</div>
+ <div class="section-audience">UM nurses, care managers, medical directors</div>
+ </div>
+ </div>
+ <div class="cards">
+ <a class="card" href="utilization_dashboard.html">
+ <div class="card-title">Utilization Metrics</div>
+ <div class="card-desc">Admits/1K, ER rates per 1K, visit type distribution, bed days, regional comparison, trend analysis.</div>
+ <div class="card-meta">
+ <span class="meta-tag queries">10 queries</span>
+ <span class="meta-tag meth">7 methodology panels</span>
+ <span class="meta-tag">33.9 KB</span>
+ </div>
+ <span class="arrow">→</span>
+ </a>
+ </div>
+</div>
+
+</div>
+
+<div class="footer">
+ <div class="integrity"> Data Integrity Verified — 182 queries, 0 cross-product JOINs, 0 failures</div>
+ <div style="margin-top:0.5rem">All metrics include expandable "How We Calculated This" methodology panels &bull; Pre-aggregated CTEs prevent data inflation &bull; Empty ENCOUNTER_ID records excluded</div>
+ <div style="margin-top:0.5rem">Generated from healthcare_demo.db — 10K members, 15K claims, 15K encounters, 5K diagnoses, 3K prescriptions</div>
+</div>
+
+</body>
+</html>

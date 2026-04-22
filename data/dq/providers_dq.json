@@ -1,0 +1,153 @@
+{
+  "table_name": "providers",
+  "file_name": "providers.csv",
+  "total_rows": 1500,
+  "total_columns": 14,
+  "checked_at": "2026-03-31T15:16:07.530045",
+  "column_checks": {
+    "NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 100.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PROVIDER_FIRST_NAME": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PROVIDER_LAST_NAME": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "SPECIALTY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DEPARTMENT": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "KP_REGION": {
+      "field_type": "kp_region",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "FACILITY": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PROVIDER_TYPE": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DEA_NUMBER": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100.0,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "LICENSE_STATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "HIRE_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "STATUS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PANEL_SIZE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ACCEPTS_NEW_PATIENTS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "NPI": 100.0,
+    "PROVIDER_FIRST_NAME": 100.0,
+    "PROVIDER_LAST_NAME": 100.0,
+    "SPECIALTY": 100.0,
+    "DEPARTMENT": 100.0,
+    "KP_REGION": 100.0,
+    "FACILITY": 100.0,
+    "PROVIDER_TYPE": 100.0,
+    "DEA_NUMBER": 100.0,
+    "LICENSE_STATE": 100.0,
+    "HIRE_DATE": 100.0,
+    "STATUS": 100.0,
+    "PANEL_SIZE": 100.0,
+    "ACCEPTS_NEW_PATIENTS": 100.0
+  },
+  "dq_score": 100.0,
+  "dq_grade": "A"
+}

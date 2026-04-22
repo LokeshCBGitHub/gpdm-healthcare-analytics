@@ -1,0 +1,154 @@
+{
+  "table_name": "diagnoses",
+  "file_name": "diagnoses.csv",
+  "total_rows": 5000,
+  "total_columns": 13,
+  "checked_at": "2026-03-31T15:16:07.157797",
+  "column_checks": {
+    "DIAGNOSIS_ID": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100.0,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "MEMBER_ID": {
+      "field_type": "member_id",
+      "completeness": 100.0,
+      "uniqueness": 79.06,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 93.72,
+      "issues": [
+        "Uniqueness issues: 79.06% unique"
+      ]
+    },
+    "ENCOUNTER_ID": {
+      "field_type": "encounter_id",
+      "completeness": 69.84,
+      "uniqueness": 88.8,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 84.58,
+      "issues": [
+        "Low completeness: 69.84% non-null",
+        "Uniqueness issues: 88.8% unique"
+      ]
+    },
+    "ICD10_CODE": {
+      "field_type": "icd10",
+      "completeness": 100.0,
+      "uniqueness": 0.5,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 70.15,
+      "issues": []
+    },
+    "ICD10_DESCRIPTION": {
+      "field_type": "icd10",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 0.0,
+      "consistency": 100,
+      "column_score": 80.0,
+      "issues": [
+        "Validity issues: 0.0% valid format"
+      ]
+    },
+    "DIAGNOSIS_TYPE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DIAGNOSIS_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "RESOLVED_DATE": {
+      "field_type": null,
+      "completeness": 38.58,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 75.43,
+      "issues": [
+        "Low completeness: 38.58% non-null"
+      ]
+    },
+    "IS_CHRONIC": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "SEVERITY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DIAGNOSING_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 100.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "HCC_CODE": {
+      "field_type": "hcc",
+      "completeness": 39.56,
+      "uniqueness": 9.56,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 48.69,
+      "issues": [
+        "Low completeness: 39.56% non-null"
+      ]
+    },
+    "HCC_CATEGORY": {
+      "field_type": "hcc",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "DIAGNOSIS_ID": 100.0,
+    "MEMBER_ID": 93.72,
+    "ENCOUNTER_ID": 84.58,
+    "ICD10_CODE": 70.15,
+    "ICD10_DESCRIPTION": 80.0,
+    "DIAGNOSIS_TYPE": 100.0,
+    "DIAGNOSIS_DATE": 100.0,
+    "RESOLVED_DATE": 75.43,
+    "IS_CHRONIC": 100.0,
+    "SEVERITY": 100.0,
+    "DIAGNOSING_NPI": 100.0,
+    "HCC_CODE": 48.69,
+    "HCC_CATEGORY": 100.0
+  },
+  "dq_score": 88.66,
+  "dq_grade": "C"
+}

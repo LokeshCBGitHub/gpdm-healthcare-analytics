@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Deep Member Intelligence & Population Profile</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Deep Member Intelligence & Population Profile</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 22 data queries • April 21, 2026</div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For Your Organization</h3>
+    <div class="insight-item">18-29: Avg Chronic (3) is 3% higher than the network average (3). Members managing multiple conditions need coordinated care. Consider disease management programs and care navigators.</div><div class="insight-item">NW: Members (1,335) is 7% higher than the network average (1,250). This region or group may be growing rapidly — evaluate capacity and provider network adequacy.</div><div class="insight-item">NW: Pct Of Pop (13) is 7% higher than the network average (12).</div><div class="insight-item">MID: Avg Risk (2) is 2% higher than the network average (2). Higher acuity population requiring more intensive care management, driving up costs. Deploy chronic disease programs.</div><div class="insight-item">CO: Avg Risk (2) is 2% lower than the network average (2). Healthier population — good candidate for wellness and preventive care programs to maintain health.</div><div class="insight-item">NCAL: Er Visits (170) is 9% lower than the network average (188).</div><div class="insight-item">Portland: total Members (1,345) is 8% higher than the group average (1,250). This region or group may be growing rapidly — evaluate capacity and provider network adequacy.</div><div class="insight-item">Tysons: avg Avg Risk (2) is 4% lower than the group average (2). Healthier population — good candidate for wellness and preventive care programs to maintain health.</div><div class="insight-item">Baltimore: avg Avg Cost Per Member (4,711) is 7% higher than the group average (4,384). Higher per-member spending — benchmark against risk score to determine if acuity-adjusted costs are appropriate.</div><div class="insight-item">Baltimore: total Facilities (223) is 2% lower than the group average (227).</div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">English: Pct (60) is 377% higher than average — requires attention.</div><div class="alert-item">Generalized anxiety disorder: Avg Risk Of Affected (2) is 8% higher than average — requires attention.</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $575,100</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_56767_0').style.display=document.getElementById('method_56767_0').style.display==='none'?'block':'none'"><strong><span style="color:#17a2b8;font-weight:700">&#9632;</span> Care Management — High-Risk Care Management</strong> <span class="status-badge green">ROI: 11%</span> Investment: $5,175,900.<br>Care management for 5,751 high-risk members: invest $5,175,900, save $5,751,000 (ROI: 11%)<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_56767_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> $75-120/member/month program cost (telephonic care management, per AHRQ guidelines). 20% cost reduction based on CMS CMMI demonstrations for high-risk populations.</div></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]High-Risk Care Management: Care management for 5,751 high-risk members: invest $5,175,900, save $5,751,000 (ROI: 11%)</div><div class="rec-item"><strong>Initiative:</strong> Deploy care management for 5,751 high-risk members: predictive analytics, condition-specific programs, care coordination, medication management, and social support services. Expected impact: 15-25% cost reduction, improved HEDIS measures.</div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">10,000</div><div class="label">Total Members</div><div class="subtitle-text">10,000 lives covered. Mid-size plan — network adequacy standards apply.</div></div><div class="kpi"><div class="value">8</div><div class="label">Regions</div><div class="subtitle-text">Operating across 8 service areas</div></div><div class="kpi"><div class="value">6</div><div class="label">Plan Types</div></div><div class="kpi"><div class="value">2.3</div><div class="label">Avg Risk Score</div><div class="subtitle-text">1.0 = average acuity | High acuity — care management recommended</div></div><div class="kpi"><div class="value">3</div><div class="label">Avg Chronic Conditions</div><div class="subtitle-text">3.0 conditions avg — intensive care coordination required</div></div><div class="kpi"><div class="value">4,381</div><div class="label">Avg Cost Per Member</div><div class="subtitle-text">Industry avg: $4,500-6,000/year | Below average — efficient</div></div><div class="kpi"><div class="value">9,163</div><div class="label">Active Members</div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_801467').style.display=document.getElementById('sql_801467').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_801467" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Population KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost, COUNT(*) as claims
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT COUNT(*) as total_members,
+                        COUNT(DISTINCT m.KP_REGION) as regions,
+                        COUNT(DISTINCT m.PLAN_TYPE) as plan_types,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk_score,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic_conditions,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        SUM(CASE WHEN m.DISENROLLMENT_DATE = '' OR m.DISENROLLMENT_DATE IS NULL THEN 1 ELSE 0 END) as active_members
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT COUNT(*) as total_members,
+                        C<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Age Distribution with Risk & Cost</h3><div class="chart-container"><canvas id="chart_69393" data-chart='{"type": "bar", "data": {"labels": ["Under 18", "18-29", "30-44", "45-64", "65+"], "datasets": [{"label": "Members", "data": [506.0, 1181.0, 2690.0, 3301.0, 2322.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Total", "data": [5.1, 11.8, 26.9, 33.0, 23.2], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.41, 2.37, 2.33, 2.3, 2.35], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-risk age cohort: 45-64 with Pct Of Total of 33 vs lowest Under 18 at 5.1. Largest cohort: 45-64 (3,301 members). Age drives 60-80% of total cost — deploy chronic disease management for 45+ and wellness programs for younger cohorts.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_7357').style.display=document.getElementById('sql_7357').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_7357" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Age Distribution with Risk & Cost</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT m.*,
+                            CASE
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 18 THEN 'Under 18'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 30 THEN '18-29'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 45 THEN '30-44'
+                                WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &lt; 65 THEN '45-64'
+                                ELSE '65+' END as age_group,
+                            (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 as age
+                        FROM MEMBERS m
+                    )
+                    SELECT a.age_group, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct_of_total,
+                        ROUND(AVG(CAST(a.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(a.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member
+                    FROM aged a LEFT JOIN member_costs mc ON a.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY a.age_group ORDER BY MIN(a.age)</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT m.*,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Gender Distribution</h3><div class="chart-container"><canvas id="chart_98379" data-chart='{"type": "doughnut", "data": {"labels": ["F", "M"], "datasets": [{"label": "Members", "data": [5023.0, 4977.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [50.2, 49.8], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.32, 2.34], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> F members lead at 5,023 (Members), while M has 4,977. Risk profile: F has the highest Pct at 50.2, M lowest at 49.8. Review gender-specific preventive care coverage (mammography, prostate screening, cardiovascular risk) to ensure equitable program design.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_915261').style.display=document.getElementById('sql_915261').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_915261" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Gender Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT GENDER, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic
+                    FROM MEMBERS GROUP BY GENDER ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY GENDER<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 2 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Race & Ethnicity Health Equity</h3><div class="chart-container"><canvas id="chart_84916" data-chart='{"type": "bar", "data": {"labels": ["Unknown", "Asian", "White", "Hispanic", "Other", "Native Hawaiian", "Black", "American Indian", ""], "datasets": [{"label": "Members", "data": [1280.0, 1262.0, 1260.0, 1225.0, 1201.0, 1198.0, 1187.0, 1173.0, 214.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.34, 2.36, 2.27, 2.3, 2.35, 2.31, 2.37, 2.33, 2.48], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Chronic", "data": [3.0, 3.1, 3.0, 3.0, 3.0, 3.1, 3.0, 3.1, 2.7], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Risk scores are relatively equitable across groups (highest: Black at 2.4, lowest: White at 2.3). Population: Unknown (1,280 members) is the largest demographic group.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_905495').style.display=document.getElementById('sql_905495').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_905495" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Race & Ethnicity Health Equity</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost, COUNT(*) as claims
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT m.RACE, COUNT(*) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        ROUND(AVG(mc.claims),1) as avg_claims_per_member
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY m.RACE ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT m.RACE, COUNT(*) as members,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 9 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Regional Profile — Members, Cost, Risk</h3><div class="table-container"><table><thead><tr><th>Region</th><th>Members</th><th>Pct Of Pop</th><th>Avg Risk</th><th>Cost Per Member</th><th>Total Regional Cost</th><th>Er Visits</th><th>Er Per 1K</th></tr></thead><tbody><tr><td>NW</td><td>1,335</td><td>13.40</td><td>2.33</td><td>4,301.00</td><td>4,069,166.00</td><td>193</td><td>144.60</td></tr><tr><td>SCAL</td><td>1,274</td><td>12.70</td><td>2.33</td><td>4,456.00</td><td>4,019,111.00</td><td>203</td><td>159.30</td></tr><tr><td>HI</td><td>1,222</td><td>12.20</td><td>2.34</td><td>4,609.00</td><td>3,964,134.00</td><td>185</td><td>151.40</td></tr><tr><td>MAS</td><td>1,213</td><td>12.10</td><td>2.33</td><td>4,578.00</td><td>3,950,529.00</td><td>182</td><td>150.00</td></tr><tr><td>MID</td><td>1,271</td><td>12.70</td><td>2.39</td><td>4,423.00</td><td>3,892,597.00</td><td>186</td><td>146.30</td></tr><tr><td>GA</td><td>1,217</td><td>12.20</td><td>2.34</td><td>4,269.00</td><td>3,705,518.00</td><td>187</td><td>153.70</td></tr><tr><td>NCAL</td><td>1,218</td><td>12.20</td><td>2.32</td><td>4,320.00</td><td>3,650,058.00</td><td>170</td><td>139.60</td></tr><tr><td>CO</td><td>1,250</td><td>12.50</td><td>2.28</td><td>4,099.00</td><td>3,595,260.00</td><td>195</td><td>156.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 8 rows of 8 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_569681').style.display=document.getElementById('sql_569681').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_569681" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Regional Profile — Members, Cost, Risk</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    ),
+                    region_er AS (
+                        SELECT m.KP_REGION, COUNT(*) as er_visits
+                        FROM ENCOUNTERS e JOIN MEMBERS m ON e.MEMBER_ID = m.MEMBER_ID
+                        WHERE e.VISIT_TYPE = 'EMERGENCY' GROUP BY m.KP_REGION
+                    )
+                    SELECT m.KP_REGION as region, COUNT(DISTINCT m.MEMBER_ID) as members,
+                        ROUND(100.0*COUNT(DISTINCT m.MEMBER_ID)/(SELECT COUNT(*) FROM MEMBERS),1) as pct_of_pop,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(mc.total_cost),0) as cost_per_member,
+                        ROUND(SUM(mc.total_cost),0) as total_regional_cost,
+                        COALESCE(re.er_visits,0) as er_visits,
+                        ROUND(1000.0*COALESCE(re.er_visits,0)/COUNT(DISTINCT m.MEMBER_ID),1) as er_per_1k
+                    FROM MEMBERS m
+                    LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    LEFT JOIN region_er re ON m.KP_REGION = re.KP_REGION
+                    GROUP BY m.KP_REGION ORDER BY total_regional_cost DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    region_er AS (
+                        SELECT m.KP_REGION,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Geographic Distribution by City</h3><div class="table-container"><table><thead><tr><th>City</th><th>State</th><th>Members</th><th>Avg Risk</th><th>Avg Cost Per Member</th><th>Facilities</th></tr></thead><tbody><tr><td>Portland</td><td>CO</td><td>168</td><td>2.25</td><td>4,663.00</td><td>26</td></tr><tr><td>Honolulu</td><td>WA</td><td>163</td><td>2.20</td><td>4,972.00</td><td>26</td></tr><tr><td>Portland</td><td>VA</td><td>161</td><td>2.36</td><td>4,125.00</td><td>25</td></tr><tr><td>Baltimore</td><td>WA</td><td>158</td><td>2.19</td><td>4,382.00</td><td>26</td></tr><tr><td>LA</td><td>DC</td><td>158</td><td>2.43</td><td>4,387.00</td><td>24</td></tr><tr><td>Oakland</td><td>HI</td><td>158</td><td>2.28</td><td>3,695.00</td><td>26</td></tr><tr><td>Portland</td><td>WA</td><td>157</td><td>2.42</td><td>4,251.00</td><td>23</td></tr><tr><td>Tysons</td><td>GA</td><td>157</td><td>2.14</td><td>4,307.00</td><td>26</td></tr><tr><td>Denver</td><td>WA</td><td>156</td><td>2.34</td><td>4,261.00</td><td>25</td></tr><tr><td>Honolulu</td><td>VA</td><td>155</td><td>2.20</td><td>4,215.00</td><td>24</td></tr><tr><td>Atlanta</td><td>DC</td><td>153</td><td>2.34</td><td>4,371.00</td><td>25</td></tr><tr><td>Portland</td><td>HI</td><td>153</td><td>2.35</td><td>4,349.00</td><td>25</td></tr><tr><td>Honolulu</td><td>DC</td><td>152</td><td>2.56</td><td>3,642.00</td><td>25</td></tr><tr><td>Honolulu</td><td>OR</td><td>150</td><td>2.36</td><td>4,530.00</td><td>26</td></tr><tr><td>LA</td><td>VA</td><td>150</td><td>2.24</td><td>4,273.00</td><td>26</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 72 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_31001').style.display=document.getElementById('meth_31001').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_31001" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_559097').style.display=document.getElementById('sql_559097').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_559097" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Geographic Distribution by City</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT m.CITY, m.STATE, COUNT(*) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        COUNT(DISTINCT m.FACILITY) as facilities
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY m.CITY, m.STATE ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT m.CITY, m.STATE, COUNT(*) as members,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 72 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Plan Type Selection Profile</h3><div class="table-container"><table><thead><tr><th>Plan Type</th><th>Members</th><th>Avg Risk</th><th>Avg Chronic</th><th>Avg Cost Per Member</th><th>Pct Senior</th><th>Pct High Risk</th></tr></thead><tbody><tr><td>EPO</td><td>1,732</td><td>2.34</td><td>3.10</td><td>4,327.00</td><td>23.20</td><td>58.00</td></tr><tr><td>HMO</td><td>1,700</td><td>2.32</td><td>3.00</td><td>4,283.00</td><td>23.60</td><td>56.80</td></tr><tr><td>PPO</td><td>1,692</td><td>2.32</td><td>3.00</td><td>4,337.00</td><td>21.90</td><td>56.60</td></tr><tr><td>HDHP</td><td>1,663</td><td>2.32</td><td>3.00</td><td>4,482.00</td><td>23.50</td><td>56.60</td></tr><tr><td>Medicaid</td><td>1,628</td><td>2.34</td><td>3.00</td><td>4,340.00</td><td>23.00</td><td>58.70</td></tr><tr><td>Medicare Advantage</td><td>1,585</td><td>2.35</td><td>3.00</td><td>4,537.00</td><td>24.20</td><td>58.50</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 6 rows of 6 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_97249').style.display=document.getElementById('meth_97249').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_97249" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_755984').style.display=document.getElementById('sql_755984').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_755984" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Plan Type Selection Profile</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT MEMBER_ID,
+                            CASE WHEN (julianday('now') - julianday(DATE_OF_BIRTH))/365.25 &gt;= 65 THEN 'Senior (65+)'
+                                 WHEN (julianday('now') - julianday(DATE_OF_BIRTH))/365.25 &gt;= 45 THEN 'Middle-Age (45-64)'
+                                 ELSE 'Younger (&lt;45)' END as age_band
+                        FROM MEMBERS
+                    )
+                    SELECT m.PLAN_TYPE, COUNT(*) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        ROUND(100.0*SUM(CASE WHEN a.age_band='Senior (65+)' THEN 1 ELSE 0 END)/COUNT(*),1) as pct_senior,
+                        ROUND(100.0*SUM(CASE WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 2.0 THEN 1 ELSE 0 END)/COUNT(*),1) as pct_high_risk
+                    FROM MEMBERS m
+                    LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    LEFT JOIN aged a ON m.MEMBER_ID = a.MEMBER_ID
+                    GROUP BY m.PLAN_TYPE ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    aged AS (
+                        SELECT MEMBER_ID,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Risk Stratification with Cost Impact</h3><div class="chart-container"><canvas id="chart_73695" data-chart='{"type": "bar", "data": {"labels": ["1. Low Risk (<1.0)", "2. Moderate (1.0-2.0)", "3. High (2.0-3.0)", "4. Very High (3.0+)"], "datasets": [{"label": "Members", "data": [1877.0, 2372.0, 2264.0, 3487.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Pop", "data": [18.8, 23.7, 22.6, 34.9], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Chronic", "data": [3.1, 3.0, 3.0, 3.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> 5,751 members are in high/very-high risk tiers — these typically drive 60-80% of total medical spend. 1,877 low-risk members are candidates for wellness and preventive programs to maintain health status.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_73695').style.display=document.getElementById('meth_73695').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_73695" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Risk Stratification & Segmentation</strong><br>
+            <strong>Calculation:</strong> Members grouped into risk tiers (low, moderate, high, very high) using predictive algorithms.<br>
+            <strong>Standard:</strong> Typical distribution: 50% low, 30% moderate, 15% high, 5% very high risk.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Driven by PMPM, HCC codes, claim patterns, pharmacy data</li><li>Very high risk: >$20K annual cost, multiple hospitalizations</li><li>Used to allocate case management, care coordination resources</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <5% very high risk | <strong>average:</strong> 5-10% very high risk | <strong>concern:</strong> >15% very high risk<br>
+            <strong>Why It Matters:</strong> Risk concentration: top 5% of members drive 50%+ of costs. Targeting top tier with interventions yields 3:1 ROI.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_348495').style.display=document.getElementById('sql_348495').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_348495" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Risk Stratification with Cost Impact</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost, COUNT(*) as claims
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 1.0 THEN '1. Low Risk (&lt;1.0)'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 2.0 THEN '2. Moderate (1.0-2.0)'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 3.0 THEN '3. High (2.0-3.0)'
+                        ELSE '4. Very High (3.0+)' END as risk_tier,
+                        COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct_of_pop,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        ROUND(SUM(mc.total_cost),0) as total_tier_cost,
+                        ROUND(100.0*SUM(mc.total_cost)/(SELECT SUM(CAST(PAID_AMOUNT AS REAL)) FROM CLAIMS WHERE ENCOUNTER_ID != ''),1) as pct_of_total_cost
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY risk_tier ORDER BY risk_tier</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.RISK_SCORE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Chronic Condition Burden & Cost</h3><div class="chart-container"><canvas id="chart_99027" data-chart='{"type": "bar", "data": {"labels": ["0 - Healthy", "1 Condition", "2 Conditions", "3-4 Conditions", "5+ Conditions"], "datasets": [{"label": "Members", "data": [1385.0, 1424.0, 1433.0, 2820.0, 2938.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.31, 2.35, 2.28, 2.38, 2.32], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Cost Per Member", "data": [4495.0, 4432.0, 4515.0, 4083.0, 4515.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Largest group: 5+ Conditions (2,938 members). 5,758 members have 3+ chronic conditions — each additional condition increases per-member cost by 30-50%. Coordinate care across specialists for this group.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_99027').style.display=document.getElementById('meth_99027').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_99027" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Chronic Disease Management & Control</strong><br>
+            <strong>Calculation:</strong> Members with chronic condition with documented control/treatment ÷ members with condition.<br>
+            <strong>Standard:</strong> STARS measures: HTN control >80%, diabetes A1C monitoring >90%, COPD management >75%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Requires recent clinical data (within 12 months)</li><li>Control defined by clinical guidelines (e.g., BP <140/90 for HTN)</li><li>Tracked per condition and in aggregate</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> >80% | <strong>average:</strong> 70-80% | <strong>concern:</strong> <60%<br>
+            <strong>Why It Matters:</strong> Uncontrolled chronic disease drives hospitalizations. Each 10% improvement = $1-2M savings + STARS gain.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_738747').style.display=document.getElementById('sql_738747').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_738747" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Chronic Condition Burden & Cost</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.CHRONIC_CONDITIONS AS INTEGER) = 0 THEN '0 - Healthy'
+                        WHEN CAST(m.CHRONIC_CONDITIONS AS INTEGER) = 1 THEN '1 Condition'
+                        WHEN CAST(m.CHRONIC_CONDITIONS AS INTEGER) = 2 THEN '2 Conditions'
+                        WHEN CAST(m.CHRONIC_CONDITIONS AS INTEGER) &lt;= 4 THEN '3-4 Conditions'
+                        ELSE '5+ Conditions' END as burden,
+                        COUNT(*) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        ROUND(100.0*SUM(mc.total_cost)/(SELECT SUM(CAST(PAID_AMOUNT AS REAL)) FROM CLAIMS WHERE ENCOUNTER_ID != ''),1) as pct_of_total_spend
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY burden ORDER BY MIN(CAST(m.CHRONIC_CONDITIONS AS INTEGER))</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.CHRONIC_CON<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 5 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Language Diversity & Health Profile</h3><div class="chart-container"><canvas id="chart_85776" data-chart='{"type": "bar", "data": {"labels": ["English", "Spanish", "Chinese", "Vietnamese", "Other", "Tagalog", "Korean", "Russian"], "datasets": [{"label": "Members", "data": [5979.0, 1541.0, 779.0, 516.0, 395.0, 326.0, 296.0, 168.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [59.8, 15.4, 7.8, 5.2, 4.0, 3.3, 3.0, 1.7], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.32, 2.35, 2.31, 2.32, 2.37, 2.38, 2.38, 2.34], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-risk age cohort: English with Pct of 59.8 vs lowest Russian at 1.7. Largest cohort: English (5,979 members). Age drives 60-80% of total cost — deploy chronic disease management for 45+ and wellness programs for younger cohorts.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_856820').style.display=document.getElementById('sql_856820').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_856820" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Language Diversity & Health Profile</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT LANGUAGE, COUNT(*) as members,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM MEMBERS),1) as pct,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic
+                    FROM MEMBERS GROUP BY LANGUAGE ORDER BY members DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY LANGUAGE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Disease Propensity by Age Group</h3><div class="table-container"><table><thead><tr><th>Disease Category</th><th>Age Group</th><th>Affected Members</th><th>Prevalence Pct</th></tr></thead><tbody><tr><td>CKD</td><td>18-29</td><td>127</td><td>7.50</td></tr><tr><td>CKD</td><td>30-44</td><td>160</td><td>5.90</td></tr><tr><td>CKD</td><td>45-64</td><td>253</td><td>7.70</td></tr><tr><td>CKD</td><td>65+</td><td>158</td><td>6.80</td></tr><tr><td>COPD</td><td>18-29</td><td>102</td><td>6.00</td></tr><tr><td>COPD</td><td>30-44</td><td>203</td><td>7.50</td></tr><tr><td>COPD</td><td>45-64</td><td>216</td><td>6.50</td></tr><tr><td>COPD</td><td>65+</td><td>166</td><td>7.10</td></tr><tr><td>Cancer</td><td>18-29</td><td>111</td><td>6.60</td></tr><tr><td>Cancer</td><td>30-44</td><td>198</td><td>7.40</td></tr><tr><td>Cancer</td><td>45-64</td><td>238</td><td>7.20</td></tr><tr><td>Cancer</td><td>65+</td><td>165</td><td>7.10</td></tr><tr><td>Diabetes</td><td>18-29</td><td>113</td><td>6.70</td></tr><tr><td>Diabetes</td><td>30-44</td><td>175</td><td>6.50</td></tr><tr><td>Diabetes</td><td>45-64</td><td>246</td><td>7.50</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 28 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_866104').style.display=document.getElementById('sql_866104').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_866104" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Disease Propensity by Age Group</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH aged AS (
+                        SELECT MEMBER_ID,
+                            CASE WHEN (julianday('now') - julianday(DATE_OF_BIRTH))/365.25 &lt; 30 THEN '18-29'
+                                 WHEN (julianday('now') - julianday(DATE_OF_BIRTH))/365.25 &lt; 45 THEN '30-44'
+                                 WHEN (julianday('now') - julianday(DATE_OF_BIRTH))/365.25 &lt; 65 THEN '45-64'
+                                 ELSE '65+' END as age_group
+                        FROM MEMBERS
+                    )
+                    SELECT d.HCC_CATEGORY as disease_category, a.age_group,
+                        COUNT(DISTINCT d.MEMBER_ID) as affected_members,
+                        ROUND(100.0*COUNT(DISTINCT d.MEMBER_ID)/
+                            (SELECT COUNT(*) FROM aged WHERE age_group = a.age_group),1) as prevalence_pct
+                    FROM DIAGNOSES d JOIN aged a ON d.MEMBER_ID = a.MEMBER_ID
+                    WHERE d.HCC_CATEGORY IS NOT NULL AND d.HCC_CATEGORY != 'None'
+                    GROUP BY d.HCC_CATEGORY, a.age_group ORDER BY disease_category, age_group</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, DIAGNOSES<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY d.HCC_CATEGORY, a.age_group<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 28 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Top Diagnoses — Who Gets What</h3><div class="chart-container"><canvas id="chart_42423" data-chart='{"type": "bar", "data": {"labels": ["Low back pain", "Headache", "Unspecified atrial fibril", "Primary osteoarthritis, r", "Insomnia, unspecified", "Major depressive disorder", "Generalized anxiety disor", "Acute upper respiratory i", "Atherosclerotic heart dis", "Hyperlipidemia, unspecifi", "GERD with esophagitis", "Essential hypertension", "Chronic kidney disease, s", "Dermatitis, unspecified", "Pneumonia, unspecified or"], "datasets": [{"label": "Affected Members", "data": [220.0, 216.0, 211.0, 211.0, 207.0, 206.0, 206.0, 205.0, 203.0, 202.0, 199.0, 199.0, 199.0, 198.0, 197.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Prevalence Pct", "data": [2.2, 2.2, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk Of Affected", "data": [2.23, 2.33, 2.25, 2.29, 2.28, 2.29, 2.48, 2.33, 2.31, 2.35, 2.26, 2.22, 2.24, 2.24, 2.38], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Affected Members: Low back pain (220). Lowest: Pneumonia, unspecified organism (197). Average: 205.3.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_42423').style.display=document.getElementById('meth_42423').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_42423" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Clinical Outcomes & Patient Safety</strong><br>
+            <strong>Calculation:</strong> Readmission rate, adverse event rate, mortality rate. Condition-specific (COPD, CHF, MI).<br>
+            <strong>Standard:</strong> 30-day readmission <20%, hospital mortality in range of peer hospitals, adverse events <1%.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Risk-adjusted for case-mix (age, comorbidities)</li><li>Publicly reported for Medicare (Physician Compare, Hospital Compare)</li><li>Tracked per facility and by primary condition</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> Peer benchmark | <strong>average:</strong> Slightly above peer | <strong>concern:</strong> Significantly above peer<br>
+            <strong>Why It Matters:</strong> Poor outcomes trigger CMS penalties + member dissatisfaction. Each readmission prevented = $15K saved.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_647086').style.display=document.getElementById('sql_647086').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_647086" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Top Diagnoses — Who Gets What</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT d.ICD10_DESCRIPTION, COUNT(DISTINCT d.MEMBER_ID) as affected_members,
+                        ROUND(100.0*COUNT(DISTINCT d.MEMBER_ID)/(SELECT COUNT(*) FROM MEMBERS),1) as prevalence_pct,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk_of_affected
+                    FROM DIAGNOSES d JOIN MEMBERS m ON d.MEMBER_ID = m.MEMBER_ID
+                    GROUP BY d.ICD10_DESCRIPTION ORDER BY affected_members DESC LIMIT 15</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, DIAGNOSES<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY d.ICD10_DESCRIPTION<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 15 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>High-Risk Population Deep Profile</h3><div class="table-container"><table><thead><tr><th>Senior Flag</th><th>Gender</th><th>Members</th><th>Avg Risk</th><th>Avg Chronic</th><th>Avg Cost</th><th>Plan Types Used</th></tr></thead><tbody><tr><td>Non-Senior</td><td>M</td><td>2,182</td><td>3.26</td><td>3.00</td><td>4,445.00</td><td>6</td></tr><tr><td>Senior</td><td>M</td><td>675</td><td>3.25</td><td>3.10</td><td>4,364.00</td><td>6</td></tr><tr><td>Senior</td><td>F</td><td>688</td><td>3.22</td><td>3.10</td><td>4,359.00</td><td>6</td></tr><tr><td>Non-Senior</td><td>F</td><td>2,206</td><td>3.24</td><td>3.10</td><td>4,285.00</td><td>6</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 4 rows of 4 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_240785').style.display=document.getElementById('sql_240785').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_240785" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — High-Risk Population Deep Profile</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    ),
+                    high_risk AS (
+                        SELECT m.*, mc.total_cost,
+                            CASE WHEN (julianday('now') - julianday(m.DATE_OF_BIRTH))/365.25 &gt;= 65 THEN 'Senior'
+                                 ELSE 'Non-Senior' END as senior_flag
+                        FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                        WHERE CAST(m.RISK_SCORE AS REAL) &gt;= 2.0
+                    )
+                    SELECT senior_flag, GENDER, COUNT(*) as members,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(total_cost),0) as avg_cost,
+                        COUNT(DISTINCT PLAN_TYPE) as plan_types_used
+                    FROM high_risk GROUP BY senior_flag, GENDER ORDER BY avg_cost DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    high_risk AS (
+                        SELECT m.*, mc.tota<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Enrollment Tenure Distribution</h3><div class="chart-container"><canvas id="chart_28987" data-chart='{"type": "bar", "data": {"labels": ["1-2 Years", "2-4 Years", "4+ Years"], "datasets": [{"label": "Members", "data": [1031.0, 2874.0, 6095.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.32, 2.33, 2.33], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Disenrolled", "data": [84.0, 240.0, 513.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Members: 4+ Years (6,095). Lowest: 1-2 Years (1,031). Average: 3,333. A 491% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_28987').style.display=document.getElementById('meth_28987').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_28987" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Provider Network & Workforce Analytics</strong><br>
+            <strong>Calculation:</strong> Provider counts by type (MD/DO/PA/RN), panel size analysis, capacity = panel_size vs benchmark (2,000 for PCP, 3,000+ for specialist). Provider-to-member ratio per 1K members.<br>
+            <strong>Standard:</strong> CMS Network Adequacy standards, NCQA Provider Directory accuracy, state licensure compliance requirements<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active providers only (STATUS=ACTIVE) for capacity calculations</li><li>Panel over-capacity: >2,500 for PCP, may indicate burnout risk</li><li>New patient acceptance required for network adequacy</li><li>Provider tenure bands: <3 years (new), 3-10 (experienced), 10+ (senior)</li></ul>
+            <strong>Thresholds:</strong> <strong>PCP panel target:</strong> 1,800-2,200 | <strong>Provider:member ratio:</strong> ≥1:1,500 | <strong>Accepting new patients:</strong> ≥70%<br>
+            <strong>Why It Matters:</strong> Provider network adequacy directly affects member access, satisfaction, and retention. Over-paneled providers face burnout and quality risk. Under-staffed regions create access gaps driving ER utilization.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_248652').style.display=document.getElementById('sql_248652').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_248652" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Enrollment Tenure Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT CASE
+                        WHEN (julianday('now') - julianday(ENROLLMENT_DATE))/365.25 &lt; 1 THEN '&lt; 1 Year'
+                        WHEN (julianday('now') - julianday(ENROLLMENT_DATE))/365.25 &lt; 2 THEN '1-2 Years'
+                        WHEN (julianday('now') - julianday(ENROLLMENT_DATE))/365.25 &lt; 4 THEN '2-4 Years'
+                        ELSE '4+ Years' END as tenure,
+                        COUNT(*) as members,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        SUM(CASE WHEN DISENROLLMENT_DATE != '' AND DISENROLLMENT_DATE IS NOT NULL THEN 1 ELSE 0 END) as disenrolled,
+                        ROUND(100.0*SUM(CASE WHEN DISENROLLMENT_DATE != '' AND DISENROLLMENT_DATE IS NOT NULL THEN 1 ELSE 0 END)/COUNT(*),1) as churn_pct
+                    FROM MEMBERS WHERE ENROLLMENT_DATE IS NOT NULL AND ENROLLMENT_DATE != ''
+                    GROUP BY tenure ORDER BY MIN(julianday('now') - julianday(ENROLLMENT_DATE))</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> summation, averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY tenure<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 3 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Facility Member Distribution</h3><div class="chart-container"><canvas id="chart_54751" data-chart='{"type": "bar", "data": {"labels": ["Mid-Atlantic Medical Cent", "Moanalua Medical Center", "Capitol Hill Medical Cent", "Burke Medical Center", "Town Center Medical Offic", "Crescent Center", "Maui Lani Medical Office", "Tysons Corner Medical Cen", "Westside Medical Center", "Interstate Medical Office", "Franklin Medical Center", "Rock Creek Medical Office", "Sunnyside Medical Center", "Skyline Medical Center", "Oakland Medical Center"], "datasets": [{"label": "Members", "data": [658.0, 632.0, 625.0, 613.0, 612.0, 605.0, 590.0, 588.0, 495.0, 450.0, 446.0, 418.0, 390.0, 386.0, 239.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [2.44, 2.4, 2.32, 2.33, 2.36, 2.32, 2.28, 2.35, 2.34, 2.33, 2.23, 2.29, 2.3, 2.34, 2.34], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Chronic", "data": [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.1, 3.1, 3.1, 3.0, 3.1, 2.9, 2.8, 3.1, 2.8], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Members: Mid-Atlantic Medical Center (658). Lowest: Oakland Medical Center (239). Average: 516.5. A 175% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_532880').style.display=document.getElementById('sql_532880').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_532880" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Facility Member Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT FACILITY, COUNT(*) as members,
+                        ROUND(AVG(CAST(RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic
+                    FROM MEMBERS GROUP BY FACILITY ORDER BY members DESC LIMIT 15</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY FACILITY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 15 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Cost by Gender & Plan Type</h3><div class="table-container"><table><thead><tr><th>Gender</th><th>Plan Type</th><th>Members</th><th>Avg Cost Per Member</th><th>Avg Risk</th></tr></thead><tbody><tr><td>M</td><td>Medicare Advantage</td><td>760</td><td>4,625.00</td><td>2.34</td></tr><tr><td>M</td><td>HDHP</td><td>838</td><td>4,488.00</td><td>2.32</td></tr><tr><td>F</td><td>HDHP</td><td>825</td><td>4,476.00</td><td>2.31</td></tr><tr><td>F</td><td>Medicare Advantage</td><td>825</td><td>4,459.00</td><td>2.36</td></tr><tr><td>F</td><td>Medicaid</td><td>819</td><td>4,407.00</td><td>2.32</td></tr><tr><td>M</td><td>EPO</td><td>863</td><td>4,376.00</td><td>2.35</td></tr><tr><td>F</td><td>PPO</td><td>840</td><td>4,343.00</td><td>2.24</td></tr><tr><td>M</td><td>PPO</td><td>852</td><td>4,331.00</td><td>2.39</td></tr><tr><td>M</td><td>HMO</td><td>855</td><td>4,307.00</td><td>2.28</td></tr><tr><td>F</td><td>EPO</td><td>869</td><td>4,279.00</td><td>2.34</td></tr><tr><td>M</td><td>Medicaid</td><td>809</td><td>4,272.00</td><td>2.36</td></tr><tr><td>F</td><td>HMO</td><td>845</td><td>4,259.00</td><td>2.37</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 12 rows of 12 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_75178').style.display=document.getElementById('meth_75178').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_75178" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Membership & Enrollment Intelligence</strong><br>
+            <strong>Calculation:</strong> Active members = enrolled with no disenrollment date. Retention rate = 1 - (disenrolled / total). Average tenure = months from enrollment to now or disenrollment. Net growth = new enrollments - disenrollments per period.<br>
+            <strong>Standard:</strong> CMS Enrollment & Disenrollment regulations, ACA open enrollment compliance, Medicare Advantage retention benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active member = DISENROLLMENT_DATE is NULL</li><li>Plan mix analyzed by PLAN_TYPE (HMO, PPO, Medicare Advantage, etc.)</li><li>Risk profile segmented by plan for actuarial pricing</li><li>Care gap = chronic member with no encounter in 6+ months</li></ul>
+            <strong>Thresholds:</strong> <strong>Retention target:</strong> ≥90% | <strong>Net growth target:</strong> >2% annually | <strong>Care gap alert:</strong> >15% of chronic members<br>
+            <strong>Why It Matters:</strong> Member retention is 5-7x more cost-effective than acquisition. Disenrollment trends signal satisfaction issues. Plan mix affects risk pool and premium adequacy. High-risk member identification enables proactive care management.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_533763').style.display=document.getElementById('sql_533763').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_533763" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Cost by Gender & Plan Type</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_costs AS (
+                        SELECT MEMBER_ID, SUM(CAST(PAID_AMOUNT AS REAL)) as total_cost
+                        FROM CLAIMS WHERE ENCOUNTER_ID != '' GROUP BY MEMBER_ID
+                    )
+                    SELECT m.GENDER, m.PLAN_TYPE,
+                        COUNT(DISTINCT m.MEMBER_ID) as members,
+                        ROUND(AVG(mc.total_cost),0) as avg_cost_per_member,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk
+                    FROM MEMBERS m LEFT JOIN member_costs mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    GROUP BY m.GENDER, m.PLAN_TYPE ORDER BY avg_cost_per_member DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT m.GENDER, m.PLAN_TYPE,
+                        COUNT<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>At-Risk Population Segments</h3><div class="chart-container"><canvas id="chart_10434" data-chart='{"type": "bar", "data": {"labels": ["Critical \u2014 Immediate Inte", "High ER Utilizer", "Chronic Care Management", "Rising Risk \u2014 Preventive ", "Standard Care", "Healthy \u2014 Wellness Progra"], "datasets": [{"label": "Members", "data": [1512.0, 44.0, 2583.0, 2801.0, 2806.0, 254.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Risk", "data": [3.74, 3.18, 2.97, 2.6, 0.86, 0.59], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Chronic", "data": [5.0, 2.8, 3.5, 1.6, 3.3, 0.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Members: Standard Care (2,806). Lowest: High ER Utilizer (44). Average: 1,667. A 6277% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_656859').style.display=document.getElementById('sql_656859').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_656859" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — At-Risk Population Segments</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH member_er AS (
+                        SELECT MEMBER_ID, COUNT(*) as er_visits
+                        FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY'
+                        GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 3.0 AND CAST(m.CHRONIC_CONDITIONS AS INTEGER) &gt;= 4 THEN 'Critical — Immediate Intervention'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 2.0 AND COALESCE(er.er_visits,0) &gt;= 2 THEN 'High ER Utilizer'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 2.0 AND CAST(m.CHRONIC_CONDITIONS AS INTEGER) &gt;= 2 THEN 'Chronic Care Management'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &gt;= 1.5 THEN 'Rising Risk — Preventive Focus'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 1.0 AND CAST(m.CHRONIC_CONDITIONS AS INTEGER) = 0 THEN 'Healthy — Wellness Programs'
+                        ELSE 'Standard Care' END as segment,
+                        COUNT(*) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(COALESCE(er.er_visits,0)),1) as avg_er_visits
+                    FROM MEMBERS m LEFT JOIN member_er er ON m.MEMBER_ID = er.MEMBER_ID
+                    GROUP BY segment ORDER BY avg_risk DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, ENCOUNTERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.RISK_SCORE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Monthly Active Members & Cost Trend</h3><div class="chart-container"><canvas id="chart_17247" data-chart='{"type": "line", "data": {"labels": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03"], "datasets": [{"label": "Active Members", "data": [336.0, 313.0, 323.0, 328.0, 337.0, 312.0, 359.0, 330.0, 289.0, 340.0, 327.0, 338.0, 303.0, 318.0, 326.0], "backgroundColor": "#002B5C", "borderColor": "#002B5C", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Total Cost", "data": [949687.0, 850977.0, 762505.0, 817575.0, 806222.0, 761976.0, 926574.0, 787084.0, 830499.0, 887588.0, 789766.0, 924741.0, 797019.0, 825730.0, 840545.0], "backgroundColor": "#0056b3", "borderColor": "#0056b3", "borderWidth": 2, "tension": 0.3, "fill": false}, {"label": "Cost Per Member", "data": [2826.45, 2718.78, 2360.7, 2492.61, 2392.35, 2442.23, 2580.99, 2385.1, 2873.7, 2610.55, 2415.19, 2735.92, 2630.43, 2596.64, 2578.36], "backgroundColor": "#28a745", "borderColor": "#28a745", "borderWidth": 2, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Active Members has decreased 3.6% over the period shown (from 336 to 324).</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_17247').style.display=document.getElementById('meth_17247').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_17247" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Forecasting & Predictive Analytics</strong><br>
+            <strong>Calculation:</strong> Time-series analysis of member-month data: paid PMPM trends, utilization rates (admits/1K, ER/1K), denial rates. YoY growth computed as (current - prior) / prior × 100. Seasonality via month-of-year averages.<br>
+            <strong>Standard:</strong> Actuarial Standards of Practice (ASOP), CMS rate-setting methodology, IBNR (Incurred But Not Reported) adjustments<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>PMPM = total paid / member months by LOB</li><li>Trend analysis uses 12+ months of data for stability</li><li>Seasonal adjustment compares same month across years</li><li>Growth projections use most recent month vs prior month</li></ul>
+            <strong>Thresholds:</strong> <strong>PMPM trend alert:</strong> >5% monthly increase | <strong>Utilization trend:</strong> >10% YoY increase | <strong>Denial trend:</strong> >2% monthly increase<br>
+            <strong>Why It Matters:</strong> Accurate forecasting enables proactive rate setting, reserve adequacy, and strategic planning. Cost trends drive premium adjustments and capitation negotiations. Utilization forecasts inform staffing and capacity planning.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_893796').style.display=document.getElementById('sql_893796').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_893796" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Monthly Active Members & Cost Trend</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT substr(SERVICE_DATE,1,7) as month,
+                        COUNT(DISTINCT MEMBER_ID) as active_members,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL)),0) as total_cost,
+                        ROUND(SUM(CAST(PAID_AMOUNT AS REAL))/COUNT(DISTINCT MEMBER_ID),2) as cost_per_member
+                    FROM CLAIMS WHERE SERVICE_DATE IS NOT NULL AND ENCOUNTER_ID != ''
+                    GROUP BY month ORDER BY month</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>Grouping:</strong> GROUP BY month<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 36 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Health Equity — Race by Region</h3><div class="table-container"><table><thead><tr><th>Region</th><th>Race</th><th>Members</th><th>Avg Risk</th><th>Avg Chronic</th></tr></thead><tbody><tr><td>CO</td><td>Black</td><td>135</td><td>2.38</td><td>2.90</td></tr><tr><td>CO</td><td>Hispanic</td><td>152</td><td>2.36</td><td>3.20</td></tr><tr><td>CO</td><td>White</td><td>164</td><td>2.32</td><td>3.10</td></tr><tr><td>CO</td><td>Unknown</td><td>163</td><td>2.31</td><td>3.00</td></tr><tr><td>CO</td><td>Other</td><td>161</td><td>2.25</td><td>3.10</td></tr><tr><td>CO</td><td>American Indian</td><td>146</td><td>2.24</td><td>3.10</td></tr><tr><td>CO</td><td>Asian</td><td>156</td><td>2.21</td><td>3.00</td></tr><tr><td>CO</td><td>Native Hawaiian</td><td>146</td><td>2.18</td><td>2.80</td></tr><tr><td>GA</td><td>Black</td><td>147</td><td>2.46</td><td>3.10</td></tr><tr><td>GA</td><td>Native Hawaiian</td><td>141</td><td>2.39</td><td>3.40</td></tr><tr><td>GA</td><td>American Indian</td><td>139</td><td>2.39</td><td>3.30</td></tr><tr><td>GA</td><td>Other</td><td>133</td><td>2.36</td><td>2.90</td></tr><tr><td>GA</td><td>Unknown</td><td>152</td><td>2.34</td><td>2.70</td></tr><tr><td>GA</td><td>Asian</td><td>173</td><td>2.27</td><td>3.20</td></tr><tr><td>GA</td><td>White</td><td>143</td><td>2.25</td><td>2.60</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 64 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_525002').style.display=document.getElementById('sql_525002').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_525002" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Health Equity — Race by Region</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT m.KP_REGION as region, m.RACE,
+                        COUNT(*) as members,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic
+                    FROM MEMBERS m
+                    GROUP BY m.KP_REGION, m.RACE
+                    HAVING COUNT(*) &gt;= 50
+                    ORDER BY region, avg_risk DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY m.KP_REGION, m.RACE<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 64 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Risk Stratification</h3><div class="table-container"><table><thead><tr><th>Risk Tier</th><th>Members</th><th>Pct</th><th>Avg Risk</th><th>Avg Cost</th><th>Avg Chronic</th><th>Avg Er Visits</th></tr></thead><tbody><tr><td>Low (0-1.0)</td><td>1,877</td><td>18.80</td><td>0.59</td><td>2,563.31</td><td>3.10</td><td>0.14</td></tr><tr><td>Moderate (1.0-2.0)</td><td>2,372</td><td>23.70</td><td>1.49</td><td>2,585.27</td><td>3.00</td><td>0.15</td></tr><tr><td>High (2.0-3.0)</td><td>2,264</td><td>22.60</td><td>2.50</td><td>2,439.45</td><td>3.00</td><td>0.15</td></tr><tr><td>Very High (3.0+)</td><td>3,487</td><td>34.90</td><td>3.73</td><td>2,631.87</td><td>3.00</td><td>0.16</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 4 rows of 4 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_43208').style.display=document.getElementById('meth_43208').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_43208" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Risk Stratification & Segmentation</strong><br>
+            <strong>Calculation:</strong> Members grouped into risk tiers (low, moderate, high, very high) using predictive algorithms.<br>
+            <strong>Standard:</strong> Typical distribution: 50% low, 30% moderate, 15% high, 5% very high risk.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Driven by PMPM, HCC codes, claim patterns, pharmacy data</li><li>Very high risk: >$20K annual cost, multiple hospitalizations</li><li>Used to allocate case management, care coordination resources</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <5% very high risk | <strong>average:</strong> 5-10% very high risk | <strong>concern:</strong> >15% very high risk<br>
+            <strong>Why It Matters:</strong> Risk concentration: top 5% of members drive 50%+ of costs. Targeting top tier with interventions yields 3:1 ROI.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_140196').style.display=document.getElementById('sql_140196').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_140196" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Risk Stratification</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH er_visits AS (
+                        SELECT MEMBER_ID, COUNT(*) as er_count
+                        FROM ENCOUNTERS
+                        WHERE VISIT_TYPE='EMERGENCY'
+                        GROUP BY MEMBER_ID
+                    ),
+                    member_cost AS (
+                        SELECT MEMBER_ID, AVG(CAST(PAID_AMOUNT AS REAL)) as avg_paid
+                        FROM CLAIMS
+                        WHERE ENCOUNTER_ID != ''
+                        GROUP BY MEMBER_ID
+                    )
+                    SELECT CASE
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 1.0 THEN 'Low (0-1.0)'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 2.0 THEN 'Moderate (1.0-2.0)'
+                        WHEN CAST(m.RISK_SCORE AS REAL) &lt; 3.0 THEN 'High (2.0-3.0)'
+                        ELSE 'Very High (3.0+)' END as risk_tier,
+                        COUNT(DISTINCT m.MEMBER_ID) as members,
+                        ROUND(100.0*COUNT(DISTINCT m.MEMBER_ID)/(SELECT COUNT(*) FROM MEMBERS),1) as pct,
+                        ROUND(AVG(CAST(m.RISK_SCORE AS REAL)),2) as avg_risk,
+                        ROUND(AVG(CAST(mc.avg_paid AS REAL)),2) as avg_cost,
+                        ROUND(AVG(CAST(m.CHRONIC_CONDITIONS AS REAL)),1) as avg_chronic,
+                        ROUND(AVG(COALESCE(er.er_count, 0)),2) as avg_er_visits
+                    FROM MEMBERS m
+                    LEFT JOIN member_cost mc ON m.MEMBER_ID = mc.MEMBER_ID
+                    LEFT JOIN er_visits er ON m.MEMBER_ID = er.MEMBER_ID
+                    GROUP BY risk_tier ORDER BY MIN(CAST(m.RISK_SCORE AS REAL))</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, CLAIMS, ENCOUNTERS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    ),
+                    member_cost AS (
+                        SELECT MEMBER_ID,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">8,615</div><div class="label">Total Chronic Members</div></div><div class="kpi"><div class="value">7,770</div><div class="label">Care Gap Members</div></div><div class="kpi"><div class="value">90.2</div><div class="label">Care Gap Pct</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_47609').style.display=document.getElementById('meth_47609').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_47609" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Care Gap Analysis</strong><br>
+            <strong>Calculation:</strong> Members with chronic condition but no relevant visit/service in past 6-12 months ÷ total with condition.<br>
+            <strong>Standard:</strong> Benchmark: <10% of chronic disease patients should have care gaps.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Gaps identify members at risk for disease progression</li><li>Triggers outreach for appointment scheduling</li><li>Tracked per condition (diabetes, hypertension, asthma, COPD)</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <10% gap rate | <strong>average:</strong> 10-20% gap rate | <strong>concern:</strong> >25% gap rate<br>
+            <strong>Why It Matters:</strong> Each member with care gap has 2-3x higher ER risk. Closing gaps = reduced acute care + STARS improvement.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_938392').style.display=document.getElementById('sql_938392').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_938392" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Care Gap Analysis</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH recent_encounters AS (
+                        SELECT MEMBER_ID
+                        FROM ENCOUNTERS
+                        WHERE SERVICE_DATE &gt; date('now', '-6 months')
+                        GROUP BY MEMBER_ID
+                    )
+                    SELECT
+                        COUNT(DISTINCT m.MEMBER_ID) as total_chronic_members,
+                        SUM(CASE WHEN re.MEMBER_ID IS NULL THEN 1 ELSE 0 END) as care_gap_members,
+                        ROUND(100.0*SUM(CASE WHEN re.MEMBER_ID IS NULL THEN 1 ELSE 0 END)/COUNT(DISTINCT m.MEMBER_ID),1) as care_gap_pct
+                    FROM MEMBERS m
+                    LEFT JOIN recent_encounters re ON m.MEMBER_ID = re.MEMBER_ID
+                    WHERE CAST(m.CHRONIC_CONDITIONS AS INTEGER) &gt; 0</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> MEMBERS, ENCOUNTERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY MEMBER_ID
+                    )
+                    SELECT
+                        COUNT(DISTINCT m.MEMBER_ID)<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Preventable ER Visits</h3><div class="chart-container"><canvas id="chart_26140" data-chart='{"type": "bar", "data": {"labels": ["Other Preventable", "Migraine", "Asthma", "UTI"], "datasets": [{"label": "Er Visits", "data": [1460.0, 30.0, 11.0, 9.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct Of Er", "data": [97.3, 2.0, 0.7, 0.6], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Er Visits: Other Preventable (1,460). Lowest: UTI (9). Average: 377.5. A 16122% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_26140').style.display=document.getElementById('meth_26140').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_26140" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Emergency Department (ED) Utilization</strong><br>
+            <strong>Calculation:</strong> ED visits per 1,000 members per year.<br>
+            <strong>Standard:</strong> Benchmark: 80-100/1K. High-performing networks: 60-80/1K.<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Includes all ED visits (treated and released, admitted from ED)</li><li>Preventable ED visits subset: ambulatory-sensitive diagnoses (asthma, UTI, COPD exacerbation)</li><li>Primary driver of high utilization for high-risk populations</li></ul>
+            <strong>Thresholds:</strong> <strong>good:</strong> <80/1K | <strong>average:</strong> 80-120/1K | <strong>concern:</strong> >150/1K<br>
+            <strong>Why It Matters:</strong> ED visit = $1,500 avg cost. Diverting 20/1K to urgent care saves $30/member/year.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_844079').style.display=document.getElementById('sql_844079').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_844079" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Preventable ER Visits</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT CASE
+                        WHEN d.ICD10_DESCRIPTION LIKE '%asthma%' OR d.ICD10_DESCRIPTION LIKE '%ASTHMA%' THEN 'Asthma'
+                        WHEN d.ICD10_DESCRIPTION LIKE '%COPD%' OR d.ICD10_DESCRIPTION LIKE '%EMPHYSEMA%' THEN 'COPD'
+                        WHEN d.ICD10_DESCRIPTION LIKE '%UTI%' OR d.ICD10_DESCRIPTION LIKE '%urinary%' THEN 'UTI'
+                        WHEN d.ICD10_DESCRIPTION LIKE '%migraine%' OR d.ICD10_DESCRIPTION LIKE '%headache%' THEN 'Migraine'
+                        WHEN d.ICD10_DESCRIPTION LIKE '%dental%' OR d.ICD10_DESCRIPTION LIKE '%tooth%' THEN 'Dental'
+                        ELSE 'Other Preventable' END as preventable_category,
+                        COUNT(DISTINCT e.ENCOUNTER_ID) as er_visits,
+                        ROUND(100.0*COUNT(DISTINCT e.ENCOUNTER_ID)/(SELECT COUNT(*) FROM ENCOUNTERS WHERE VISIT_TYPE='EMERGENCY'),1) as pct_of_er
+                    FROM ENCOUNTERS e
+                    LEFT JOIN DIAGNOSES d ON e.ENCOUNTER_ID = d.ENCOUNTER_ID
+                    WHERE e.VISIT_TYPE='EMERGENCY' GROUP BY preventable_category ORDER BY er_visits DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> ENCOUNTERS, DIAGNOSES<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY preventable_category<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which region has the highest risk-adjusted cost per member?</span><span class="followup">Show me health equity gaps by race and region</span><span class="followup">What percentage of our cost comes from the top 5% of members?</span><span class="followup">Which age group is most prone to chronic diseases?</span><span class="followup">How does plan selection differ between high-risk and low-risk members?</span><span class="followup">What is the churn rate for members with 3+ chronic conditions?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

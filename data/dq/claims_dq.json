@@ -1,0 +1,276 @@
+{
+  "table_name": "claims",
+  "file_name": "claims.csv",
+  "total_rows": 15000,
+  "total_columns": 25,
+  "checked_at": "2026-03-31T15:16:06.805837",
+  "column_checks": {
+    "CLAIM_ID": {
+      "field_type": "claim_id",
+      "completeness": 100.0,
+      "uniqueness": 99.99,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": [
+        "Uniqueness issues: 99.99% unique"
+      ]
+    },
+    "MEMBER_ID": {
+      "field_type": "member_id",
+      "completeness": 100.0,
+      "uniqueness": 51.75,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 85.53,
+      "issues": [
+        "Uniqueness issues: 51.75% unique"
+      ]
+    },
+    "ENCOUNTER_ID": {
+      "field_type": "encounter_id",
+      "completeness": 80.14,
+      "uniqueness": 68.96,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 82.74,
+      "issues": [
+        "Low completeness: 80.14% non-null",
+        "Uniqueness issues: 68.96% unique"
+      ]
+    },
+    "SERVICE_DATE": {
+      "field_type": "service_date",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "RENDERING_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 10.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 73.0,
+      "issues": []
+    },
+    "BILLING_NPI": {
+      "field_type": "npi",
+      "completeness": 100.0,
+      "uniqueness": 10.0,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 73.0,
+      "issues": []
+    },
+    "CPT_CODE": {
+      "field_type": "cpt",
+      "completeness": 100.0,
+      "uniqueness": 0.13,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 70.04,
+      "issues": []
+    },
+    "CPT_DESCRIPTION": {
+      "field_type": "cpt",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 0.0,
+      "consistency": 100,
+      "column_score": 80.0,
+      "issues": [
+        "Validity issues: 0.0% valid format"
+      ]
+    },
+    "ICD10_CODE": {
+      "field_type": "icd10",
+      "completeness": 100.0,
+      "uniqueness": 0.17,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 70.05,
+      "issues": []
+    },
+    "ICD10_DESCRIPTION": {
+      "field_type": "icd10",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 0.0,
+      "consistency": 100,
+      "column_score": 80.0,
+      "issues": [
+        "Validity issues: 0.0% valid format"
+      ]
+    },
+    "BILLED_AMOUNT": {
+      "field_type": "billed_amount",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ALLOWED_AMOUNT": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PAID_AMOUNT": {
+      "field_type": "paid_amount",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100.0,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "MEMBER_RESPONSIBILITY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 60.09,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 88.03,
+      "issues": []
+    },
+    "COPAY": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "COINSURANCE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "DEDUCTIBLE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "CLAIM_STATUS": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 0.04,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 70.01,
+      "issues": []
+    },
+    "DENIAL_REASON": {
+      "field_type": null,
+      "completeness": 5.39,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 62.16,
+      "issues": [
+        "Low completeness: 5.39% non-null"
+      ]
+    },
+    "KP_REGION": {
+      "field_type": "kp_region",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "FACILITY": {
+      "field_type": "facility",
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100.0,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "PLAN_TYPE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "CLAIM_TYPE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 0.03,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 70.01,
+      "issues": []
+    },
+    "SUBMITTED_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    },
+    "ADJUDICATED_DATE": {
+      "field_type": null,
+      "completeness": 100.0,
+      "uniqueness": 100,
+      "validity": 100,
+      "consistency": 100,
+      "column_score": 100.0,
+      "issues": []
+    }
+  },
+  "column_scores": {
+    "CLAIM_ID": 100.0,
+    "MEMBER_ID": 85.53,
+    "ENCOUNTER_ID": 82.74,
+    "SERVICE_DATE": 100.0,
+    "RENDERING_NPI": 73.0,
+    "BILLING_NPI": 73.0,
+    "CPT_CODE": 70.04,
+    "CPT_DESCRIPTION": 80.0,
+    "ICD10_CODE": 70.05,
+    "ICD10_DESCRIPTION": 80.0,
+    "BILLED_AMOUNT": 100.0,
+    "ALLOWED_AMOUNT": 100.0,
+    "PAID_AMOUNT": 100.0,
+    "MEMBER_RESPONSIBILITY": 88.03,
+    "COPAY": 100.0,
+    "COINSURANCE": 100.0,
+    "DEDUCTIBLE": 100.0,
+    "CLAIM_STATUS": 70.01,
+    "DENIAL_REASON": 62.16,
+    "KP_REGION": 100.0,
+    "FACILITY": 100.0,
+    "PLAN_TYPE": 100.0,
+    "CLAIM_TYPE": 70.01,
+    "SUBMITTED_DATE": 100.0,
+    "ADJUDICATED_DATE": 100.0
+  },
+  "dq_score": 88.18,
+  "dq_grade": "C"
+}

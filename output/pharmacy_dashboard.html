@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Pharmacy & Medication Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Pharmacy & Medication Intelligence</h1>
+    <div class="subtitle">AI-Generated Analytical Intelligence • 7 queries executed • April 20, 2026</div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For Your Organization</h3>
+    <div class="insight-item">Azithromycin 250mg: Scripts (174) is 9% higher than the network average (160).</div><div class="insight-item">Lisinopril 10mg: Avg Cost (370) is 7% lower than the network average (396).</div><div class="insight-item">Metoprolol 50mg: Total Cost (69,215) is 9% higher than the network average (63,350).</div><div class="insight-item">Hypertension: Scripts (766) is 180% higher than the network average (274).</div><div class="insight-item">Hypertension: Patients (744) is 176% higher than the network average (269).</div><div class="insight-item">Hypertension: Total Cost (303,254) is 177% higher than the network average (109,558).</div><div class="insight-item">Concentration risk: Hypertension, Infection, Pain together account for 51% of all Scripts (total: 2,737). If any of these areas experience disruption, the impact would be disproportionate. Consider diversification strategies.</div><div class="insight-item">Concentration risk: Hypertension, Infection, Pain together account for 51% of all Patients (total: 2,692). If any of these areas experience disruption, the impact would be disproportionate. Consider diversification strategies.</div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">Hypertension: Scripts (766) is 180% higher than average — requires attention.</div><div class="alert-item">Hypertension: Patients (744) is 176% higher than average — requires attention.</div><div class="alert-item">Hypertension: Total Cost (303,254) is 177% higher than average — requires attention.</div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> Improve Clean Claim Rate for Financial Health: increase from 60.4% toward 95.0% (industry good). This gap indicates operational or quality issues needing immediate attention.</div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">3,000</div><div class="label">Total Rx</div></div><div class="kpi"><div class="value">2,599</div><div class="label">Unique Patients</div></div><div class="kpi"><div class="value">20</div><div class="label">Unique Meds</div></div><div class="kpi"><div class="value">398.7</div><div class="label">Avg Cost</div></div><div class="kpi"><div class="value">$1.2M</div><div class="label">Total Spend</div></div></div><div class="card"><h3>Top Medications by Cost</h3><div class="chart-container"><canvas id="chart_63728" data-chart='{"type": "bar", "data": {"labels": ["Metoprolol 50mg", "Azithromycin 250mg", "Duloxetine 60mg", "Tramadol 50mg", "Amoxicillin 500mg", "Levothyroxine 50mcg", "Lisinopril 10mg", "Albuterol Inhaler", "Ibuprofen 800mg", "Escitalopram 10mg"], "datasets": [{"label": "Scripts", "data": [170.0, 174.0, 157.0, 158.0, 158.0, 153.0, 167.0, 156.0, 153.0, 153.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Cost", "data": [407.15, 378.9, 407.93, 399.91, 399.58, 407.62, 369.86, 393.96, 401.41, 398.58], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Total Cost", "data": [69215.09, 65929.41, 64045.6, 63184.99, 63133.67, 62365.32, 61767.02, 61457.69, 61415.54, 60982.44], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Showing 10 data points across 4 dimensions. Look for the largest values, unusual patterns, and compare against benchmarks to identify areas requiring attention or investment.</div></div><div class="card"><h3>Medication Class Analysis</h3><div class="chart-container"><canvas id="chart_87152" data-chart='{"type": "bar", "data": {"labels": ["Hypertension", "Infection", "Pain", "Depression", "GERD", "Hypothyroid", "Asthma", "Anxiety", "Cholesterol", "Diabetes"], "datasets": [{"label": "Scripts", "data": [766.0, 332.0, 311.0, 300.0, 278.0, 153.0, 156.0, 153.0, 150.0, 138.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Patients", "data": [744.0, 327.0, 304.0, 298.0, 274.0, 153.0, 153.0, 153.0, 148.0, 138.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Cost", "data": [395.89, 388.74, 400.64, 413.61, 406.5, 407.62, 393.96, 398.58, 401.69, 409.54], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Showing 10 data points across 5 dimensions. Look for the largest values, unusual patterns, and compare against benchmarks to identify areas requiring attention or investment.</div></div><div class="card"><h3>Refill Compliance</h3><div class="chart-container"><canvas id="chart_2003" data-chart='{"type": "bar", "data": {"labels": ["Inflammation", "GERD", "Anxiety", "Neuropathy", "Hypertension", "Diabetes", "Depression", "Infection", "Asthma", "Hypothyroid"], "datasets": [{"label": "Avg Refills Used", "data": [3.1, 2.9, 3.0, 2.6, 3.0, 3.0, 3.3, 3.0, 3.1, 2.9], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Refills Auth", "data": [6.5, 6.1, 6.4, 5.4, 6.1, 6.1, 6.6, 5.9, 6.2, 5.7], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Compliance Rate", "data": [47.3, 47.4, 47.7, 48.6, 49.5, 49.7, 50.3, 50.4, 50.5, 50.6], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Showing 10 data points across 4 dimensions. Look for the largest values, unusual patterns, and compare against benchmarks to identify areas requiring attention or investment.</div></div><div class="kpi-row"><div class="kpi"><div class="value">10,000</div><div class="label">Total Members</div></div><div class="kpi"><div class="value">1,500</div><div class="label">Total Providers</div></div><div class="kpi"><div class="value">15,000</div><div class="label">Total Claims</div></div><div class="kpi"><div class="value">15,068</div><div class="label">Total Encounters</div></div><div class="kpi"><div class="value">$38.8M</div><div class="label">Total Paid</div></div><div class="kpi"><div class="value">3,000</div><div class="label">Total Rx</div></div></div><div class="kpi-row"><div class="kpi"><div class="value">4,999</div><div class="label">Cost Per Member</div></div><div class="kpi"><div class="value">9.9</div><div class="label">Denial Rate</div><div class="subtitle-text">Industry good: <5% | Current benchmark: good vs average</div></div><div class="kpi"><div class="value">60.4</div><div class="label">Clean Claim Rate</div></div><div class="kpi"><div class="value">34.6</div><div class="label">Loss Ratio</div><div class="subtitle-text">Lower is better | Industry good: <90%</div></div></div><div class="kpi-row"><div class="kpi"><div class="value">2.3</div><div class="label">Avg Risk</div><div class="subtitle-text">Average population risk score</div></div><div class="kpi"><div class="value">3</div><div class="label">Avg Chronic</div><div class="subtitle-text">Chronic conditions per member</div></div><div class="kpi"><div class="value">3,468</div><div class="label">High Risk Count</div><div class="subtitle-text">Average population risk score</div></div><div class="kpi"><div class="value">34.7</div><div class="label">High Risk Pct</div><div class="subtitle-text">Average population risk score</div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which patients are on 5+ medications?</span><span class="followup">What generic alternatives could save us money?</span><span class="followup">Show me medication adherence by chronic condition</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>

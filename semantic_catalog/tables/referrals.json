@@ -1,0 +1,752 @@
+{
+  "table_name": "referrals",
+  "file_name": "referrals.csv",
+  "total_rows": 1500,
+  "total_columns": 13,
+  "table_purpose": "Referral and authorization records",
+  "columns": {
+    "REFERRAL_ID": {
+      "column_name": "REFERRAL_ID",
+      "data_type": "string",
+      "semantic_type": "referral_id",
+      "healthcare_type": "referral_id",
+      "is_phi": false,
+      "cardinality": 1499,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "REF576787",
+          "count": 2
+        },
+        {
+          "value": "REF323690",
+          "count": 1
+        },
+        {
+          "value": "REF156911",
+          "count": 1
+        },
+        {
+          "value": "REF720862",
+          "count": 1
+        },
+        {
+          "value": "REF611088",
+          "count": 1
+        },
+        {
+          "value": "REF770630",
+          "count": 1
+        },
+        {
+          "value": "REF419019",
+          "count": 1
+        },
+        {
+          "value": "REF573459",
+          "count": 1
+        },
+        {
+          "value": "REF549674",
+          "count": 1
+        },
+        {
+          "value": "REF738199",
+          "count": 1
+        }
+      ],
+      "description": "Unique identifier for a provider referral",
+      "sample_values": [
+        "REF239303",
+        "REF655592",
+        "REF413832",
+        "REF847500",
+        "REF656635"
+      ]
+    },
+    "MEMBER_ID": {
+      "column_name": "MEMBER_ID",
+      "data_type": "string",
+      "semantic_type": "member_id",
+      "healthcare_type": "member_id",
+      "is_phi": false,
+      "cardinality": 1403,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "MBR799329581",
+          "count": 3
+        },
+        {
+          "value": "MBR323125273",
+          "count": 3
+        },
+        {
+          "value": "MBR776447126",
+          "count": 3
+        },
+        {
+          "value": "MBR364239159",
+          "count": 2
+        },
+        {
+          "value": "MBR759143768",
+          "count": 2
+        },
+        {
+          "value": "MBR523861817",
+          "count": 2
+        },
+        {
+          "value": "MBR285953213",
+          "count": 2
+        },
+        {
+          "value": "MBR689230897",
+          "count": 2
+        },
+        {
+          "value": "MBR516141218",
+          "count": 2
+        },
+        {
+          "value": "MBR419638188",
+          "count": 2
+        }
+      ],
+      "description": "Unique health plan member identifier used for linking enrollment, claims, and encounters",
+      "sample_values": [
+        "MBR584368812",
+        "MBR858772079",
+        "MBR363185190",
+        "MBR377152573",
+        "MBR996328118"
+      ]
+    },
+    "REFERRING_NPI": {
+      "column_name": "REFERRING_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 942,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1001054723.0,
+      "max_value": 1998760537.0,
+      "mean": 1495186311.1706667,
+      "top_values": [
+        {
+          "value": "1584815019",
+          "count": 6
+        },
+        {
+          "value": "1868786080",
+          "count": 6
+        },
+        {
+          "value": "1515464457",
+          "count": 5
+        },
+        {
+          "value": "1430238522",
+          "count": 5
+        },
+        {
+          "value": "1116889705",
+          "count": 4
+        },
+        {
+          "value": "1101656642",
+          "count": 4
+        },
+        {
+          "value": "1069951150",
+          "count": 4
+        },
+        {
+          "value": "1740431024",
+          "count": 4
+        },
+        {
+          "value": "1596587593",
+          "count": 4
+        },
+        {
+          "value": "1863097983",
+          "count": 4
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1557529496",
+        "1325502306",
+        "1119653774",
+        "1114867674",
+        "1407823389"
+      ]
+    },
+    "REFERRED_TO_NPI": {
+      "column_name": "REFERRED_TO_NPI",
+      "data_type": "integer",
+      "semantic_type": "npi",
+      "healthcare_type": "npi",
+      "is_phi": false,
+      "cardinality": 920,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": 1000231520.0,
+      "max_value": 1998930676.0,
+      "mean": 1490428060.6413333,
+      "top_values": [
+        {
+          "value": "1156400809",
+          "count": 6
+        },
+        {
+          "value": "1646133746",
+          "count": 6
+        },
+        {
+          "value": "1019036662",
+          "count": 5
+        },
+        {
+          "value": "1104000908",
+          "count": 5
+        },
+        {
+          "value": "1943183523",
+          "count": 5
+        },
+        {
+          "value": "1820422723",
+          "count": 5
+        },
+        {
+          "value": "1028111730",
+          "count": 5
+        },
+        {
+          "value": "1016461214",
+          "count": 5
+        },
+        {
+          "value": "1356653118",
+          "count": 4
+        },
+        {
+          "value": "1529909300",
+          "count": 4
+        }
+      ],
+      "description": "National Provider Identifier - unique 10-digit code for healthcare providers",
+      "sample_values": [
+        "1314075846",
+        "1024503265",
+        "1318648005",
+        "1487378371",
+        "1020771600"
+      ]
+    },
+    "REFERRAL_DATE": {
+      "column_name": "REFERRAL_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 795,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2024-08-04",
+          "count": 7
+        },
+        {
+          "value": "2023-08-12",
+          "count": 6
+        },
+        {
+          "value": "2023-08-20",
+          "count": 6
+        },
+        {
+          "value": "2024-11-02",
+          "count": 5
+        },
+        {
+          "value": "2025-03-04",
+          "count": 5
+        },
+        {
+          "value": "2023-08-07",
+          "count": 5
+        },
+        {
+          "value": "2023-09-09",
+          "count": 5
+        },
+        {
+          "value": "2025-09-03",
+          "count": 5
+        },
+        {
+          "value": "2024-05-01",
+          "count": 5
+        },
+        {
+          "value": "2023-07-03",
+          "count": 5
+        }
+      ],
+      "description": "Date field: REFERRAL_DATE",
+      "sample_values": [
+        "2024-04-15",
+        "2023-05-03",
+        "2025-09-11",
+        "2024-04-07",
+        "2025-10-20"
+      ]
+    },
+    "REFERRAL_REASON": {
+      "column_name": "REFERRAL_REASON",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 11,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Specialist evaluation",
+          "count": 154
+        },
+        {
+          "value": "Cancer screening",
+          "count": 144
+        },
+        {
+          "value": "Post-op follow-up",
+          "count": 144
+        },
+        {
+          "value": "Cardiac evaluation",
+          "count": 141
+        },
+        {
+          "value": "Pain management",
+          "count": 140
+        },
+        {
+          "value": "Physical therapy",
+          "count": 133
+        },
+        {
+          "value": "Surgery consultation",
+          "count": 132
+        },
+        {
+          "value": "Diagnostic workup",
+          "count": 132
+        },
+        {
+          "value": "Chronic disease management",
+          "count": 128
+        },
+        {
+          "value": "Second opinion",
+          "count": 127
+        }
+      ],
+      "description": "Field: REFERRAL_REASON",
+      "sample_values": [
+        "Surgery consultation",
+        "Pain management",
+        "Cardiac evaluation",
+        "Second opinion",
+        "Cardiac evaluation"
+      ]
+    },
+    "URGENCY": {
+      "column_name": "URGENCY",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 4,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "ROUTINE",
+          "count": 750
+        },
+        {
+          "value": "URGENT",
+          "count": 391
+        },
+        {
+          "value": "ELECTIVE",
+          "count": 280
+        },
+        {
+          "value": "STAT",
+          "count": 79
+        }
+      ],
+      "description": "Field: URGENCY",
+      "sample_values": [
+        "ELECTIVE",
+        "ROUTINE",
+        "ROUTINE",
+        "ROUTINE"
+      ]
+    },
+    "REFERRAL_TYPE": {
+      "column_name": "REFERRAL_TYPE",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 3,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "INTERNAL",
+          "count": 921
+        },
+        {
+          "value": "EXTERNAL",
+          "count": 433
+        },
+        {
+          "value": "SELF_REFERRAL",
+          "count": 146
+        }
+      ],
+      "description": "Field: REFERRAL_TYPE",
+      "sample_values": [
+        "INTERNAL",
+        "INTERNAL",
+        "EXTERNAL"
+      ]
+    },
+    "STATUS": {
+      "column_name": "STATUS",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 6,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "APPROVED",
+          "count": 512
+        },
+        {
+          "value": "COMPLETED",
+          "count": 442
+        },
+        {
+          "value": "PENDING",
+          "count": 334
+        },
+        {
+          "value": "CANCELLED",
+          "count": 76
+        },
+        {
+          "value": "DENIED",
+          "count": 71
+        },
+        {
+          "value": "EXPIRED",
+          "count": 65
+        }
+      ],
+      "description": "Field: STATUS",
+      "sample_values": [
+        "COMPLETED",
+        "PENDING",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED"
+      ]
+    },
+    "APPOINTMENT_DATE": {
+      "column_name": "APPOINTMENT_DATE",
+      "data_type": "date",
+      "semantic_type": "date",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 829,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "2023-05-20",
+          "count": 6
+        },
+        {
+          "value": "2025-03-25",
+          "count": 5
+        },
+        {
+          "value": "2024-06-14",
+          "count": 5
+        },
+        {
+          "value": "2024-03-18",
+          "count": 5
+        },
+        {
+          "value": "2024-11-27",
+          "count": 5
+        },
+        {
+          "value": "2024-10-25",
+          "count": 5
+        },
+        {
+          "value": "2025-09-28",
+          "count": 5
+        },
+        {
+          "value": "2025-07-18",
+          "count": 5
+        },
+        {
+          "value": "2023-12-20",
+          "count": 5
+        },
+        {
+          "value": "2023-10-29",
+          "count": 5
+        }
+      ],
+      "description": "Date field: APPOINTMENT_DATE",
+      "sample_values": [
+        "2025-09-08",
+        "2026-01-16",
+        "2025-01-30",
+        "2024-07-24",
+        "2023-11-12"
+      ]
+    },
+    "SPECIALTY": {
+      "column_name": "SPECIALTY",
+      "data_type": "string",
+      "semantic_type": "category",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 20,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "Urology",
+          "count": 92
+        },
+        {
+          "value": "Pulmonology",
+          "count": 90
+        },
+        {
+          "value": "Surgery",
+          "count": 87
+        },
+        {
+          "value": "Cardiology",
+          "count": 86
+        },
+        {
+          "value": "Nephrology",
+          "count": 82
+        },
+        {
+          "value": "ENT",
+          "count": 80
+        },
+        {
+          "value": "Oncology",
+          "count": 80
+        },
+        {
+          "value": "OB/GYN",
+          "count": 77
+        },
+        {
+          "value": "Psychiatry",
+          "count": 77
+        },
+        {
+          "value": "Rheumatology",
+          "count": 77
+        }
+      ],
+      "description": "Field: SPECIALTY",
+      "sample_values": [
+        "Surgery",
+        "Cardiology",
+        "Pulmonology",
+        "Pediatrics",
+        "Psychiatry"
+      ]
+    },
+    "AUTHORIZATION_NUMBER": {
+      "column_name": "AUTHORIZATION_NUMBER",
+      "data_type": "string",
+      "semantic_type": "text",
+      "healthcare_type": null,
+      "is_phi": false,
+      "cardinality": 1040,
+      "null_count": 460,
+      "null_percentage": 30.67,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "AUTH457212",
+          "count": 1
+        },
+        {
+          "value": "AUTH185275",
+          "count": 1
+        },
+        {
+          "value": "AUTH977655",
+          "count": 1
+        },
+        {
+          "value": "AUTH249040",
+          "count": 1
+        },
+        {
+          "value": "AUTH886645",
+          "count": 1
+        },
+        {
+          "value": "AUTH842053",
+          "count": 1
+        },
+        {
+          "value": "AUTH365588",
+          "count": 1
+        },
+        {
+          "value": "AUTH228576",
+          "count": 1
+        },
+        {
+          "value": "AUTH905403",
+          "count": 1
+        },
+        {
+          "value": "AUTH636615",
+          "count": 1
+        }
+      ],
+      "description": "Field: AUTHORIZATION_NUMBER",
+      "sample_values": [
+        "AUTH375641",
+        "AUTH905520",
+        "AUTH260729",
+        "AUTH623015",
+        "AUTH769172"
+      ]
+    },
+    "KP_REGION": {
+      "column_name": "KP_REGION",
+      "data_type": "string",
+      "semantic_type": "kp_region",
+      "healthcare_type": "kp_region",
+      "is_phi": false,
+      "cardinality": 8,
+      "null_count": 0,
+      "null_percentage": 0.0,
+      "min_value": null,
+      "max_value": null,
+      "mean": null,
+      "top_values": [
+        {
+          "value": "CO",
+          "count": 209
+        },
+        {
+          "value": "MAS",
+          "count": 206
+        },
+        {
+          "value": "GA",
+          "count": 191
+        },
+        {
+          "value": "NCAL",
+          "count": 190
+        },
+        {
+          "value": "MID",
+          "count": 183
+        },
+        {
+          "value": "NW",
+          "count": 175
+        },
+        {
+          "value": "HI",
+          "count": 173
+        },
+        {
+          "value": "SCAL",
+          "count": 173
+        }
+      ],
+      "description": "Geographic region or service area for the health plan",
+      "sample_values": [
+        "SCAL",
+        "NCAL",
+        "CO",
+        "CO",
+        "GA"
+      ]
+    }
+  },
+  "dq_score": 85,
+  "profiled_at": "2026-04-02T01:48:52.239774",
+  "has_phi": false
+}

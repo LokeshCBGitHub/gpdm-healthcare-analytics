@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Referral Network & Care Coordination</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7FA; color: #333; }
+.header { background: linear-gradient(135deg, #002B5C 0%, #003d7a 100%); color: #FFFFFF; padding: 2.5rem 2rem; text-align: center; }
+.header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 8px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.section { margin: 2rem 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: #002B5C; border-bottom: 3px solid #002B5C; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+.kpi-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 1.5rem; }
+.kpi { background: #FFFFFF; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px; border-left: 4px solid #002B5C; }
+.kpi .value { font-size: 2.5rem; font-weight: 700; color: #002B5C; line-height: 1; }
+.kpi .label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+.kpi .subtitle-text { font-size: 0.875rem; color: #888; margin-top: 0.75rem; line-height: 1.4; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-container { position: relative; height: 300px; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; }
+.status-badge.green { background-color: rgba(40,167,69,0.1); color: #28a745; }
+.status-badge.yellow { background-color: rgba(255,193,7,0.1); color: #856404; }
+.status-badge.red { background-color: rgba(220,53,69,0.1); color: #dc3545; }
+.alerts-section { background: rgba(220,53,69,0.05); border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.alerts-section h3 { color: #dc3545; font-size: 1.1rem; margin-bottom: 1rem; }
+.alert-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #dc3545; font-size: 0.95rem; line-height: 1.5; }
+.insights-section { background: rgba(0,43,92,0.05); border-left: 4px solid #002B5C; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.insights-section h3 { color: #002B5C; font-size: 1.1rem; margin-bottom: 1rem; }
+.insight-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #002B5C; font-size: 0.95rem; line-height: 1.5; }
+.recs-section { background: rgba(40,167,69,0.05); border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.recs-section h3 { color: #28a745; font-size: 1.1rem; margin-bottom: 1rem; }
+.rec-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #28a745; font-size: 0.95rem; line-height: 1.5; }
+.followups { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center; }
+.followup { background: #FFFFFF; border: 1px solid #ddd; border-radius: 4px; padding: 10px 16px; font-size: 0.875rem; color: #002B5C; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.followup:hover { background: #002B5C; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: #F5F7FA; padding: 12px; text-align: left; color: #002B5C; font-weight: 600; border-bottom: 2px solid #ddd; }
+td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #F5F7FA; }
+.footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; margin-top: 2rem; border-top: 1px solid #ddd; }
+.explanation { padding: 1rem; background: #FAFBFC; border-radius: 4px; margin-top: 1rem; font-size: 0.9rem; color: #555; line-height: 1.6; }
+.impact-section { background: linear-gradient(135deg, rgba(0,43,92,0.03) 0%, rgba(40,167,69,0.05) 100%); border-left: 4px solid #17a2b8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.impact-section h3 { color: #17a2b8; font-size: 1.1rem; margin-bottom: 1rem; }
+.impact-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95rem; line-height: 1.5; }
+.forecast-section { background: rgba(111,66,193,0.05); border-left: 4px solid #6f42c1; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+.forecast-section h3 { color: #6f42c1; font-size: 1.1rem; margin-bottom: 1rem; }
+.forecast-item { padding: 0.75rem; margin: 0.5rem 0; background: #FFFFFF; border-radius: 4px; border-left: 3px solid #6f42c1; font-size: 0.95rem; line-height: 1.5; }
+</style></head><body>
+<div class="header">
+    <h1>Referral Network & Care Coordination</h1>
+    <div class="subtitle">Healthcare Analytical Intelligence • 10 data queries • April 21, 2026</div>
+    <div style="margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;">
+        <span style="background:#28a745;width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+        <span>Database: healthcare_4m.db • 4,036,000 total rows</span>
+        <span style="margin-left:8px;opacity:0.7;">|</span>
+        <span style="margin-left:8px;">Self-Audit: PASS — 38 insights passed, 0 blocked</span>
+    </div>
+</div>
+<div class="container">
+<div class="section insights-section">
+    <h3>What This Means For The Organization</h3>
+    <div class="insight-item" style="border-left-color:#002B5C">Denial Rate Pct benchmark: All 8 entities within acceptable range (avg 4.7%, benchmark good: 5.0%). 5 near average, 3 performing well.</div><div class="insight-item" style="border-left-color:#002B5C">Denial Rate benchmark: 3/10 entities below standard (avg 9.6%, range 8.8–11.6%, benchmark: 5.0%). Worst performers: OB/GYN, Radiology, Nephrology.<div style="margin-top:6px"><span onclick="document.getElementById('reason_157855').style.display=document.getElementById('reason_157855').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_157855" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Each entity's Denial Rate was compared against the industry benchmark of 5.0% (source: CMS/NCQA/Milliman industry standards). Entities scoring above this threshold are flagged. 3 of 10 entities (30%) fall below standard. The spread from 8.8 to 11.6% suggests systematic variation that warrants operational review — not random noise.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Surgery: Approved (1,480) is 45% higher than the network average (1,024).<div style="margin-top:6px"><span onclick="document.getElementById('reason_395934').style.display=document.getElementById('reason_395934').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_395934" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 20 data points. Mean = 1,024, StdDev = 227. Surgery at 1,480 yields Z = 2.01 (45% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Surgery is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cardiology: Completed (1,240) is 40% higher than the network average (884).<div style="margin-top:6px"><span onclick="document.getElementById('reason_843934').style.display=document.getElementById('reason_843934').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_843934" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 20 data points. Mean = 884, StdDev = 175. Cardiology at 1,240 yields Z = 2.04 (40% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cardiology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Nephrology: Completion Rate Pct (20) is 34% lower than the network average (29).<div style="margin-top:6px"><span onclick="document.getElementById('reason_71048').style.display=document.getElementById('reason_71048').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_71048" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 20 data points. Mean = 29, StdDev = 5. Nephrology at 20 yields Z = 2.21 (34% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Nephrology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Endocrinology: Completion Rate Pct (39) is 31% higher than the network average (29).<div style="margin-top:6px"><span onclick="document.getElementById('reason_131414').style.display=document.getElementById('reason_131414').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_131414" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 20 data points. Mean = 29, StdDev = 5. Endocrinology at 39 yields Z = 2.02 (31% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Endocrinology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Anderson, Patrick: Referral Count (240) is 36% higher than the network average (176).<div style="margin-top:6px"><span onclick="document.getElementById('reason_208428').style.display=document.getElementById('reason_208428').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_208428" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 15 data points. Mean = 176, StdDev = 28. Anderson, Patrick at 240 yields Z = 2.25 (36% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Anderson, Patrick is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Evans, Helen: Referral Count (240) is 36% higher than the network average (176).<div style="margin-top:6px"><span onclick="document.getElementById('reason_380778').style.display=document.getElementById('reason_380778').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_380778" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 15 data points. Mean = 176, StdDev = 28. Evans, Helen at 240 yields Z = 2.25 (36% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Evans, Helen is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Cardiology: Providers (368) is 14% higher than the network average (323). Well-staffed specialty — ensure panel sizes are optimized to avoid provider burnout.<div style="margin-top:6px"><span onclick="document.getElementById('reason_662544').style.display=document.getElementById('reason_662544').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_662544" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 323, StdDev = 17. Cardiology at 368 yields Z = 2.62 (14% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Cardiology is in the top/bottom 1% of the distribution — unlikely to be random variation.</div></div></div><div class="insight-item" style="border-left-color:#002B5C">Radiology: Avg Panel (1,177) is 9% lower than the network average (1,288). Smaller panels allow more face-time per patient — assess if this translates to better outcomes.<div style="margin-top:6px"><span onclick="document.getElementById('reason_2687').style.display=document.getElementById('reason_2687').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why we can say this &darr;</span><div id="reason_2687" style="display:none;margin-top:6px;padding:10px 12px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #17a2b8"><strong>Reasoning:</strong> Z-score analysis across 12 data points. Mean = 1,288, StdDev = 55. Radiology at 1,177 yields Z = 2.01 (9% from mean). Threshold: Z > 1.8 flags as outlier, Z > 2.5 triggers alert. This means Radiology is in the top/bottom 4% of the distribution — unlikely to be random variation.</div></div></div>
+</div><div class="section alerts-section">
+    <h3>Alerts Requiring Immediate Attention</h3>
+    <div class="alert-item">Cardiology: Providers (368) is 14% higher than average — requires attention. [WHY: Z = 2.62, p < 0.012. Across 12 entities, this deviation is statistically significant.]</div>
+</div><div class="section impact-section">
+    <h3>Business Impact Analysis — Total Estimated Opportunity: $483,600</h3>
+    <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Estimates based on actual data combined with industry-standard cost assumptions. Click each item for methodology details. All projections should be validated with operational leadership before committing resources.</p>
+    <div class="impact-item"><div style="cursor:pointer" onclick="document.getElementById('method_74907_0').style.display=document.getElementById('method_74907_0').style.display==='none'?'block':'none'"><strong><span style="color:#28a745;font-weight:700">&#9632;</span> Cost Reduction — ER Diversion Program</strong><br>Divert 372 ER visits to urgent care/telehealth — saves $483,600/year<br><small style="color:#17a2b8;text-decoration:underline">Click to see methodology and assumptions</small></div><div id="method_74907_0" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#555;line-height:1.5"><strong>Data Source:</strong> Calculated from actual claims, encounters, and member data in this analysis. <strong>Assumptions:</strong> ER visit avg cost $1,500, urgent care $200, telehealth $75 (HCUP national statistics). 15% diversion rate is conservative industry benchmark.</div></div>
+</div><div class="section recs-section">
+    <h3>Recommended Next Steps & Initiatives</h3>
+    <div class="rec-item"><strong>Initiative:</strong> [Priority]ER Diversion Program: Divert 372 ER visits to urgent care/telehealth — saves $483,600/year</div><div class="rec-item"><strong>Initiative:</strong> Improve Denial Rate across 3 underperforming entities (OB/GYN, Radiology, Nephrology): current range 10.1–11.6%, target 5.0%.<div style="margin-top:4px"><span onclick="document.getElementById('rec_reason_412535_1').style.display=document.getElementById('rec_reason_412535_1').style.display==='none'?'block':'none'" style="cursor:pointer;color:#17a2b8;font-size:0.82rem;text-decoration:underline">Why this initiative &darr;</span><div id="rec_reason_412535_1" style="display:none;margin-top:6px;padding:10px;background:#f0f4f8;border-radius:4px;font-size:0.82rem;color:#555;line-height:1.5;border-left:3px solid #28a745"><strong>Reasoning:</strong> Target set at 5.0% based on industry benchmark. Current worst performer at 11.6% needs 6.6% improvement. Prioritized because: (1) 3/10 entities affected, (2) gap is large, (3) this metric directly impacts CMS quality reporting and reimbursement.</div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Analysis & Visualizations</h2>
+    <div class="grid"><div class="kpi-row"><div class="kpi"><div class="value">59,960</div><div class="label">Total Refs</div></div><div class="kpi"><div class="value">17,680</div><div class="label">Completed</div></div><div class="kpi"><div class="value">20,480</div><div class="label">Approved</div></div><div class="kpi"><div class="value">2,840</div><div class="label">Denied</div></div><div class="kpi"><div class="value">3,040</div><div class="label">Cancelled</div></div><div class="kpi"><div class="value">29.5</div><div class="label">Completion Rate Pct</div></div><div class="kpi"><div class="value">31.8</div><div class="label">Avg Days To Appt</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_4247').style.display=document.getElementById('meth_4247').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_4247" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_315891').style.display=document.getElementById('sql_315891').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_315891" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referral KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH ref_stats AS (
+                        SELECT COUNT(DISTINCT REFERRAL_ID) as total_refs,
+                            COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN REFERRAL_ID END) as completed,
+                            COUNT(DISTINCT CASE WHEN STATUS='APPROVED' THEN REFERRAL_ID END) as approved,
+                            COUNT(DISTINCT CASE WHEN STATUS='DENIED' THEN REFERRAL_ID END) as denied,
+                            COUNT(DISTINCT CASE WHEN STATUS='CANCELLED' THEN REFERRAL_ID END) as cancelled
+                        FROM REFERRALS
+                    ),
+                    appt_lag AS (
+                        SELECT AVG(CAST((julianday(APPOINTMENT_DATE) - julianday(REFERRAL_DATE)) AS REAL)) as avg_days_to_appt
+                        FROM REFERRALS
+                        WHERE APPOINTMENT_DATE IS NOT NULL
+                    )
+                    SELECT rs.total_refs,
+                        rs.completed,
+                        rs.approved,
+                        rs.denied,
+                        rs.cancelled,
+                        ROUND(100.0*rs.completed/NULLIF(rs.total_refs,0),1) as completion_rate_pct,
+                        ROUND(al.avg_days_to_appt,1) as avg_days_to_appt
+                    FROM ref_stats rs, appt_lag al</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Referrals by Specialty</h3><div class="chart-container"><canvas id="chart_63652" data-chart='{"type": "bar", "data": {"labels": ["Urology", "Pulmonology", "Surgery", "Cardiology", "Nephrology", "ENT", "Oncology", "OB/GYN", "Psychiatry", "Rheumatology", "Orthopedics", "Neurology", "Internal Medicine", "Pediatrics", "Endocrinology"], "datasets": [{"label": "Ref Count", "data": [3680.0, 3600.0, 3480.0, 3440.0, 3280.0, 3200.0, 3200.0, 3080.0, 3080.0, 3080.0, 2960.0, 2920.0, 2880.0, 2840.0, 2800.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Approved", "data": [1280.0, 1360.0, 1480.0, 1120.0, 1280.0, 840.0, 1200.0, 800.0, 1000.0, 1240.0, 1000.0, 1240.0, 880.0, 880.0, 760.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Completed", "data": [960.0, 1120.0, 960.0, 1240.0, 640.0, 960.0, 1000.0, 840.0, 1000.0, 1080.0, 840.0, 840.0, 960.0, 720.0, 1080.0], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-cost specialty: Urology at 3,680. Lowest: Dermatology at 2,320. Highest volume: Surgery (1,480 Approved). Compare cost per encounter across specialties to identify candidates for value-based contracts.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_63652').style.display=document.getElementById('meth_63652').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_63652" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_591066').style.display=document.getElementById('sql_591066').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_591066" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referrals by Specialty</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH spec_stats AS (
+                        SELECT SPECIALTY, COUNT(DISTINCT REFERRAL_ID) as ref_count,
+                            COUNT(DISTINCT CASE WHEN STATUS='APPROVED' THEN REFERRAL_ID END) as approved,
+                            COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN REFERRAL_ID END) as completed
+                        FROM REFERRALS GROUP BY SPECIALTY
+                    )
+                    SELECT SPECIALTY, ref_count, approved, completed,
+                        ROUND(100.0*approved/NULLIF(ref_count,0),1) as approval_rate_pct,
+                        ROUND(100.0*completed/NULLIF(ref_count,0),1) as completion_rate_pct
+                    FROM spec_stats ORDER BY ref_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY SPECIALTY
+                    )
+                    SELECT SPECIALTY, ref_count, approved, completed,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 20 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Referral Status Funnel</h3><div class="chart-container"><canvas id="chart_39199" data-chart='{"type": "doughnut", "data": {"labels": ["APPROVED", "COMPLETED", "PENDING", "CANCELLED", "DENIED", "EXPIRED"], "datasets": [{"label": "Count", "data": [20480.0, 17680.0, 13360.0, 3040.0, 2840.0, 2600.0], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [34.1, 29.5, 22.3, 5.1, 4.7, 4.3], "backgroundColor": ["#002B5C", "#0056b3", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#20c997"], "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Count: APPROVED (20,480). Lowest: EXPIRED (2,600). Average: 10,000. A 688% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_39199').style.display=document.getElementById('meth_39199').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_39199" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_482147').style.display=document.getElementById('sql_482147').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_482147" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referral Status Funnel</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT STATUS, COUNT(*) as count,
+                        ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM REFERRALS),1) as pct
+                    FROM REFERRALS GROUP BY STATUS ORDER BY count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> rounding for precision<br><strong>Grouping:</strong> GROUP BY STATUS<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 6 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Urgency Distribution & Completion</h3><div class="table-container"><table><thead><tr><th>Urgency</th><th>Ref Count</th><th>Completed</th><th>Completion Rate Pct</th></tr></thead><tbody><tr><td>ROUTINE</td><td>29,960</td><td>8,920</td><td>29.80</td></tr><tr><td>URGENT</td><td>15,640</td><td>4,760</td><td>30.40</td></tr><tr><td>ELECTIVE</td><td>11,200</td><td>2,960</td><td>26.40</td></tr><tr><td>STAT</td><td>3,160</td><td>1,040</td><td>32.90</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 4 rows of 4 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_637504').style.display=document.getElementById('sql_637504').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_637504" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Urgency Distribution & Completion</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT URGENCY,
+                        COUNT(DISTINCT REFERRAL_ID) as ref_count,
+                        COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN REFERRAL_ID END) as completed,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN STATUS='COMPLETED' THEN REFERRAL_ID END)/NULLIF(COUNT(DISTINCT REFERRAL_ID),0),1) as completion_rate_pct
+                    FROM REFERRALS GROUP BY URGENCY ORDER BY ref_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), rounding for precision<br><strong>Grouping:</strong> GROUP BY URGENCY<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 4 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Referral Type Mix</h3><div class="chart-container"><canvas id="chart_34791" data-chart='{"type": "bar", "data": {"labels": ["INTERNAL", "EXTERNAL", "SELF_REFERRAL"], "datasets": [{"label": "Ref Count", "data": [36800.0, 17320.0, 5840.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Pct", "data": [61.3, 28.9, 9.7], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Follow Up Cost", "data": [147302.04, 150187.26, 132438.96], "backgroundColor": "#28a745", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest Ref Count: INTERNAL (36,800). Lowest: SELF_REFERRAL (5,840). Average: 19,987. A 530% spread between highest and lowest warrants investigation into what drives this variation.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_34791').style.display=document.getElementById('meth_34791').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_34791" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_350059').style.display=document.getElementById('sql_350059').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_350059" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Referral Type Mix</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">WITH type_costs AS (
+                        SELECT r.REFERRAL_TYPE, COUNT(DISTINCT r.REFERRAL_ID) as ref_count,
+                            ROUND(AVG(COALESCE(CAST((SELECT SUM(CAST(PAID_AMOUNT AS REAL)) FROM CLAIMS c
+                                INNER JOIN ENCOUNTERS e ON c.ENCOUNTER_ID = e.ENCOUNTER_ID
+                                WHERE c.ENCOUNTER_ID != ''
+                                AND e.SERVICE_DATE &gt;= r.REFERRAL_DATE AND e.SERVICE_DATE &lt;= DATETIME(r.REFERRAL_DATE, '+90 days')
+                                AND e.RENDERING_NPI = r.REFERRED_TO_NPI) AS REAL), 0)),2) as avg_follow_up_cost
+                        FROM REFERRALS r
+                        GROUP BY r.REFERRAL_TYPE
+                    )
+                    SELECT REFERRAL_TYPE, ref_count,
+                        ROUND(100.0*ref_count/(SELECT COUNT(*) FROM REFERRALS),1) as pct,
+                        avg_follow_up_cost
+                    FROM type_costs ORDER BY ref_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, ENCOUNTERS, REFERRALS<br><strong>Data Integrity:</strong> Uses pre-aggregated CTE (Common Table Expression) to prevent cross-product JOINs. Claims/encounters are aggregated FIRST, then joined — this eliminates row inflation from many-to-many relationships.<br><strong>Orphan Exclusion:</strong> Filters out empty ENCOUNTER_ID records (orphan claims/diagnoses) that would create spurious matches in JOINs.<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY r.REFERRAL_TYPE
+                    )
+                    SELECT REFERRAL_TYPE, ref_count,<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 3 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Top Referring Providers</h3><div class="table-container"><table><thead><tr><th>Provider Name</th><th>Provider Specialty</th><th>Referral Count</th><th>Referred To Specialties</th><th>Completion Rate Pct</th></tr></thead><tbody><tr><td>Anderson, Patrick</td><td>Neurology</td><td>240</td><td>Gastroenterology,Pulmonology,Ophthalmology,Urology,OB/GYN</td><td>16.70</td></tr><tr><td>Evans, Helen</td><td>Oncology</td><td>240</td><td>Radiology,OB/GYN,Neurology,Ophthalmology,Rheumatology,Endocrinology</td><td>0.00</td></tr><tr><td>White, Sandra</td><td>OB/GYN</td><td>200</td><td>OB/GYN,Endocrinology,Orthopedics,Emergency Medicine,Pediatrics</td><td>40.00</td></tr><tr><td>Miller, Raymond</td><td>Pulmonology</td><td>200</td><td>Urology,Nephrology,OB/GYN,Cardiology</td><td>20.00</td></tr><tr><td>Nguyen, Deborah</td><td>Emergency Medicine</td><td>160</td><td>Orthopedics,Surgery,Gastroenterology,Oncology</td><td>25.00</td></tr><tr><td>Wilson, Robert</td><td>Pediatrics</td><td>160</td><td>Oncology,Internal Medicine,Neurology,Dermatology</td><td>50.00</td></tr><tr><td>Davis, Steven</td><td>Ophthalmology</td><td>160</td><td>Urology,Surgery,Cardiology</td><td>25.00</td></tr><tr><td>Johnson, Karen</td><td>Cardiology</td><td>160</td><td>Ophthalmology,Endocrinology,Dermatology,Internal Medicine</td><td>25.00</td></tr><tr><td>Carter, Pamela</td><td>Oncology</td><td>160</td><td>Urology,Dermatology,Internal Medicine,Surgery</td><td>25.00</td></tr><tr><td>Martinez, Brenda</td><td>Surgery</td><td>160</td><td>Oncology,Nephrology,OB/GYN</td><td>0.00</td></tr><tr><td>Murphy, Michelle</td><td>Urology</td><td>160</td><td>Pediatrics,Rheumatology,Pulmonology,OB/GYN</td><td>25.00</td></tr><tr><td>Young, Lisa</td><td>Radiology</td><td>160</td><td>Surgery,OB/GYN,Nephrology</td><td>0.00</td></tr><tr><td>Jones, Paul</td><td>Surgery</td><td>160</td><td>Internal Medicine,Gastroenterology,Emergency Medicine,Psychiatry</td><td>25.00</td></tr><tr><td>Carter, Deborah</td><td>Emergency Medicine</td><td>160</td><td>Rheumatology,Pulmonology,Neurology,Radiology</td><td>25.00</td></tr><tr><td>Ramirez, Robert</td><td>OB/GYN</td><td>160</td><td>Emergency Medicine,Cardiology,Orthopedics,Pulmonology</td><td>50.00</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 15 rows of 15 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_368531').style.display=document.getElementById('sql_368531').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_368531" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Top Referring Providers</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT p.PROVIDER_LAST_NAME || ', ' || p.PROVIDER_FIRST_NAME as provider_name,
+                        p.SPECIALTY as provider_specialty,
+                        COUNT(DISTINCT r.REFERRAL_ID) as referral_count,
+                        GROUP_CONCAT(DISTINCT r.SPECIALTY) as referred_to_specialties,
+                        ROUND(100.0*SUM(CASE WHEN r.STATUS='COMPLETED' THEN 1 ELSE 0 END)/COUNT(*),1) as completion_rate_pct
+                    FROM REFERRALS r
+                    LEFT JOIN PROVIDERS p ON r.REFERRING_NPI = p.NPI
+                    GROUP BY r.REFERRING_NPI ORDER BY referral_count DESC LIMIT 15</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS, REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, rounding for precision<br><strong>JOIN Strategy:</strong> LEFT JOIN preserves all records from the primary table even when no matching cost/encounter data exists — prevents silent data loss.<br><strong>Grouping:</strong> GROUP BY r.REFERRING_NPI<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 15 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Regional Referral Patterns</h3><div class="table-container"><table><thead><tr><th>Kp Region</th><th>Ref Count</th><th>Denied Count</th><th>Denial Rate Pct</th><th>Avg Days To Appt</th></tr></thead><tbody><tr><td>CO</td><td>8,360</td><td>520</td><td>6.20</td><td>30.80</td></tr><tr><td>MAS</td><td>8,240</td><td>520</td><td>6.30</td><td>32.10</td></tr><tr><td>GA</td><td>7,640</td><td>200</td><td>2.60</td><td>30.60</td></tr><tr><td>NCAL</td><td>7,600</td><td>440</td><td>5.80</td><td>31.90</td></tr><tr><td>MID</td><td>7,320</td><td>400</td><td>5.50</td><td>33.50</td></tr><tr><td>NW</td><td>7,000</td><td>80</td><td>1.10</td><td>32.20</td></tr><tr><td>SCAL</td><td>6,920</td><td>200</td><td>2.90</td><td>32.80</td></tr><tr><td>HI</td><td>6,920</td><td>480</td><td>6.90</td><td>30.30</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 8 rows of 8 total. Review the data above for patterns and outliers.</div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_56616').style.display=document.getElementById('meth_56616').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_56616" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Referral Network & Care Coordination Analytics</strong><br>
+            <strong>Calculation:</strong> Referral completion rate (COMPLETED/total), denial rate (DENIED/total), avg time-to-appointment (APPOINTMENT_DATE - REFERRAL_DATE in days). Internal vs external mix from REFERRAL_TYPE.<br>
+            <strong>Standard:</strong> NCQA Access standards, CMS Timely Care measures, HEDIS referral completion benchmarks<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Referral completion = status COMPLETED</li><li>Time-to-appointment measured from referral date to first appointment</li><li>Internal referrals preferred for network retention and cost control</li><li>STAT/URGENT referrals tracked for ≤48 hour appointment compliance</li></ul>
+            <strong>Thresholds:</strong> <strong>Completion target:</strong> ≥85% | <strong>Denial rate alert:</strong> >10% | <strong>Time-to-appointment:</strong> ≤14 days routine, ≤48 hrs urgent<br>
+            <strong>Why It Matters:</strong> Referral leakage (external referrals) represents significant revenue loss. Delayed specialist access worsens outcomes and increases downstream costs. Denied referrals may indicate authorization process friction.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_541254').style.display=document.getElementById('sql_541254').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_541254" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Regional Referral Patterns</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT r.KP_REGION,
+                        COUNT(DISTINCT REFERRAL_ID) as ref_count,
+                        COUNT(DISTINCT CASE WHEN STATUS='DENIED' THEN REFERRAL_ID END) as denied_count,
+                        ROUND(100.0*COUNT(DISTINCT CASE WHEN STATUS='DENIED' THEN REFERRAL_ID END)/NULLIF(COUNT(DISTINCT REFERRAL_ID),0),1) as denial_rate_pct,
+                        ROUND(AVG(CAST((julianday(APPOINTMENT_DATE) - julianday(REFERRAL_DATE)) AS REAL)),1) as avg_days_to_appt
+                    FROM REFERRALS r
+                    GROUP BY r.KP_REGION ORDER BY ref_count DESC</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> REFERRALS<br><strong>Aggregations:</strong> distinct counts (no double-counting), averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY r.KP_REGION<br><strong>Sorting:</strong> Results ordered for logical presentation.<br><strong>Result:</strong> 8 rows returned
+            </div>
+        </div></div></div><div class="kpi-row"><div class="kpi"><div class="value">6,000</div><div class="label">Total Providers</div></div><div class="kpi"><div class="value">20</div><div class="label">Specialties</div></div><div class="kpi"><div class="value">8</div><div class="label">Regions</div><div class="subtitle-text">Operating across 8 service areas</div></div><div class="kpi"><div class="value">1,309</div><div class="label">Avg Panel</div></div><div class="kpi"><div class="value">0</div><div class="label">Accepting New</div></div><div style="margin-top:4px">
+        <span onclick="document.getElementById('meth_6881').style.display=document.getElementById('meth_6881').style.display==='none'?'block':'none'"
+              style="color:#0066cc;cursor:pointer;font-size:0.8rem;text-decoration:underline">
+            &#9432; How we calculated this &amp; business rules considered</span>
+        <div id="meth_6881" style="display:none;margin-top:8px;padding:12px;background:#f0f4f8;border-left:3px solid #002B5C;border-radius:4px;font-size:0.82rem;color:#444;line-height:1.6">
+            <strong>Provider Network & Workforce Analytics</strong><br>
+            <strong>Calculation:</strong> Provider counts by type (MD/DO/PA/RN), panel size analysis, capacity = panel_size vs benchmark (2,000 for PCP, 3,000+ for specialist). Provider-to-member ratio per 1K members.<br>
+            <strong>Standard:</strong> CMS Network Adequacy standards, NCQA Provider Directory accuracy, state licensure compliance requirements<br>
+            <strong>Business Rules:</strong><ul style="margin:4px 0 4px 16px;padding:0"><li>Active providers only (STATUS=ACTIVE) for capacity calculations</li><li>Panel over-capacity: >2,500 for PCP, may indicate burnout risk</li><li>New patient acceptance required for network adequacy</li><li>Provider tenure bands: <3 years (new), 3-10 (experienced), 10+ (senior)</li></ul>
+            <strong>Thresholds:</strong> <strong>PCP panel target:</strong> 1,800-2,200 | <strong>Provider:member ratio:</strong> ≥1:1,500 | <strong>Accepting new patients:</strong> ≥70%<br>
+            <strong>Why It Matters:</strong> Provider network adequacy directly affects member access, satisfaction, and retention. Over-paneled providers face burnout and quality risk. Under-staffed regions create access gaps driving ER utilization.
+        </div></div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_226049').style.display=document.getElementById('sql_226049').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_226049" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Provider Network KPIs</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT COUNT(*) as total_providers,
+                        COUNT(DISTINCT SPECIALTY) as specialties,
+                        COUNT(DISTINCT KP_REGION) as regions,
+                        ROUND(AVG(CAST(PANEL_SIZE AS REAL)),0) as avg_panel,
+                        SUM(CASE WHEN ACCEPTS_NEW_PATIENTS='Yes' THEN 1 ELSE 0 END) as accepting_new
+                    FROM PROVIDERS</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>Result:</strong> 1 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Specialty Distribution</h3><div class="chart-container"><canvas id="chart_67031" data-chart='{"type": "bar", "data": {"labels": ["Cardiology", "ENT", "Emergency Medicine", "Radiology", "Rheumatology", "Orthopedics", "OB/GYN", "Oncology", "Pediatrics", "Internal Medicine", "Surgery", "Nephrology"], "datasets": [{"label": "Providers", "data": [368.0, 336.0, 336.0, 332.0, 324.0, 320.0, 316.0, 316.0, 312.0, 308.0, 308.0, 304.0], "backgroundColor": "#002B5C", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}, {"label": "Avg Panel", "data": [1267.0, 1277.0, 1293.0, 1177.0, 1283.0, 1324.0, 1204.0, 1316.0, 1356.0, 1352.0, 1356.0, 1253.0], "backgroundColor": "#0056b3", "borderColor": "transparent", "borderWidth": 0, "tension": 0.3, "fill": false}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"labels": {"color": "#002B5C", "font": {"size": 12}}}, "tooltip": {"backgroundColor": "#002B5C", "titleColor": "#FFF", "bodyColor": "#FFF", "borderColor": "#003d7a", "borderWidth": 1}}, "scales": {"x": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}, "y": {"ticks": {"color": "#666", "font": {"size": 11}}, "grid": {"color": "#E5E7EB", "drawBorder": false}}}}}'></canvas></div><div class="explanation"><strong>What This Means:</strong> Highest-cost specialty: Cardiology at 368. Lowest: Nephrology at 304. Highest volume: Pediatrics (1,356 Avg Panel). Compare cost per encounter across specialties to identify candidates for value-based contracts.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_449209').style.display=document.getElementById('sql_449209').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_449209" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Specialty Distribution</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT SPECIALTY, COUNT(*) as providers,
+                        ROUND(AVG(CAST(PANEL_SIZE AS REAL)),0) as avg_panel
+                    FROM PROVIDERS GROUP BY SPECIALTY ORDER BY providers DESC LIMIT 12</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> PROVIDERS<br><strong>Aggregations:</strong> averages, rounding for precision<br><strong>Grouping:</strong> GROUP BY SPECIALTY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 12 rows returned
+            </div>
+        </div></div></div><div class="card"><h3>Provider Performance</h3><div class="table-container"><table><thead><tr><th>Specialty</th><th>Providers</th><th>Avg Claim Cost</th><th>Total Claims</th><th>Denial Rate</th></tr></thead><tbody><tr><td>Cardiology</td><td>92</td><td>2,552.19</td><td>91,900</td><td>9.00</td></tr><tr><td>ENT</td><td>84</td><td>2,632.84</td><td>86,600</td><td>9.90</td></tr><tr><td>Oncology</td><td>79</td><td>2,540.50</td><td>82,500</td><td>9.50</td></tr><tr><td>Radiology</td><td>83</td><td>2,645.03</td><td>82,500</td><td>10.10</td></tr><tr><td>Emergency Medicine</td><td>84</td><td>2,670.26</td><td>81,100</td><td>8.80</td></tr><tr><td>Orthopedics</td><td>80</td><td>2,616.42</td><td>80,700</td><td>8.80</td></tr><tr><td>Rheumatology</td><td>81</td><td>2,675.60</td><td>80,200</td><td>9.50</td></tr><tr><td>Nephrology</td><td>76</td><td>2,738.22</td><td>77,900</td><td>10.10</td></tr><tr><td>OB/GYN</td><td>79</td><td>2,551.03</td><td>77,700</td><td>11.60</td></tr><tr><td>Internal Medicine</td><td>77</td><td>2,646.29</td><td>77,600</td><td>8.90</td></tr></tbody></table></div><div class="explanation"><strong>What This Means:</strong> Showing top 10 rows of 10 total. Review the data above for patterns and outliers.</div><div style="margin-top:6px;">
+        <span onclick="document.getElementById('sql_325191').style.display=document.getElementById('sql_325191').style.display==='none'?'block':'none'"
+              style="color:#0056b3;cursor:pointer;font-size:0.78rem;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+            &#128270; View SQL &amp; Reasoning</span>
+        <div id="sql_325191" style="display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid #d0d7de;">
+            <div style="background:#002B5C;color:#fff;padding:8px 12px;font-size:0.78rem;font-weight:600;">
+                SQL Query — Provider Performance</div>
+            <pre style="margin:0;padding:12px;background:#f6f8fa;font-size:0.75rem;line-height:1.5;overflow-x:auto;color:#24292f;white-space:pre-wrap;word-break:break-word;">SELECT p.SPECIALTY,
+                        COUNT(DISTINCT p.NPI) as providers,
+                        ROUND(AVG(CAST(c.PAID_AMOUNT AS REAL)),2) as avg_claim_cost,
+                        COUNT(c.CLAIM_ID) as total_claims,
+                        ROUND(100.0*SUM(CASE WHEN c.CLAIM_STATUS='DENIED' THEN 1 ELSE 0 END)/COUNT(c.CLAIM_ID),1) as denial_rate
+                    FROM PROVIDERS p JOIN CLAIMS c ON p.NPI = c.RENDERING_NPI
+                    GROUP BY p.SPECIALTY ORDER BY total_claims DESC LIMIT 10</pre>
+            <div style="padding:12px;background:#f0f4f8;border-top:1px solid #d0d7de;font-size:0.78rem;color:#444;line-height:1.7;">
+                <strong style="color:#002B5C;">&#9432; Why this SQL:</strong><br>
+                <strong>Tables:</strong> CLAIMS, PROVIDERS<br><strong>Aggregations:</strong> distinct counts (no double-counting), summation, averages, rounding for precision<br><strong>JOIN Strategy:</strong> INNER JOIN — only includes records with matches in both tables.<br><strong>Grouping:</strong> GROUP BY p.SPECIALTY<br><strong>Ranking:</strong> Results sorted by highest values first, limited to top results for readability.<br><strong>Result:</strong> 10 rows returned
+            </div>
+        </div></div></div></div>
+</div>
+<div class="section">
+    <h2 class="section-title">Suggested Next Steps</h2>
+    <div class="followups"><span class="followup">Which specialties have longest wait times?</span><span class="followup">What is causing referral denials by specialty?</span><span class="followup">Compare internal vs external referral outcomes</span><span class="followup">Which providers refer most to each specialty?</span></div>
+</div>
+<div class="footer">Healthcare Analytical Intelligence Engine | Decomposition-based multi-query analysis | Insight synthesis with industry benchmarks</div>
+</div>
+<script>
+document.querySelectorAll('[data-chart]').forEach(el => {
+    try {
+        const cfg = JSON.parse(el.getAttribute('data-chart'));
+        new Chart(el, cfg);
+    } catch(e) { console.error('Chart error:', e); }
+});
+</script>
+</body></html>
