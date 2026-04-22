@@ -1,23 +1,47 @@
-"""
-Auto-analyze data and recommend business actions with ready-to-run SQL.
-Standalone module with Pure Python - no external dependencies beyond standard library.
-"""
-
 import re
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
 from enum import Enum
 
 
+CLINICAL_CONFIG = {
+    'chronic_icd_prefixes': ['E11', 'I10', 'J44'],
+    'screening_types': {
+        'mammogram': {'keyword': 'mammo', 'min_age': 40},
+        'colonoscopy': {'keyword': 'colonoscopy', 'min_age': 50},
+        'flu_vaccine': {'keyword': 'flu_vaccine', 'min_age': 0},
+    },
+    'er_diagnoses': ['URI', 'Migraine', 'Minor_Injury'],
+    'facility_type_er': 'EMERGENCY_DEPT',
+    'sdoh_services': ['TRANSPORTATION', 'HOUSING_RELATED'],
+    'sdoh_utilization': ['ER', 'HOSPITALIZATION'],
+}
+
+WINDOW_90_DAYS = 90
+WINDOW_30_DAYS = 30
+WINDOW_60_DAYS = 60
+WINDOW_365_DAYS = 365
+WINDOW_1095_DAYS = 1095
+WINDOW_6_MONTHS = 6
+WINDOW_1_YEAR = 1
+WINDOW_5_YEARS = 5
+
+HIGH_COST_PERCENTILE = 0.90
+P75_COST_PERCENTILE = 0.75
+P95_COST_PERCENTILE = 0.95
+
+IMPACT_HIGH = 3
+IMPACT_MEDIUM = 2
+IMPACT_LOW = 1
+
+
 class Impact(Enum):
-    """Business impact level."""
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
 
 
 class AnalyticsCategory(Enum):
-    """Business domain categories."""
     PATIENT_RETENTION = "patient_retention"
     PATIENT_ACQUISITION = "patient_acquisition"
     PREVENTIVE_CARE = "preventive_care"
@@ -29,19 +53,16 @@ class AnalyticsCategory(Enum):
 
 @dataclass
 class AnalyticSpec:
-    """Specification for a single analytic."""
     category: str
     name: str
     description: str
     required_columns: List[str]
     sql_template: str
-    impact: str  # HIGH, MEDIUM, LOW
+    impact: str
     business_action: str
 
 
-# Registry of 17 analytics with ready-to-run SQL templates
 ANALYTICS_REGISTRY = [
-    # PATIENT RETENTION (3)
     AnalyticSpec(
         category="patient_retention",
         name="Member Churn Analysis",
@@ -56,8 +77,8 @@ SELECT
   MAX({date_col}) as last_service_date,
   DATEDIFF(day, MAX({date_col}), GETDATE()) as days_since_visit,
   CASE
-    WHEN DATEDIFF(day, MAX({date_col}), GETDATE()) > 90 THEN 'HIGH_RISK'
-    WHEN DATEDIFF(day, MAX({date_col}), GETDATE()) > 30 THEN 'MEDIUM_RISK'
+    WHEN DATEDIFF(day, MAX({date_col}), GETDATE()) > {churn_window_high} THEN 'HIGH_RISK'
+    WHEN DATEDIFF(day, MAX({date_col}), GETDATE()) > {churn_window_medium} THEN 'MEDIUM_RISK'
     ELSE 'ACTIVE'
   END as churn_risk
 FROM {table}
@@ -120,7 +141,6 @@ ORDER BY no_show_pct DESC
         business_action="Send appointment reminders; implement SMS/call confirmations; analyze scheduling conflicts; offer flexible times"
     ),
 
-    # PATIENT ACQUISITION (3)
     AnalyticSpec(
         category="patient_acquisition",
         name="High-Demand Service Lines",
@@ -185,7 +205,6 @@ ORDER BY claims_per_member ASC
         business_action="Open clinics or partner facilities in underserved areas; enhance transportation programs; increase digital health offerings"
     ),
 
-    # PREVENTIVE CARE (2)
     AnalyticSpec(
         category="preventive_care",
         name="Preventive Screening Gap",
@@ -201,14 +220,14 @@ SELECT
   DATEDIFF(day, MAX({date_col}), GETDATE()) as days_overdue,
   CASE
     WHEN screening_type = 'mammo' AND gender = 'F' AND DATEDIFF(year, dob, GETDATE()) >= 40
-      AND DATEDIFF(day, MAX({date_col}), GETDATE()) > 365 THEN 'OVERDUE'
+      AND DATEDIFF(day, MAX({date_col}), GETDATE()) > {screening_mammo_days} THEN 'OVERDUE'
     WHEN screening_type = 'colonoscopy' AND DATEDIFF(year, dob, GETDATE()) >= 50
-      AND DATEDIFF(day, MAX({date_col}), GETDATE()) > 1095 THEN 'OVERDUE'
-    WHEN screening_type = 'flu_vaccine' AND DATEDIFF(day, MAX({date_col}), GETDATE()) > 365 THEN 'OVERDUE'
+      AND DATEDIFF(day, MAX({date_col}), GETDATE()) > {screening_colonoscopy_days} THEN 'OVERDUE'
+    WHEN screening_type = 'flu_vaccine' AND DATEDIFF(day, MAX({date_col}), GETDATE()) > {screening_flu_days} THEN 'OVERDUE'
     ELSE 'CURRENT'
   END as status
 FROM {table}
-WHERE {date_col} >= DATEADD(year, -5, GETDATE())
+WHERE {date_col} >= DATEADD(year, -{screening_lookback_years}, GETDATE())
 GROUP BY {member_col}, dob, gender, screening_type
         """,
         impact="HIGH",
@@ -228,12 +247,12 @@ SELECT
   DATEDIFF(day, MAX({date_col}), GETDATE()) as days_since_visit,
   COUNT(DISTINCT medication_id) as unique_meds,
   CASE
-    WHEN DATEDIFF(day, MAX({date_col}), GETDATE()) > 60 THEN 'NEEDS_ATTENTION'
+    WHEN DATEDIFF(day, MAX({date_col}), GETDATE()) > {chronic_care_window} THEN 'NEEDS_ATTENTION'
     ELSE 'MANAGED'
   END as management_status
 FROM {table}
 WHERE {date_col} >= DATEADD(year, -1, GETDATE())
-  AND diagnosis_code IN ('E11', 'I10', 'J44')  -- Type 2 Diabetes, Hypertension, COPD
+  AND diagnosis_code IN ({chronic_icd_codes})
 GROUP BY {member_col}, diagnosis_code
 ORDER BY days_since_visit DESC
         """,
@@ -241,7 +260,6 @@ ORDER BY days_since_visit DESC
         business_action="Enroll in disease management programs; increase visit frequency; optimize medication therapy; provide care coordinator support"
     ),
 
-    # COST OPTIMIZATION (3)
     AnalyticSpec(
         category="cost_optimization",
         name="High-Cost Member Identification",
@@ -265,13 +283,13 @@ SELECT
   total_cost,
   claim_count,
   ROUND(total_cost / claim_count, 2) as avg_cost_per_claim,
-  PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY total_cost) OVER () as p75_cost,
-  PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY total_cost) OVER () as p90_cost,
+  PERCENTILE_CONT({p75_percentile}) WITHIN GROUP (ORDER BY total_cost) OVER () as p75_cost,
+  PERCENTILE_CONT({high_cost_percentile}) WITHIN GROUP (ORDER BY total_cost) OVER () as p90_cost,
   diabetes_claims,
   hypertension_claims,
   CASE
-    WHEN total_cost > PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY total_cost) OVER () THEN 'CATASTROPHIC'
-    WHEN total_cost > PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY total_cost) OVER () THEN 'HIGH'
+    WHEN total_cost > PERCENTILE_CONT({p95_percentile}) WITHIN GROUP (ORDER BY total_cost) OVER () THEN 'CATASTROPHIC'
+    WHEN total_cost > PERCENTILE_CONT({p75_percentile}) WITHIN GROUP (ORDER BY total_cost) OVER () THEN 'HIGH'
     ELSE 'STANDARD'
   END as cost_tier
 FROM member_costs
@@ -293,11 +311,11 @@ SELECT
   SUM({amount_col}) as total_er_cost,
   ROUND(SUM({amount_col}) / COUNT(*), 2) as avg_cost_per_visit,
   CASE
-    WHEN primary_diagnosis IN ('URI', 'Migraine', 'Minor_Injury') THEN 'POTENTIALLY_NON_EMERGENT'
+    WHEN primary_diagnosis IN ({er_diagnoses}) THEN 'POTENTIALLY_NON_EMERGENT'
     ELSE 'LIKELY_EMERGENT'
   END as appropriateness
 FROM {table}
-WHERE facility_type = 'EMERGENCY_DEPT'
+WHERE facility_type = {facility_er_type}
   AND {date_col} >= DATEADD(year, -1, GETDATE())
 GROUP BY {member_col}, primary_diagnosis
 HAVING COUNT(*) > 1
@@ -341,7 +359,6 @@ ORDER BY readmission_rate_pct DESC
         business_action="Deploy transitional care team; enhance discharge planning; increase post-discharge follow-up; optimize medication reconciliation; implement remote monitoring"
     ),
 
-    # OPERATIONS (2)
     AnalyticSpec(
         category="operations",
         name="Provider Workload Analysis",
@@ -402,7 +419,6 @@ ORDER BY visit_month DESC, visit_modality
         business_action="Expand telehealth infrastructure; train providers; market telehealth benefits; invest in patient portal; negotiate rates with payers"
     ),
 
-    # POPULATION HEALTH (2)
     AnalyticSpec(
         category="population_health",
         name="Disease Prevalence Analysis",
@@ -435,11 +451,11 @@ SELECT
   {member_col} as member_id,
   zip_code,
   income_quartile,
-  SUM(CASE WHEN service_type = 'TRANSPORTATION' THEN 1 ELSE 0 END) as transportation_claims,
-  SUM(CASE WHEN service_type = 'HOUSING_RELATED' THEN 1 ELSE 0 END) as housing_claims,
+  SUM(CASE WHEN service_type = {sdoh_transportation} THEN 1 ELSE 0 END) as transportation_claims,
+  SUM(CASE WHEN service_type = {sdoh_housing} THEN 1 ELSE 0 END) as housing_claims,
   SUM({amount_col}) as total_sdoh_spending,
-  SUM(CASE WHEN service_type IN ('ER', 'HOSPITALIZATION') THEN {amount_col} ELSE 0 END) as acute_care_cost,
-  ROUND(SUM(CASE WHEN service_type IN ('ER', 'HOSPITALIZATION') THEN {amount_col} ELSE 0 END) /
+  SUM(CASE WHEN service_type IN ({sdoh_acute_types}) THEN {amount_col} ELSE 0 END) as acute_care_cost,
+  ROUND(SUM(CASE WHEN service_type IN ({sdoh_acute_types}) THEN {amount_col} ELSE 0 END) /
         SUM({amount_col}), 2) as acute_cost_ratio
 FROM {table}
 WHERE {date_col} >= DATEADD(year, -1, GETDATE())
@@ -451,12 +467,11 @@ ORDER BY acute_cost_ratio DESC
         business_action="Partner with community organizations; address transportation barriers; invest in housing stability; coordinate social services; close SDOH gaps"
     ),
 
-    # DATA QUALITY (2)
     AnalyticSpec(
         category="data_quality",
         name="Completeness Scorecard",
         description="Measure data completeness and missing value rates by column",
-        required_columns=["*"],  # Requires all columns
+        required_columns=["*"],
         sql_template="""
 SELECT
   column_name,
@@ -514,28 +529,23 @@ ORDER BY record_count DESC
 
 
 class AnalyticsCatalog:
-    """Registry of available analytics."""
 
     def __init__(self):
         self.analytics = ANALYTICS_REGISTRY
 
     def get_by_category(self, category: str) -> List[AnalyticSpec]:
-        """Get all analytics for a category."""
         return [a for a in self.analytics if a.category == category]
 
     def get_all(self) -> List[AnalyticSpec]:
-        """Get all analytics."""
         return self.analytics
 
     def find_by_name(self, name: str) -> Optional[AnalyticSpec]:
-        """Find a single analytic by name."""
         for a in self.analytics:
             if name.lower() in a.name.lower():
                 return a
         return None
 
 
-# Pattern matching for analytics questions
 ADVISOR_PATTERNS = {
     "all_analytics": [
         r"what\s+analytics\s+can\s+we\s+do",
@@ -600,9 +610,6 @@ ADVISOR_PATTERNS = {
 
 
 class AnalyticsAdvisor:
-    """
-    Recommend analytics and business actions based on available data.
-    """
 
     def __init__(self, catalog: Optional[Any] = None):
         self.catalog = AnalyticsCatalog()
@@ -610,7 +617,6 @@ class AnalyticsAdvisor:
         self.available_columns = self._detect_available_columns()
 
     def _detect_available_columns(self) -> List[str]:
-        """Scan semantic catalog for available column types."""
         columns = []
 
         if self.semantic_catalog and hasattr(self.semantic_catalog, "tables"):
@@ -621,7 +627,6 @@ class AnalyticsAdvisor:
                         semantic_type = getattr(col, "semantic_type", "")
                         healthcare_type = getattr(col, "healthcare_type", "")
 
-                        # Add both specific and generic names
                         if col_name:
                             columns.append(col_name.lower())
                         if semantic_type:
@@ -632,13 +637,11 @@ class AnalyticsAdvisor:
         return list(set(columns))
 
     def _can_run_analytic(self, analytic: AnalyticSpec, available_cols: List[str]) -> bool:
-        """Check if required columns exist for an analytic."""
         if "*" in analytic.required_columns:
             return True
 
         for req_col in analytic.required_columns:
             req_lower = req_col.lower()
-            # Check if any available column contains the required column concept
             if not any(req_lower in avail for avail in available_cols):
                 return False
 
@@ -647,10 +650,8 @@ class AnalyticsAdvisor:
     def _fill_sql_template(
         self, analytic: AnalyticSpec, available_cols: List[str]
     ) -> str:
-        """Fill SQL template with actual column names."""
         sql = analytic.sql_template
 
-        # Replace common placeholders with defaults
         replacements = {
             "{table}": "analytics_table",
             "{member_col}": "member_id",
@@ -660,6 +661,22 @@ class AnalyticsAdvisor:
             "{encounter_col}": "encounter_id",
             "{service_col}": "service_code",
             "{region_col}": "region",
+            "{churn_window_high}": str(WINDOW_90_DAYS),
+            "{churn_window_medium}": str(WINDOW_30_DAYS),
+            "{chronic_care_window}": str(WINDOW_60_DAYS),
+            "{screening_mammo_days}": str(WINDOW_365_DAYS),
+            "{screening_colonoscopy_days}": str(WINDOW_1095_DAYS),
+            "{screening_flu_days}": str(WINDOW_365_DAYS),
+            "{screening_lookback_years}": str(WINDOW_5_YEARS),
+            "{p75_percentile}": str(P75_COST_PERCENTILE),
+            "{high_cost_percentile}": str(HIGH_COST_PERCENTILE),
+            "{p95_percentile}": str(P95_COST_PERCENTILE),
+            "{chronic_icd_codes}": "'" + "', '".join(CLINICAL_CONFIG['chronic_icd_prefixes']) + "'",
+            "{er_diagnoses}": "'" + "', '".join(CLINICAL_CONFIG['er_diagnoses']) + "'",
+            "{facility_er_type}": "'" + CLINICAL_CONFIG['facility_type_er'] + "'",
+            "{sdoh_transportation}": "'" + CLINICAL_CONFIG['sdoh_services'][0] + "'",
+            "{sdoh_housing}": "'" + CLINICAL_CONFIG['sdoh_services'][1] + "'",
+            "{sdoh_acute_types}": "'" + "', '".join(CLINICAL_CONFIG['sdoh_utilization']) + "'",
         }
 
         for placeholder, default in replacements.items():
@@ -668,13 +685,12 @@ class AnalyticsAdvisor:
         return sql
 
     def get_all_recommendations(self) -> List[Dict[str, Any]]:
-        """Get all recommendations, prioritized by feasibility and impact."""
         recommendations = []
+        impact_map = {"HIGH": IMPACT_HIGH, "MEDIUM": IMPACT_MEDIUM, "LOW": IMPACT_LOW}
 
         for analytic in self.catalog.get_all():
             can_run = self._can_run_analytic(analytic, self.available_columns)
-            impact_score = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}.get(analytic.impact, 0)
-            priority = (can_run, impact_score)
+            impact_score = impact_map.get(analytic.impact, 0)
 
             sql = self._fill_sql_template(analytic, self.available_columns) if can_run else ""
 
@@ -684,22 +700,20 @@ class AnalyticsAdvisor:
                 "description": analytic.description,
                 "can_run": can_run,
                 "impact": analytic.impact,
+                "impact_score": impact_score,
                 "business_action": analytic.business_action,
                 "sql_template": sql,
-                "priority": priority[0] and priority[1],
+                "priority": can_run and impact_score,
             })
 
-        # Sort by feasibility first, then impact
-        recommendations.sort(key=lambda x: (not x["can_run"], -{"HIGH": 3, "MEDIUM": 2, "LOW": 1}.get(x["impact"], 0)))
+        recommendations.sort(key=lambda x: (not x["can_run"], -x["impact_score"]))
         return recommendations
 
     def get_category_recommendations(self, category: str) -> List[Dict[str, Any]]:
-        """Get recommendations for a specific category."""
         all_recs = self.get_all_recommendations()
         return [r for r in all_recs if r["category"] == category]
 
     def is_analytics_question(self, question: str) -> Optional[str]:
-        """Classify question type; return category or None."""
         question_lower = question.lower()
 
         for category, patterns in ADVISOR_PATTERNS.items():
@@ -710,10 +724,6 @@ class AnalyticsAdvisor:
         return None
 
     def answer_question(self, question: str) -> Dict[str, Any]:
-        """
-        Answer an analytics question.
-        Returns {answer: str, result_data: list}
-        """
         question_type = self.is_analytics_question(question)
 
         if question_type is None:
@@ -729,7 +739,6 @@ class AnalyticsAdvisor:
         else:
             recs = self.get_all_recommendations()
 
-        # Filter to runnable analytics
         runnable = [r for r in recs if r["can_run"]]
         blocked = [r for r in recs if not r["can_run"]]
 
@@ -749,12 +758,11 @@ class AnalyticsAdvisor:
 
         return {
             "answer": "\n".join(answer_parts),
-            "result_data": runnable[:5]  # Top 5 runnable
+            "result_data": runnable[:5]
         }
 
 
 if __name__ == "__main__":
-    # Demo usage
     advisor = AnalyticsAdvisor()
 
     print("AnalyticsAdvisor Demo")

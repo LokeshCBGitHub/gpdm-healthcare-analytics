@@ -1,27 +1,3 @@
-"""
-Databricks Connector — Production Data Source
-===============================================
-
-Connects to Databricks SQL Warehouse via REST API to execute queries
-against production healthcare data in Unity Catalog.
-
-Features:
-    1. Dual auth: Personal Access Token (PAT) + OAuth2 Service Principal
-    2. SQL Statement Execution API (/api/2.0/sql/statements)
-    3. Auto-detect: if Databricks config exists → use it, else → local fallback
-    4. Connection pooling with retry logic and circuit breaker
-    5. Spark SQL dialect via DatabricksDialect translator
-    6. HIPAA-safe: no PHI in logs, all connections TLS-encrypted
-    7. Paramset config file pattern (like IICS)
-
-Auth Priority:
-    1. Environment variables (DATABRICKS_HOST, DATABRICKS_TOKEN, etc.)
-    2. Paramset config file (paramset/databricks.cfg)
-    3. mtp_chatbot.cfg [DATABRICKS_*] keys
-
-Uses only Python stdlib (urllib, json, ssl) — zero extra dependencies.
-"""
-
 import os
 import re
 import json
@@ -38,75 +14,57 @@ from datetime import datetime, timezone
 try:
     from production import get_logger, audit_log
 except ImportError:
-    # Fallback: no-op logger
     import logging
-    def get_logger(name='mtp'):
+    def get_logger(name='gpdm'):
         return logging.getLogger(name)
     def audit_log(event, **kwargs):
         pass
 
 
-# =============================================================================
-# 1. CONFIGURATION
-# =============================================================================
+DEFAULT_CATALOG = 'healthcare_prod'
+DEFAULT_SCHEMA = 'analytics'
+DEFAULT_TIMEOUT = 120
+DEFAULT_MAX_RETRIES = 3
+CIRCUIT_BREAKER_THRESHOLD = 5
+CIRCUIT_BREAKER_RECOVERY = 60
+
 
 class DatabricksConfig:
-    """
-    Databricks connection configuration.
-
-    Reads from (in priority order):
-      1. Environment variables
-      2. Dedicated databricks.cfg paramset file
-      3. mtp_chatbot.cfg DATABRICKS_* keys
-
-    Required:
-      - host: Databricks workspace URL (e.g., adb-1234567890.12.azuredatabricks.net)
-      - Either token (PAT) OR client_id + client_secret (OAuth)
-      - warehouse_id: SQL warehouse ID
-
-    Optional:
-      - catalog: Unity Catalog name (default: healthcare_prod)
-      - schema: Schema name (default: analytics)
-      - timeout: Query timeout in seconds (default: 120)
-      - max_retries: Retry count for transient errors (default: 3)
-    """
 
     def __init__(self):
         self.host: str = ''
-        self.token: str = ''                # PAT auth
-        self.client_id: str = ''            # OAuth auth
-        self.client_secret: str = ''        # OAuth auth
+        self.token: str = ''
+        self.client_id: str = ''
+        self.client_secret: str = ''
         self.warehouse_id: str = ''
-        self.catalog: str = 'healthcare_prod'
-        self.schema: str = 'analytics'
-        self.timeout: int = 120
-        self.max_retries: int = 3
-        self.http_path: str = ''            # Optional: for JDBC/ODBC style paths
-        self.auth_type: str = ''            # 'pat' or 'oauth' (auto-detected)
+        self.catalog: str = DEFAULT_CATALOG
+        self.schema: str = DEFAULT_SCHEMA
+        self.timeout: int = DEFAULT_TIMEOUT
+        self.max_retries: int = DEFAULT_MAX_RETRIES
+        self.http_path: str = ''
+        self.auth_type: str = ''
 
     @classmethod
     def from_environment(cls) -> 'DatabricksConfig':
-        """Load config from environment variables."""
         cfg = cls()
         cfg.host = os.environ.get('DATABRICKS_HOST', '').strip().rstrip('/')
         cfg.token = os.environ.get('DATABRICKS_TOKEN', '').strip()
         cfg.client_id = os.environ.get('DATABRICKS_CLIENT_ID', '').strip()
         cfg.client_secret = os.environ.get('DATABRICKS_CLIENT_SECRET', '').strip()
         cfg.warehouse_id = os.environ.get('DATABRICKS_WAREHOUSE_ID', '').strip()
-        cfg.catalog = os.environ.get('DATABRICKS_CATALOG', 'healthcare_prod').strip()
-        cfg.schema = os.environ.get('DATABRICKS_SCHEMA', 'analytics').strip()
+        cfg.catalog = os.environ.get('DATABRICKS_CATALOG', DEFAULT_CATALOG).strip()
+        cfg.schema = os.environ.get('DATABRICKS_SCHEMA', DEFAULT_SCHEMA).strip()
         cfg.http_path = os.environ.get('DATABRICKS_HTTP_PATH', '').strip()
-        timeout_str = os.environ.get('DATABRICKS_TIMEOUT', '120')
+        timeout_str = os.environ.get('DATABRICKS_TIMEOUT', str(DEFAULT_TIMEOUT))
         try:
             cfg.timeout = int(timeout_str)
         except ValueError:
-            cfg.timeout = 120
+            cfg.timeout = DEFAULT_TIMEOUT
         cfg._detect_auth_type()
         return cfg
 
     @classmethod
     def from_config_file(cls, config_path: str) -> 'DatabricksConfig':
-        """Load config from a KEY=VALUE config file."""
         cfg = cls()
         if not os.path.exists(config_path):
             return cfg
@@ -133,7 +91,6 @@ class DatabricksConfig:
                     'DATABRICKS_HTTP_PATH': 'http_path',
                     'DATABRICKS_TIMEOUT': 'timeout',
                     'DATABRICKS_MAX_RETRIES': 'max_retries',
-                    # Short aliases
                     'HOST': 'host',
                     'TOKEN': 'token',
                     'CLIENT_ID': 'client_id',
@@ -160,39 +117,26 @@ class DatabricksConfig:
 
     @classmethod
     def auto_discover(cls, base_dir: str = None) -> 'DatabricksConfig':
-        """
-        Auto-discover configuration from all sources.
+        logger = get_logger('gpdm.databricks')
 
-        Priority:
-          1. Environment variables (always override)
-          2. paramset/databricks.cfg
-          3. paramset/mtp_chatbot.cfg DATABRICKS_* keys
-        """
-        logger = get_logger('mtp.databricks')
-
-        # Start with file-based config
         cfg = cls()
 
         if base_dir is None:
             base_dir = str(Path(__file__).resolve().parent.parent)
 
-        # Try dedicated databricks.cfg first
         db_cfg_path = os.path.join(base_dir, 'paramset', 'databricks.cfg')
         if os.path.exists(db_cfg_path):
             logger.info("Loading Databricks config from: %s", db_cfg_path)
             cfg = cls.from_config_file(db_cfg_path)
 
-        # Also check mtp_chatbot.cfg for DATABRICKS_* keys
-        main_cfg_path = os.path.join(base_dir, 'paramset', 'mtp_chatbot.cfg')
+        main_cfg_path = os.path.join(base_dir, 'paramset', 'gpdm_chatbot.cfg')
         if os.path.exists(main_cfg_path):
             main_cfg = cls.from_config_file(main_cfg_path)
-            # Only copy non-empty values that aren't already set
             for attr in ('host', 'token', 'client_id', 'client_secret',
                          'warehouse_id', 'catalog', 'schema', 'http_path'):
                 if not getattr(cfg, attr) and getattr(main_cfg, attr):
                     setattr(cfg, attr, getattr(main_cfg, attr))
 
-        # Environment variables always override
         env_cfg = cls.from_environment()
         for attr in ('host', 'token', 'client_id', 'client_secret',
                      'warehouse_id', 'catalog', 'schema', 'http_path'):
@@ -204,7 +148,6 @@ class DatabricksConfig:
         return cfg
 
     def _detect_auth_type(self) -> None:
-        """Auto-detect authentication type from available credentials."""
         if self.token:
             self.auth_type = 'pat'
         elif self.client_id and self.client_secret:
@@ -213,11 +156,9 @@ class DatabricksConfig:
             self.auth_type = ''
 
     def is_configured(self) -> bool:
-        """Check if minimum required fields are set for a Databricks connection."""
         return bool(self.host and self.warehouse_id and self.auth_type)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Return config as dict (WITHOUT secrets — safe for logging)."""
         return {
             'host': self.host,
             'warehouse_id': self.warehouse_id,
@@ -230,19 +171,7 @@ class DatabricksConfig:
         }
 
 
-# =============================================================================
-# 2. OAUTH2 TOKEN MANAGER
-# =============================================================================
-
 class OAuthTokenManager:
-    """
-    Manages OAuth2 access tokens for Databricks Service Principal auth.
-
-    Implements:
-      - Client credentials flow (grant_type=client_credentials)
-      - Automatic token refresh before expiry
-      - Thread-safe token caching
-    """
 
     def __init__(self, host: str, client_id: str, client_secret: str):
         self._host = host.rstrip('/')
@@ -251,10 +180,9 @@ class OAuthTokenManager:
         self._token: Optional[str] = None
         self._expires_at: float = 0
         self._lock = threading.Lock()
-        self._logger = get_logger('mtp.databricks.oauth')
+        self._logger = get_logger('gpdm.databricks.oauth')
 
     def get_token(self) -> str:
-        """Get a valid access token, refreshing if needed."""
         with self._lock:
             if self._token and time.time() < self._expires_at - 60:
                 return self._token
@@ -262,15 +190,18 @@ class OAuthTokenManager:
             self._token = self._fetch_token()
             return self._token
 
+    def reset_token(self) -> None:
+        with self._lock:
+            self._token = None
+            self._expires_at = 0
+
     def _fetch_token(self) -> str:
-        """Fetch a new OAuth2 access token from Databricks."""
         token_url = f"https://{self._host}/oidc/v1/token"
         data = urllib.parse.urlencode({
             'grant_type': 'client_credentials',
             'scope': 'all-apis',
         }).encode('utf-8')
 
-        # Basic auth header: base64(client_id:client_secret)
         import base64
         credentials = base64.b64encode(
             f"{self._client_id}:{self._client_secret}".encode()
@@ -305,27 +236,13 @@ class OAuthTokenManager:
             raise ConnectionError(f"OAuth token request failed: {e}")
 
 
-# =============================================================================
-# 3. CIRCUIT BREAKER
-# =============================================================================
-
 class CircuitBreaker:
-    """
-    Circuit breaker for Databricks API calls.
-
-    States:
-      CLOSED  → Normal operation, requests go through
-      OPEN    → Too many failures, requests blocked (fast-fail)
-      HALF_OPEN → Testing if service recovered
-
-    Prevents cascading failures and gives Databricks time to recover.
-    """
 
     CLOSED = 'closed'
     OPEN = 'open'
     HALF_OPEN = 'half_open'
 
-    def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60):
+    def __init__(self, failure_threshold: int = CIRCUIT_BREAKER_THRESHOLD, recovery_timeout: float = CIRCUIT_BREAKER_RECOVERY):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self._state = self.CLOSED
@@ -342,17 +259,14 @@ class CircuitBreaker:
             return self._state
 
     def allow_request(self) -> bool:
-        """Check if a request should be allowed through."""
         return self.state != self.OPEN
 
     def record_success(self) -> None:
-        """Record a successful request."""
         with self._lock:
             self._failure_count = 0
             self._state = self.CLOSED
 
     def record_failure(self) -> None:
-        """Record a failed request."""
         with self._lock:
             self._failure_count += 1
             self._last_failure_time = time.time()
@@ -360,27 +274,7 @@ class CircuitBreaker:
                 self._state = self.OPEN
 
 
-# =============================================================================
-# 4. DATABRICKS SQL CONNECTOR
-# =============================================================================
-
 class DatabricksConnector:
-    """
-    Production Databricks SQL connector.
-
-    Executes Spark SQL queries against a Databricks SQL Warehouse using
-    the SQL Statement Execution REST API.
-
-    API Endpoint: POST /api/2.0/sql/statements
-
-    Features:
-      - Dual auth (PAT + OAuth)
-      - Automatic retry with exponential backoff
-      - Circuit breaker for fault tolerance
-      - Query timeout enforcement
-      - HIPAA audit logging
-      - Connection health checks
-    """
 
     _instance: Optional['DatabricksConnector'] = None
     _init_lock = threading.Lock()
@@ -390,8 +284,8 @@ class DatabricksConnector:
     def __init__(self, config: DatabricksConfig = None):
         self._config = config or DatabricksConfig()
         self._oauth_manager: Optional[OAuthTokenManager] = None
-        self._circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
-        self._logger = get_logger('mtp.databricks')
+        self._circuit_breaker = CircuitBreaker(failure_threshold=CIRCUIT_BREAKER_THRESHOLD, recovery_timeout=CIRCUIT_BREAKER_RECOVERY)
+        self._logger = get_logger('gpdm.databricks')
         self._ssl_context = ssl.create_default_context()
         self._connected = False
         self._stats = {
@@ -410,7 +304,6 @@ class DatabricksConnector:
 
     @classmethod
     def get_instance(cls, config: DatabricksConfig = None) -> 'DatabricksConnector':
-        """Get singleton instance."""
         if cls._instance is None:
             with cls._init_lock:
                 if cls._instance is None:
@@ -419,12 +312,10 @@ class DatabricksConnector:
 
     @classmethod
     def reset(cls) -> None:
-        """Reset singleton (for testing)."""
         with cls._init_lock:
             cls._instance = None
 
     def _get_auth_header(self) -> str:
-        """Get the authorization header value."""
         if self._config.auth_type == 'pat':
             return f'Bearer {self._config.token}'
         elif self._config.auth_type == 'oauth' and self._oauth_manager:
@@ -434,11 +325,6 @@ class DatabricksConnector:
             raise ConnectionError("No valid authentication configured")
 
     def test_connection(self) -> Dict[str, Any]:
-        """
-        Test the Databricks connection by running a lightweight query.
-
-        Returns dict with connection status and details.
-        """
         if not self._config.is_configured():
             return {
                 'connected': False,
@@ -466,27 +352,12 @@ class DatabricksConnector:
 
     def execute_query(self, sql: str, timeout: int = None
                       ) -> Tuple[bool, List[Dict], str]:
-        """
-        Execute a SQL query against Databricks SQL Warehouse.
-
-        Uses the SQL Statement Execution API:
-          POST https://{host}/api/2.0/sql/statements
-
-        Args:
-            sql: Spark SQL query string
-            timeout: Override timeout (seconds)
-
-        Returns:
-            Tuple of (success, rows_as_dicts, error_message)
-        """
         t0 = time.time()
         timeout = timeout or self._config.timeout
 
-        # Circuit breaker check
         if not self._circuit_breaker.allow_request():
             return False, [], "Circuit breaker OPEN — Databricks temporarily unavailable"
 
-        # SQL safety: only SELECT allowed
         sql_upper = sql.strip().upper()
         if not sql_upper.startswith('SELECT'):
             return False, [], "Only SELECT queries are allowed"
@@ -496,7 +367,6 @@ class DatabricksConnector:
         except ConnectionError as e:
             return False, [], str(e)
 
-        # Build API request
         url = f"https://{self._config.host}{self.API_PATH}"
         payload = {
             'statement': sql,
@@ -506,7 +376,6 @@ class DatabricksConnector:
             'format': 'JSON_ARRAY',
         }
 
-        # Add catalog/schema if configured
         if self._config.catalog:
             payload['catalog'] = self._config.catalog
         if self._config.schema:
@@ -525,7 +394,6 @@ class DatabricksConnector:
             method='POST'
         )
 
-        # Execute with retries
         last_error = ''
         for attempt in range(1, self._config.max_retries + 1):
             try:
@@ -566,10 +434,9 @@ class DatabricksConnector:
                         "Databricks query FAILED (attempt %d): %s",
                         attempt, last_error[:200]
                     )
-                    break  # Don't retry failed queries
+                    break
 
                 elif status in ('PENDING', 'RUNNING'):
-                    # Poll for completion
                     statement_id = response_body.get('statement_id', '')
                     if statement_id:
                         success, rows, error = self._poll_statement(
@@ -594,7 +461,6 @@ class DatabricksConnector:
                 last_error = f"HTTP {e.code}: {error_body}"
 
                 if e.code == 429:
-                    # Rate limited — wait and retry
                     wait_time = min(2 ** attempt, 30)
                     self._logger.warning(
                         "Rate limited (attempt %d), waiting %ds", attempt, wait_time
@@ -602,7 +468,6 @@ class DatabricksConnector:
                     time.sleep(wait_time)
                     continue
                 elif e.code in (502, 503, 504):
-                    # Server error — retry
                     wait_time = min(2 ** attempt, 15)
                     self._logger.warning(
                         "Server error %d (attempt %d), retrying in %ds",
@@ -611,9 +476,8 @@ class DatabricksConnector:
                     time.sleep(wait_time)
                     continue
                 elif e.code == 401:
-                    # Auth error — refresh OAuth token and retry once
                     if self._oauth_manager and attempt == 1:
-                        self._oauth_manager._token = None
+                        self._oauth_manager.reset_token()
                         continue
                     last_error = "Authentication failed"
                     break
@@ -637,7 +501,6 @@ class DatabricksConnector:
                 self._logger.error("Unexpected error: %s", e, exc_info=True)
                 break
 
-        # All retries exhausted
         elapsed = (time.time() - t0) * 1000
         self._circuit_breaker.record_failure()
         self._stats['queries_failed'] += 1
@@ -657,7 +520,6 @@ class DatabricksConnector:
     def _poll_statement(self, statement_id: str, auth_header: str,
                         timeout: int, start_time: float
                         ) -> Tuple[bool, List[Dict], str]:
-        """Poll for async statement completion."""
         poll_url = f"https://{self._config.host}{self.API_PATH}/{statement_id}"
 
         while time.time() - start_time < timeout:
@@ -691,7 +553,7 @@ class DatabricksConnector:
                 elif status == 'CANCELED':
                     return False, [], 'Query canceled'
                 else:
-                    time.sleep(1)  # Wait 1s before next poll
+                    time.sleep(1)
 
             except Exception as e:
                 return False, [], f"Poll error: {str(e)}"
@@ -699,29 +561,22 @@ class DatabricksConnector:
         return False, [], f"Query timed out after {timeout}s"
 
     def _parse_response(self, response: Dict) -> List[Dict]:
-        """Parse Databricks SQL API response into list of dicts."""
         result = response.get('result', response.get('manifest', {}))
 
-        # Get column names from schema
         columns = []
         schema = (response.get('manifest', {}).get('schema', {})
                   .get('columns', []))
         if schema:
             columns = [col.get('name', f'col_{i}') for i, col in enumerate(schema)]
 
-        # Get data
         data_array = response.get('result', {}).get('data_array', [])
 
         if not data_array:
-            # Try chunk-based format
             chunks = response.get('result', {}).get('external_links', [])
             if chunks:
-                # For external links, we'd need to fetch each chunk
-                # For now, return what we have inline
                 pass
 
         if not columns and data_array:
-            # Infer column count from first row
             columns = [f'col_{i}' for i in range(len(data_array[0]))]
 
         rows = []
@@ -737,7 +592,6 @@ class DatabricksConnector:
         return rows
 
     def get_tables(self) -> List[str]:
-        """Get list of tables in the configured catalog.schema."""
         sql = f"SHOW TABLES IN {self._config.catalog}.{self._config.schema}"
         success, rows, error = self.execute_query(sql)
         if success:
@@ -746,8 +600,6 @@ class DatabricksConnector:
         return []
 
     def get_table_schema(self, table_name: str) -> List[Dict]:
-        """Get column schema for a table."""
-        # Validate table name
         if not re.match(r'^[a-zA-Z_]\w{0,127}$', table_name):
             return []
         fqn = f"{self._config.catalog}.{self._config.schema}.{table_name}"
@@ -758,7 +610,6 @@ class DatabricksConnector:
         return []
 
     def health_check(self) -> Dict[str, Any]:
-        """Check Databricks connection health."""
         if not self._config.is_configured():
             return {
                 'status': 'not_configured',
@@ -787,23 +638,7 @@ class DatabricksConnector:
             return {'status': 'error', 'error': str(e)}
 
 
-# =============================================================================
-# 5. AUTO-DETECT DATA SOURCE
-# =============================================================================
-
 class DataSourceManager:
-    """
-    Manages automatic selection between Databricks and local data sources.
-
-    Auto-detection logic:
-      1. Check if Databricks config exists and is valid
-      2. If yes → test connection → if healthy → use Databricks
-      3. If no → fall back to local SQLite/CSV
-      4. If Databricks fails at runtime → auto-fallback to local
-
-    This gives you seamless switching: production uses Databricks,
-    development uses local CSVs, and failures gracefully degrade.
-    """
 
     DATABRICKS = 'databricks'
     LOCAL = 'local'
@@ -814,28 +649,17 @@ class DataSourceManager:
         self._mode: str = self.LOCAL
         self._databricks: Optional[DatabricksConnector] = None
         self._db_config: Optional[DatabricksConfig] = None
-        self._logger = get_logger('mtp.datasource')
+        self._logger = get_logger('gpdm.datasource')
         self._initialized = False
 
     @classmethod
     def get_instance(cls) -> 'DataSourceManager':
-        """Get singleton instance."""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
     def initialize(self, base_dir: str = None, force_mode: str = None
                    ) -> Dict[str, Any]:
-        """
-        Initialize data source with auto-detection.
-
-        Args:
-            base_dir: Application base directory
-            force_mode: Force 'databricks' or 'local' (skip auto-detect)
-
-        Returns:
-            Dict with data source info
-        """
         if force_mode:
             self._mode = force_mode
             if force_mode == self.DATABRICKS:
@@ -844,7 +668,6 @@ class DataSourceManager:
                 self._initialized = True
                 return {'mode': self.LOCAL, 'reason': 'forced'}
 
-        # Auto-detect: try Databricks first
         self._db_config = DatabricksConfig.auto_discover(base_dir)
 
         if self._db_config.is_configured():
@@ -859,7 +682,6 @@ class DataSourceManager:
                     result.get('error', 'unknown')
                 )
 
-        # Fall back to local
         self._mode = self.LOCAL
         self._initialized = True
         self._logger.info("Using local data source (Databricks not configured)")
@@ -870,7 +692,6 @@ class DataSourceManager:
         }
 
     def _init_databricks(self, base_dir: str = None) -> Dict[str, Any]:
-        """Initialize Databricks connection."""
         try:
             self._databricks = DatabricksConnector(self._db_config)
             conn_test = self._databricks.test_connection()
@@ -908,27 +729,7 @@ class DataSourceManager:
 
     def execute_query(self, sql: str, local_fallback_fn=None,
                       cfg: Dict = None) -> Tuple[bool, List[Dict], str]:
-        """
-        Execute a query through the appropriate data source.
-
-        If Databricks mode:
-          1. Translate SQL to Spark dialect
-          2. Execute on Databricks
-          3. If fails → auto-fallback to local (if fallback available)
-
-        If Local mode:
-          Execute through local_fallback_fn
-
-        Args:
-            sql: SQL query (SQLite dialect)
-            local_fallback_fn: Callable(sql, cfg) → (success, rows, error)
-            cfg: Config dict for local fallback
-
-        Returns:
-            Tuple of (success, rows, error)
-        """
         if self._mode == self.DATABRICKS and self._databricks:
-            # Translate SQLite SQL → Spark SQL
             spark_sql = self._translate_to_spark(sql)
 
             success, rows, error = self._databricks.execute_query(spark_sql)
@@ -936,7 +737,6 @@ class DataSourceManager:
             if success:
                 return True, rows, ''
 
-            # Auto-fallback to local on Databricks failure
             if local_fallback_fn:
                 self._logger.warning(
                     "Databricks query failed, falling back to local: %s", error[:100]
@@ -945,38 +745,39 @@ class DataSourceManager:
             else:
                 return False, [], error
 
-        # Local mode
         if local_fallback_fn:
             return local_fallback_fn(sql, cfg or {})
 
         return False, [], "No data source available"
 
     def _translate_to_spark(self, sqlite_sql: str) -> str:
-        """Translate SQLite SQL to Databricks Spark SQL."""
+        try:
+            from databricks_dialect import DatabricksDialect as NewDialect
+            catalog = self._db_config.catalog if self._db_config else 'healthcare'
+            schema = self._db_config.schema if self._db_config else 'production'
+            dialect = NewDialect(catalog=catalog, schema=schema)
+            return dialect.translate(sqlite_sql)
+        except ImportError:
+            pass
+
         try:
             from graph_vector_engine import DatabricksDialect
-            # Extract table names from SQL
             tables = re.findall(r'\bFROM\s+"?(\w+)"?', sqlite_sql, re.IGNORECASE)
             tables += re.findall(r'\bJOIN\s+"?(\w+)"?', sqlite_sql, re.IGNORECASE)
             tables = list(set(tables))
-
-            # Update dialect with current config
             if self._db_config:
                 DatabricksDialect.DEFAULT_CATALOG = self._db_config.catalog
                 DatabricksDialect.DEFAULT_SCHEMA = self._db_config.schema
-
             return DatabricksDialect.translate(
                 sqlite_sql, tables=tables, use_catalog=True
             )
         except ImportError:
-            # Manual translation if DatabricksDialect not available
             sql = sqlite_sql
             sql = sql.replace('AS REAL)', 'AS DOUBLE)')
             sql = re.sub(r"SUBSTR\((\w+), 1, 7\)", r"DATE_FORMAT(\1, 'yyyy-MM')", sql)
             sql = re.sub(r"SUBSTR\((\w+), 1, 4\)", r"YEAR(\1)", sql)
             sql = re.sub(r"(\w+) LIKE '(\d{4})%'", r"YEAR(\1) = \2", sql)
 
-            # Add catalog.schema prefix
             if self._db_config:
                 prefix = f"{self._db_config.catalog}.{self._db_config.schema}"
                 tables = re.findall(r'\bFROM\s+"?(\w+)"?', sql, re.IGNORECASE)
@@ -996,7 +797,6 @@ class DataSourceManager:
             return sql
 
     def health_check(self) -> Dict[str, Any]:
-        """Get data source health status."""
         result = {
             'mode': self._mode,
             'initialized': self._initialized,
@@ -1009,10 +809,6 @@ class DataSourceManager:
 
         return result
 
-
-# =============================================================================
-# STANDALONE TEST
-# =============================================================================
 
 if __name__ == '__main__':
     import sys

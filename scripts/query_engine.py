@@ -1,19 +1,3 @@
-"""
-Query Engine — Central orchestrator for the MTP Healthcare NL→SQL pipeline.
-
-Pipeline:
-    question → input validation → session context (follow-ups, duplicates) →
-    catalog discovery → conversational/metadata early exit →
-    enrichment engines (ML, NLP, Scale) → DynamicSQLEngine → SQL execution →
-    result caching + audit logging → response
-
-Public API:
-    process_question(question, cfg, catalog=None, session=None) → dict
-
-All external module imports are wrapped in try/except for graceful degradation.
-Only stdlib is used directly; optional engines enhance accuracy when present.
-"""
-
 import os
 import json
 import re
@@ -28,42 +12,47 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# GRACEFUL IMPORTS — Optional engines degrade gracefully when absent
-# ═══════════════════════════════════════════════════════════════════════════════
+try:
+    from gpdm_config import (
+        FUZZY_MATCH_EXACT, FUZZY_MATCH_PREFIX, FUZZY_MATCH_SUBSTRING,
+        FUZZY_LEVENSHTEIN_FLOOR, FUZZY_TABLE_THRESHOLD,
+    )
+except ImportError:
+    FUZZY_MATCH_EXACT = 1.0
+    FUZZY_MATCH_PREFIX = 0.88
+    FUZZY_MATCH_SUBSTRING = 0.65
+    FUZZY_LEVENSHTEIN_FLOOR = 0.60
+    FUZZY_TABLE_THRESHOLD = 0.55
+DEFAULT_TIMEOUT = 30
+CSV_BATCH_SIZE = 5000
 
-# ML intent classification + entity extraction
+
 try:
     from ml_integration import MLEngine
 except ImportError:
     MLEngine = None
 
-# NumPy-powered TF-IDF + cosine similarity
 try:
     from nlp_engine import HybridNLPEngine
 except ImportError:
     HybridNLPEngine = None
 
-# Knowledge graph, vector search, query cache
 try:
     from graph_vector_engine import ScaleEngine, DatabricksDialect
 except ImportError:
     ScaleEngine = None
     DatabricksDialect = None
 
-# Data lineage tracking
 try:
     from lineage_tracker import LineageTracker
 except ImportError:
     LineageTracker = None
 
-# Analytics recommendations
 try:
     from analytics_advisor import AnalyticsAdvisor
 except ImportError:
     AnalyticsAdvisor = None
 
-# Production infrastructure: DB pool, logging, validation, audit
 try:
     from production import (
         DatabasePool, get_logger, audit_log, validate_question,
@@ -74,7 +63,6 @@ try:
 except ImportError:
     HAS_PRODUCTION = False
 
-# Databricks connectivity
 try:
     from databricks_connector import DataSourceManager, DatabricksConfig
     HAS_DATABRICKS = True
@@ -82,25 +70,12 @@ except ImportError:
     HAS_DATABRICKS = False
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CONFIG DISCOVERY
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def auto_discover_config() -> Optional[str]:
-    """Auto-discover mtp_chatbot.cfg in ../paramset/ relative to this script."""
-    config_path = Path(__file__).parent.parent / "paramset" / "mtp_chatbot.cfg"
+    config_path = Path(__file__).parent.parent / "paramset" / "gpdm_chatbot.cfg"
     return str(config_path) if config_path.exists() else None
 
 
 def read_config(path: str) -> Dict[str, str]:
-    """
-    Parse a KEY=VALUE config file with ${VAR} interpolation.
-
-    Supports:
-        - Comments (lines starting with #)
-        - Quoted values (single or double quotes stripped)
-        - Nested variable references resolved in up to 5 passes
-    """
     config = {}
     if not os.path.exists(path):
         print(f"[WARNING] Config file not found: {path}")
@@ -118,7 +93,6 @@ def read_config(path: str) -> Dict[str, str]:
     except Exception as e:
         print(f"[ERROR] Failed to read config: {e}")
 
-    # Resolve ${VAR} references (up to 5 passes for nested refs)
     for _ in range(5):
         changed = False
         for key, val in config.items():
@@ -138,15 +112,7 @@ def read_config(path: str) -> Dict[str, str]:
     return config
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SEMANTIC CATALOG — Table/column metadata from JSON profiles
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class SemanticCatalog:
-    """
-    Loads table profiles and relationship definitions from the semantic_catalog/
-    directory. Provides keyword-based table resolution and column lookup.
-    """
 
     def __init__(self, catalog_dir: str = None):
         if catalog_dir is None:
@@ -160,12 +126,10 @@ class SemanticCatalog:
         self._load_catalog()
 
     def _load_catalog(self):
-        """Load table profiles and relationships from JSON files."""
         self._load_tables()
         self._load_relationships()
 
     def _load_tables(self):
-        """Load table profiles, normalizing dict-format columns."""
         tables_dir = os.path.join(self.catalog_dir, "tables")
         if not os.path.exists(tables_dir):
             return
@@ -180,9 +144,6 @@ class SemanticCatalog:
                 table_name = data.get('table_name', data.get('name', filename[:-5]))
                 data['table_name'] = table_name
 
-                # ── Normalize columns: dict-keyed → list-of-dicts ──
-                # Some catalog JSONs store columns as {"COL_NAME": {props}}
-                # rather than [{"column_name": "COL_NAME", ...}].
                 cols_raw = data.get('columns', [])
                 if isinstance(cols_raw, dict):
                     cols_raw = [{'column_name': k, **v} for k, v in cols_raw.items()]
@@ -190,7 +151,6 @@ class SemanticCatalog:
 
                 self.tables[table_name] = data
 
-                # Build reverse index: column_name → [table_names]
                 for col in data.get('columns', []):
                     col_name = col.get('column_name', col.get('name', ''))
                     if col_name:
@@ -200,7 +160,6 @@ class SemanticCatalog:
                 print(f"[WARNING] Failed to load table {filename}: {e}")
 
     def _load_relationships(self):
-        """Load relationship definitions from JSON files."""
         rel_dir = os.path.join(self.catalog_dir, "relationships")
         if not os.path.exists(rel_dir):
             return
@@ -222,9 +181,7 @@ class SemanticCatalog:
             except Exception as e:
                 print(f"[WARNING] Failed to load relationship {filename}: {e}")
 
-    # ── Table resolution ──────────────────────────────────────────────────
 
-    # Keyword → table mapping for column-based inference when no direct match
     _COL_TABLE_MAP = {
         'paid': 'claims', 'billed': 'claims', 'claim': 'claims',
         'copay': 'claims', 'cost': 'claims', 'denied': 'claims',
@@ -245,16 +202,9 @@ class SemanticCatalog:
     }
 
     def find_tables(self, question: str) -> List[str]:
-        """
-        Find relevant tables for a question using layered matching:
-        1. Direct table name / alias match
-        2. FuzzyMatcher abbreviation resolution
-        3. Column-keyword inference
-        """
         q = question.lower()
         relevant = set()
 
-        # Layer 1: direct table name or alias
         for table_name, table_info in self.tables.items():
             keywords = [table_name.lower()]
             keywords.extend(table_info.get('aliases', []))
@@ -262,14 +212,12 @@ class SemanticCatalog:
             if any(kw in q for kw in keywords):
                 relevant.add(table_name)
 
-        # Layer 2: fuzzy abbreviation match
         if not relevant:
             for word in q.split():
                 resolved = FuzzyMatcher.resolve_table(word, self)
                 if resolved:
                     relevant.add(resolved)
 
-        # Layer 3: column-keyword inference
         if not relevant:
             for kw, tbl in self._COL_TABLE_MAP.items():
                 if kw in q and tbl in self.tables:
@@ -279,7 +227,6 @@ class SemanticCatalog:
         return list(relevant)
 
     def find_column_by_name(self, name: str) -> List[Tuple[str, dict]]:
-        """Find columns by name across all tables. Returns [(table, col_info)]."""
         name_lower = name.lower()
         results = []
         for table_name in self.column_index.get(name_lower, []):
@@ -293,15 +240,12 @@ class SemanticCatalog:
         return results
 
     def get_all_table_names(self) -> List[str]:
-        """Return all loaded table names."""
         return list(self.tables.keys())
 
     def get_all_column_names(self) -> List[str]:
-        """Return all column names across all tables (for ML training)."""
         return list(self.column_index.keys())
 
     def get_context(self, question: str) -> Dict[str, Any]:
-        """Get full context for a question: tables, details, relationships."""
         tables = self.find_tables(question)
         return {
             'tables': tables,
@@ -312,12 +256,7 @@ class SemanticCatalog:
         }
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# FUZZY MATCHER — Healthcare abbreviations and synonym resolution
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class FuzzyMatcher:
-    """Healthcare-specific fuzzy matching with domain abbreviations and synonyms."""
 
     ABBREVIATIONS = {
         'enc': 'encounters', 'encounter': 'encounters',
@@ -336,56 +275,81 @@ class FuzzyMatcher:
     }
 
     SYNONYMS = {
-        'patient': ['pt', 'member', 'mbr', 'individual'],
-        'encounter': ['visit', 'appointment', 'admission'],
-        'claim': ['medical_claim', 'insurance_claim'],
-        'diagnosis': ['condition', 'dx', 'icd', 'disease'],
-        'provider': ['physician', 'doctor', 'clinician', 'facility'],
+        'patient': ['pt', 'member', 'mbr', 'individual', 'members', 'memembers', 'patients'],
+        'member': ['patient', 'pt', 'mbr', 'individual', 'members', 'memembers'],
+        'encounter': ['visit', 'appointment', 'admission', 'encounters'],
+        'claim': ['medical_claim', 'insurance_claim', 'claims'],
+        'diagnosis': ['condition', 'dx', 'icd', 'disease', 'diagnoses', 'diagnossi'],
+        'provider': ['physician', 'doctor', 'clinician', 'facility', 'providers'],
         'cost': ['charge', 'amount', 'expense', 'price', 'paid_amount'],
+        'emergency': ['er', 'ed', 'emergeny', 'emergancy', 'emergency_room'],
     }
 
     @staticmethod
+    def _levenshtein_distance(s1: str, s2: str) -> int:
+        if len(s1) < len(s2):
+            return FuzzyMatcher._levenshtein_distance(s2, s1)
+        if len(s2) == 0:
+            return len(s1)
+        previous_row = list(range(len(s2) + 1))
+        for i, c1 in enumerate(s1):
+            current_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = previous_row[j + 1] + 1
+                deletions = current_row[j] + 1
+                substitutions = previous_row[j] + (c1 != c2)
+                current_row.append(min(insertions, deletions, substitutions))
+            previous_row = current_row
+        return previous_row[-1]
+
+    @staticmethod
     def fuzzy_score(term: str, target: str) -> float:
-        """Simple fuzzy scoring: exact=1.0, prefix=0.9, substring=0.7, else=0.0."""
         t, g = term.lower().strip(), target.lower().strip()
         if t == g:
-            return 1.0
-        if g.startswith(t):
-            return 0.9
-        if t in g:
-            return 0.7
+            return FUZZY_MATCH_EXACT
+        if g.startswith(t) or t.startswith(g):
+            return FUZZY_MATCH_PREFIX
+        if t in g or g in t:
+            return FUZZY_MATCH_SUBSTRING
+
+        distance = FuzzyMatcher._levenshtein_distance(t, g)
+        max_len = max(len(t), len(g))
+        if max_len == 0:
+            return 0.0
+        similarity = 1.0 - (distance / max_len)
+        if similarity >= FUZZY_LEVENSHTEIN_FLOOR:
+            return round(min(similarity, FUZZY_MATCH_SUBSTRING), 2)
         return 0.0
 
     @staticmethod
     def resolve_table(term: str, catalog: 'SemanticCatalog') -> Optional[str]:
-        """Resolve abbreviated or synonymous term to an actual table name."""
         term_lower = term.lower()
         all_tables = catalog.get_all_table_names()
 
-        # Abbreviation lookup
         if term_lower in FuzzyMatcher.ABBREVIATIONS:
             resolved = FuzzyMatcher.ABBREVIATIONS[term_lower]
             for t in all_tables:
-                if FuzzyMatcher.fuzzy_score(resolved, t) > 0.7:
+                if FuzzyMatcher.fuzzy_score(resolved, t) > FUZZY_MATCH_SUBSTRING:
                     return t
 
-        # Direct fuzzy match
+        best_score, best_table = 0.0, None
         for t in all_tables:
-            if FuzzyMatcher.fuzzy_score(term, t) > 0.8:
-                return t
+            score = FuzzyMatcher.fuzzy_score(term, t)
+            if score > best_score:
+                best_score, best_table = score, t
+        if best_score > FUZZY_TABLE_THRESHOLD:
+            return best_table
 
-        # Synonym match
         for canonical, syns in FuzzyMatcher.SYNONYMS.items():
             if term_lower in syns or term_lower == canonical:
                 for t in all_tables:
-                    if FuzzyMatcher.fuzzy_score(canonical, t) > 0.7:
+                    if FuzzyMatcher.fuzzy_score(canonical, t) > FUZZY_MATCH_SUBSTRING:
                         return t
 
         return None
 
     @staticmethod
     def resolve_column_name(term: str, catalog: 'SemanticCatalog') -> Optional[str]:
-        """Resolve abbreviated term to actual column name."""
         term_lower = term.lower()
 
         if term_lower in FuzzyMatcher.ABBREVIATIONS:
@@ -401,10 +365,6 @@ class FuzzyMatcher:
         return None
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CONVERSATIONAL HANDLER — Greetings, help, thanks, goodbye
-# ═══════════════════════════════════════════════════════════════════════════════
-
 _CONVERSATIONAL_PATTERNS = [
     (r'\bhello\b|\bhi\b|\bhey\b', 'greeting'),
     (r'\bhelp\b|\bwhat can you do\b|\bcapabilities\b', 'help'),
@@ -414,7 +374,7 @@ _CONVERSATIONAL_PATTERNS = [
 
 _CONVERSATIONAL_RESPONSES = {
     'greeting': (
-        "Hi there! I'm your MTP healthcare chatbot. I can help you explore "
+        "Hi there! I'm your GPDM healthcare chatbot. I can help you explore "
         "patient encounters, claims, diagnoses, procedures, referrals, and more. "
         "Ask me about patient trends, costs, readmissions, or any healthcare metrics!"
     ),
@@ -434,17 +394,12 @@ _CONVERSATIONAL_RESPONSES = {
 
 
 def _check_conversational(question: str) -> Optional[str]:
-    """If the question is conversational, return the response string. Else None."""
     q = question.lower()
     for pattern, key in _CONVERSATIONAL_PATTERNS:
         if re.search(pattern, q):
             return _CONVERSATIONAL_RESPONSES.get(key)
     return None
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# METADATA ENGINE — Answers about tables, columns, relationships, PHI
-# ═══════════════════════════════════════════════════════════════════════════════
 
 _METADATA_PATTERNS = [
     r'\bwhat column\b|\bwhat field\b',
@@ -459,13 +414,11 @@ _METADATA_PATTERNS = [
 
 
 def _is_metadata_question(question: str) -> bool:
-    """Check if question is about schema metadata rather than data."""
     q = question.lower()
     return any(re.search(p, q) for p in _METADATA_PATTERNS)
 
 
 def _answer_metadata(question: str, catalog: SemanticCatalog) -> str:
-    """Answer a metadata question without generating SQL."""
     q = question.lower()
 
     if re.search(r'\bwhat table\b', q):
@@ -502,11 +455,6 @@ def _answer_metadata(question: str, catalog: SemanticCatalog) -> str:
     return "Please ask more specifically about a table, column, or relationship."
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# JOURNEY BUILDER — Multi-table JOIN chains for clinical pathways
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Journey type → regex patterns
 _JOURNEY_PATTERNS = {
     'patient_journey': [r'\bpatient journey\b', r'\bpatient flow\b', r'\bpatient timeline\b'],
     'referral_chain':  [r'\breferral chain\b', r'\breferral path\b'],
@@ -515,7 +463,6 @@ _JOURNEY_PATTERNS = {
     'cost_analysis':   [r'\bcost analysis\b', r'\bcost by\b', r'\bspend\b'],
 }
 
-# Journey type → table chain (only referencing actual schema tables)
 _JOURNEY_TABLES = {
     'patient_journey': ['members', 'encounters', 'diagnoses', 'claims'],
     'referral_chain':  ['referrals', 'encounters', 'providers'],
@@ -526,7 +473,6 @@ _JOURNEY_TABLES = {
 
 
 def _detect_journey(question: str) -> Optional[str]:
-    """Detect journey type from question. Returns journey key or None."""
     q = question.lower()
     for jtype, patterns in _JOURNEY_PATTERNS.items():
         for p in patterns:
@@ -536,19 +482,12 @@ def _detect_journey(question: str) -> Optional[str]:
 
 
 def _get_journey_tables(journey_type: str) -> List[str]:
-    """Get the table chain for a journey type."""
     return _JOURNEY_TABLES.get(journey_type, [])
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# DATABASE PATH RESOLUTION
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def _resolve_db_path(cfg: Dict[str, str]) -> Optional[str]:
-    """Resolve the path to the production database file."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.dirname(script_dir)
-    # Try configured path first, then standard location
     for candidate in [
         cfg.get('DB_PATH', ''),
         os.path.join(base_dir, 'data', 'healthcare_production.db'),
@@ -559,25 +498,10 @@ def _resolve_db_path(cfg: Dict[str, str]) -> Optional[str]:
     return None
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SQL EXECUTION — Production DB pool or legacy CSV fallback
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def _execute_sql_local(sql: str, cfg: Dict[str, str],
                        timeout: int = 30) -> Tuple[bool, List, str]:
-    """
-    Execute SQL against the persistent database (production mode) or
-    fall back to in-memory CSV loading (legacy mode).
+    logger = get_logger('gpdm.sql') if HAS_PRODUCTION else None
 
-    Production mode uses DatabasePool singleton — data loaded ONCE at startup.
-    Legacy mode rebuilds from CSVs on each call (backward compatibility only).
-
-    Returns:
-        (success, rows_as_dicts, error_message)
-    """
-    logger = get_logger('mtp.sql') if HAS_PRODUCTION else None
-
-    # ── Databricks routing (if connected) ──
     if HAS_DATABRICKS:
         try:
             ds_mgr = DataSourceManager.get_instance()
@@ -594,16 +518,13 @@ def _execute_sql_local(sql: str, cfg: Dict[str, str],
 
 def _execute_sql_impl(sql: str, cfg: Dict[str, str],
                       timeout: int = 30, logger=None) -> Tuple[bool, List, str]:
-    """Internal: execute SQL against local persistent DB or in-memory CSV."""
 
-    # ── Production mode: persistent DatabasePool ──
     if HAS_PRODUCTION:
         try:
             pool = DatabasePool.get_instance()
             if not pool._loaded:
                 pool.initialize(resolve_config(cfg))
 
-            # Validate SQL before execution
             allowed = pool.get_table_names()
             is_valid, err = validate_sql_output(sql, allowed)
             if not is_valid:
@@ -616,15 +537,12 @@ def _execute_sql_impl(sql: str, cfg: Dict[str, str],
         except Exception as e:
             if logger:
                 logger.error("Production DB error, falling back to legacy: %s", e)
-            # Fall through to legacy mode
 
-    # ── Legacy mode: in-memory CSV loading ──
     return _execute_sql_legacy(sql, cfg, logger)
 
 
 def _execute_sql_legacy(sql: str, cfg: Dict[str, str],
                         logger=None) -> Tuple[bool, List, str]:
-    """Legacy CSV-to-SQLite execution for backward compatibility."""
     try:
         conn = sqlite3.connect(':memory:')
         conn.row_factory = sqlite3.Row
@@ -684,12 +602,7 @@ def _execute_sql_legacy(sql: str, cfg: Dict[str, str],
         return False, [], f"Execution Error: {e}"
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# LINEAGE & ANALYTICS WRAPPERS
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def _get_lineage_info(question: str, tables_used: List[str]) -> Dict[str, Any]:
-    """Track data lineage if LineageTracker is available."""
     if LineageTracker is None:
         return {'source_tables': tables_used, 'lineage': f"Question → {' → '.join(tables_used)}"}
     try:
@@ -699,7 +612,6 @@ def _get_lineage_info(question: str, tables_used: List[str]) -> Dict[str, Any]:
 
 
 def _get_analytics_recommendations(question: str, tables_used: List[str]) -> Dict[str, Any]:
-    """Get analytics recommendations if AnalyticsAdvisor is available."""
     if AnalyticsAdvisor is None:
         return {'recommendations': []}
     try:
@@ -708,44 +620,38 @@ def _get_analytics_recommendations(question: str, tables_used: List[str]) -> Dic
         return {'error': str(e), 'recommendations': []}
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# ENGINE SINGLETON CACHE — Expensive engines cached as module-level singletons
-# ═══════════════════════════════════════════════════════════════════════════════
-
 _engine_cache: Dict[str, Any] = {}
 _engine_cache_lock = threading.Lock()
 
 
 def clear_engine_cache():
-    """Clear all cached engines. Call on dashboard restart or data source change."""
     with _engine_cache_lock:
         for engine in _engine_cache.values():
             if hasattr(engine, 'query_cache'):
                 try:
                     engine.query_cache.cache.clear()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+                    if logger:
+                        logger.debug('Optional engine unavailable: %s', e)
         _engine_cache.clear()
 
 
 def _get_cached_engine(key: str, factory, *args, **kwargs):
-    """Get or create a cached engine instance (thread-safe, double-checked locking)."""
     if key not in _engine_cache:
         with _engine_cache_lock:
             if key not in _engine_cache:
                 try:
                     _engine_cache[key] = factory(*args, **kwargs)
-                except Exception:
+                except Exception as e:
+                    logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+                    if logger:
+                        logger.debug('Optional engine unavailable: %s', e)
                     return None
     return _engine_cache.get(key)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# PROCESS QUESTION — Main entry point
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def _empty_result(question: str) -> Dict[str, Any]:
-    """Create an empty result template."""
     return {
         'success': False,
         'question': question,
@@ -760,16 +666,6 @@ def _empty_result(question: str) -> Dict[str, Any]:
 
 
 def _init_session_context(question: str, session: dict, result: dict):
-    """
-    Initialize session context: duplicate detection, conversation chaining,
-    table hierarchy, catalog discovery.
-
-    Mutates `result` with context info and may return a modified question
-    (merged with follow-up context).
-
-    Returns:
-        (modified_question, session_mgr, learning_engine, catalog_registry)
-    """
     _session_mgr = None
     _learning_engine = None
     _catalog_registry = None
@@ -803,12 +699,10 @@ def _init_session_context(question: str, session: dict, result: dict):
         try:
             recent = _session_mgr.get_recent_turns(user_id, session_id, count=10)
 
-            # Duplicate detection
             dup = DuplicateDetector.check(question, recent, threshold=0.85)
             if dup:
                 result['duplicate_warning'] = dup
 
-            # Conversation chaining — follow-up detection
             chain = ConversationChainer.analyze(question, recent)
             if chain.get('is_followup') and chain.get('carry_forward'):
                 result['followup_info'] = chain
@@ -819,31 +713,23 @@ def _init_session_context(question: str, session: dict, result: dict):
                     result['merged_question'] = merged
                     question = merged
 
-            # Table hierarchy detection
             hierarchy = TableHierarchyResolver.detect_from_question(question)
             if hierarchy and hierarchy.get('filter'):
                 result['hierarchy_match'] = hierarchy
 
-            # Active UI selections
             active = _session_mgr.get_state(user_id, session_id, 'active_selections')
             if active:
                 result['active_selections'] = active
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
     return question, _session_mgr, _learning_engine, _catalog_registry
 
 
 def _run_enrichment_engines(question: str, catalog: SemanticCatalog,
                             result: dict) -> dict:
-    """
-    Run optional ML, NLP, and Scale engines for enrichment.
-    Returns scale_meta dict and mutates result with ml_meta, nlp_meta, scale_meta.
-
-    If Scale engine has a cache hit, returns the cached result directly
-    (caller should check result['engine_mode'] == 'cached').
-    """
-    # ── ML Engine: ensemble intent classification ──
     if MLEngine:
         try:
             def _init_ml():
@@ -865,10 +751,11 @@ def _run_enrichment_engines(question: str, catalog: SemanticCatalog,
                 }
                 if not result['intent']:
                     result['intent'] = ml_intent
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-    # ── NLP Engine: TF-IDF + cosine similarity ──
     nlp_inst = None
     if HybridNLPEngine:
         try:
@@ -890,10 +777,11 @@ def _run_enrichment_engines(question: str, catalog: SemanticCatalog,
                 result['nlp_meta'] = nlp_meta
                 if not result['intent']:
                     result['intent'] = analysis.get('intent', '')
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-    # ── Scale Engine: Knowledge Graph, Vector Search, Query Cache ──
     scale_meta = {}
     if ScaleEngine:
         try:
@@ -908,7 +796,6 @@ def _run_enrichment_engines(question: str, catalog: SemanticCatalog,
 
             stats = getattr(scale, '_init_stats', {})
 
-            # Cache hit check (semantic near-duplicate)
             cached = scale.query_cache.get(question)
             if cached and isinstance(cached.get('answer'), list) and cached['answer']:
                 result.update(cached)
@@ -917,7 +804,6 @@ def _run_enrichment_engines(question: str, catalog: SemanticCatalog,
                 result['scale_meta'] = {'cache_hit': True}
                 return {'_scale': scale, '_nlp': nlp_inst, 'cache_hit': True}
 
-            # Vector search + knowledge graph
             schema_hits = scale.search_schema(question, k=5)
             query_words = [w for w in question.lower().split() if len(w) > 2]
             subgraph = scale.get_relevant_subgraph(query_words)
@@ -932,14 +818,15 @@ def _run_enrichment_engines(question: str, catalog: SemanticCatalog,
                 'kg_edges': stats.get('knowledge_graph', {}).get('total_edges', 0),
             }
             result['scale_meta'] = scale_meta
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
     return {'_scale': _engine_cache.get('scale_engine'), '_nlp': nlp_inst, 'cache_hit': False}
 
 
 def _classify_intent_from_dynamic(dyn_result: dict) -> str:
-    """Derive intent label from DynamicSQLEngine output."""
     agg_func = dyn_result.get('agg_info', {}).get('agg_func')
     filters = dyn_result.get('filters', [])
     top_n = dyn_result.get('agg_info', {}).get('top_n')
@@ -958,25 +845,19 @@ def _classify_intent_from_dynamic(dyn_result: dict) -> str:
 def _post_process_result(result: dict, question: str, rows: list,
                          engines: dict, dyn_result: dict,
                          _learning_engine, session: dict, _t0: float):
-    """
-    Post-process after successful SQL execution:
-    - NLP validation
-    - Scale engine caching + Databricks translation
-    - Contextual learning log
-    """
     nlp_inst = engines.get('_nlp')
     scale_inst = engines.get('_scale')
 
-    # NLP result validation
     if nlp_inst and rows:
         try:
             validation = nlp_inst.validate_results(rows, question, result['sql'])
             if 'nlp_meta' in result:
                 result['nlp_meta']['validation'] = validation
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-    # Scale engine: Databricks SQL + cache + pattern mining
     if scale_inst:
         try:
             if DatabricksDialect:
@@ -993,15 +874,15 @@ def _post_process_result(result: dict, question: str, rows: list,
                 question, result['sql'],
                 dyn_result.get('agg_info', {}), result['tables_used'],
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-    # Contextual learning log
     _log_to_learning_engine(_learning_engine, session, question, result, _t0)
 
 
 def _log_to_learning_engine(learning_engine, session, question, result, _t0):
-    """Log query to contextual learning engine (if available)."""
     if not learning_engine:
         return
     try:
@@ -1015,29 +896,29 @@ def _log_to_learning_engine(learning_engine, session, question, result, _t0):
             result_count=row_cnt,
             execution_time_ms=int((time.time() - _t0) * 1000),
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+        if logger:
+            logger.debug('Optional engine unavailable: %s', e)
 
 
 def _audit_and_finalize(result: dict, question: str, session: dict,
                         _t0: float, _learning_engine,
                         similar_queries: list):
-    """Final step: attach suggestions, record audit metrics."""
     elapsed_ms = (time.time() - _t0) * 1000
 
-    # Attach similar queries
     if similar_queries:
         result['similar_queries'] = similar_queries
 
-    # Attach user suggestions
     if _learning_engine:
         try:
             uid = session.get('user_id', 'anonymous') if session else 'api'
             result['suggestions'] = _learning_engine.get_suggestions(user_id=uid, limit=5)
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-    # Production audit log + metrics
     if HAS_PRODUCTION:
         row_count = len(result.get('answer', [])) if isinstance(result.get('answer'), list) else 0
         record_query_metric(result['success'], elapsed_ms,
@@ -1061,29 +942,9 @@ def _audit_and_finalize(result: dict, question: str, session: dict,
 def process_question(question: str, cfg: Dict[str, str],
                      catalog: 'SemanticCatalog' = None,
                      session: Dict[str, Any] = None) -> Dict[str, Any]:
-    """
-    Main entry point: process a natural language question end-to-end.
-
-    Pipeline:
-        Input validation → Session context → Catalog discovery →
-        Conversational/metadata early exit → Enrichment engines (ML, NLP, Scale) →
-        DynamicSQLEngine SQL generation → SQL execution → Post-processing →
-        Audit logging → Response
-
-    Args:
-        question: Natural language question
-        cfg:      Configuration dict (data_dir, etc.)
-        catalog:  SemanticCatalog instance (auto-created if None)
-        session:  Optional session dict with user_id, username, history, etc.
-
-    Returns:
-        Dict with success, question, sql, answer, tables_used, intent,
-        engine_mode, is_metadata, confidence, and optional enrichment keys.
-    """
     _t0 = time.time()
-    _logger = get_logger('mtp.engine') if HAS_PRODUCTION else None
+    _logger = get_logger('gpdm.engine') if HAS_PRODUCTION else None
 
-    # ── 1. INPUT VALIDATION ──
     if HAS_PRODUCTION:
         is_valid, sanitized, err_msg = validate_question(question)
         if not is_valid:
@@ -1099,11 +960,9 @@ def process_question(question: str, cfg: Dict[str, str],
 
     result = _empty_result(question)
 
-    # ── 2. SESSION CONTEXT (follow-ups, duplicates, hierarchy) ──
     question, _session_mgr, _learning_engine, _catalog_registry = \
         _init_session_context(question, session, result)
 
-    # ── 3. CATALOG DISCOVERY (multi-catalog disambiguation) ──
     skip_discovery = session.get('skip_catalog_discovery', False) if session else False
     if _catalog_registry and _catalog_registry._initialized and not skip_discovery:
         discovery = _catalog_registry.discover_for_query(question)
@@ -1117,21 +976,20 @@ def process_question(question: str, cfg: Dict[str, str],
             })
             return result
 
-    # ── 4. SIMILAR QUERIES (for suggestions) ──
     similar_queries = []
     if _learning_engine:
         try:
             similar_queries = _learning_engine.get_similar_queries(question, limit=3)
-        except Exception:
-            pass
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-    # ── 5. CONVERSATIONAL EARLY EXIT ──
     conv_response = _check_conversational(question)
     if conv_response:
         result.update({'answer': conv_response, 'success': True, 'engine_mode': 'conversational'})
         return result
 
-    # ── 6. METADATA EARLY EXIT ──
     if _is_metadata_question(question):
         result.update({
             'answer': _answer_metadata(question, catalog),
@@ -1141,7 +999,6 @@ def process_question(question: str, cfg: Dict[str, str],
         })
         return result
 
-    # ── 7. LINEAGE & ANALYTICS (enrichment, non-blocking) ──
     lineage_info = _get_lineage_info(question, [])
     if lineage_info.get('source_tables'):
         result['lineage'] = lineage_info
@@ -1149,23 +1006,16 @@ def process_question(question: str, cfg: Dict[str, str],
     if recommendations.get('recommendations'):
         result['analytics_recommendations'] = recommendations
 
-    # ── 8. JOURNEY DETECTION ──
     journey_type = _detect_journey(question)
     if journey_type:
         result['intent'] = journey_type
         result['engine_mode'] = 'journey'
 
-    # ── 9. ENRICHMENT ENGINES (ML, NLP, Scale) ──
     engines = _run_enrichment_engines(question, catalog, result)
     if engines.get('cache_hit'):
-        return result  # Scale engine cache hit — already populated
+        return result
 
-    # ── 10. SEMANTIC SQL ENGINE (primary) → DYNAMIC SQL ENGINE (fallback) ──
-    # The SemanticSQLEngine uses TF-IDF, cosine similarity, intent classification,
-    # knowledge graphs, and schema auto-discovery to generate SQL intelligently.
-    # It falls back to the hardcoded DynamicSQLEngine for low-confidence queries.
     try:
-        # Try the intelligence-driven semantic engine first
         semantic_layer = None
         dyn_result = None
         try:
@@ -1174,25 +1024,23 @@ def process_question(question: str, cfg: Dict[str, str],
             if db_path and os.path.exists(db_path):
                 sem_engine = SemanticSQLEngine(db_path, catalog.catalog_dir)
                 dyn_result = sem_engine.generate(question)
-                # Keep reference to semantic layer for validation later
                 semantic_layer = sem_engine.semantic
-        except Exception:
-            pass  # Graceful degradation
+        except Exception as e:
+            logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+            if logger:
+                logger.debug('Optional engine unavailable: %s', e)
 
-        # Fallback: use the hardcoded DynamicSQLEngine directly
         if dyn_result is None:
             from dynamic_sql_engine import DynamicSQLEngine
             dyn_engine = DynamicSQLEngine(catalog.catalog_dir)
             dyn_result = dyn_engine.generate(question)
 
-            # Still try to initialize semantic layer for validation
             try:
                 from semantic_layer import SemanticLayer
                 db_path = _resolve_db_path(cfg)
                 if db_path and os.path.exists(db_path):
                     semantic_layer = SemanticLayer(db_path)
                     semantic_layer.initialize()
-                    # Enrich fallback result with semantic metadata
                     sem_intent = semantic_layer.classify_intent(question)
                     dyn_result['semantic_intent'] = sem_intent.get('intent')
                     dyn_result['semantic_confidence'] = sem_intent.get('confidence', 0)
@@ -1207,29 +1055,26 @@ def process_question(question: str, cfg: Dict[str, str],
                         if validation.get('warnings'):
                             dyn_result['data_warnings'] = validation['warnings']
                             dyn_result['data_suggestions'] = validation.get('suggestions', [])
-            except Exception:
-                pass
+            except Exception as e:
+                logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+                if logger:
+                    logger.debug('Optional engine unavailable: %s', e)
 
-        # Handle multi-question results
         if dyn_result.get('multi_query') and dyn_result.get('all_results'):
             return _handle_multi_query(dyn_result, result, cfg)
 
-        # Single query
         result['sql'] = dyn_result.get('sql')
         result['tables_used'] = dyn_result.get('tables_used', [])
         result['confidence'] = dyn_result.get('confidence', 0.5)
         result['intent'] = _classify_intent_from_dynamic(dyn_result)
 
-        # Pass semantic enrichment to result
         if dyn_result.get('data_warnings'):
             result['data_warnings'] = dyn_result['data_warnings']
             result['data_suggestions'] = dyn_result.get('data_suggestions', [])
 
-        # Execute SQL
         if result['sql'] and not result['sql'].startswith('--'):
             success, rows, error = _execute_sql_local(result['sql'], cfg)
             if success:
-                # Check for empty results with semantic validation
                 if not rows and semantic_layer:
                     try:
                         has_data, msg = semantic_layer.check_empty(result['sql'])
@@ -1243,8 +1088,10 @@ def process_question(question: str, cfg: Dict[str, str],
                                 _learning_engine, similar_queries,
                             )
                             return result
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger = get_logger('gpdm.query') if HAS_PRODUCTION else None
+                        if logger:
+                            logger.debug('Optional engine unavailable: %s', e)
 
                 result['answer'] = rows if rows else []
                 result['success'] = True
@@ -1260,13 +1107,11 @@ def process_question(question: str, cfg: Dict[str, str],
                 )
                 return result
 
-            # Execution failed — record error, fall through
             result['_dynamic_error'] = error
 
     except Exception as e:
         result['_dynamic_error'] = str(e)
 
-    # ── 11. FINAL LOGGING + AUDIT (for fallthrough/error cases) ──
     _log_to_learning_engine(_learning_engine, session, question, result, _t0)
     _audit_and_finalize(result, question, session, _t0, _learning_engine, similar_queries)
 
@@ -1275,7 +1120,6 @@ def process_question(question: str, cfg: Dict[str, str],
 
 def _handle_multi_query(dyn_result: dict, result: dict,
                         cfg: dict) -> Dict[str, Any]:
-    """Execute multiple sub-queries from a multi-question parse."""
     all_sub = dyn_result['all_results']
     combined_answers = []
     combined_sql = []
@@ -1309,10 +1153,6 @@ def _handle_multi_query(dyn_result: dict, result: dict,
     return result
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# MODULE ENTRY POINT (interactive CLI)
-# ═══════════════════════════════════════════════════════════════════════════════
-
 if __name__ == '__main__':
     config_path = auto_discover_config()
     if config_path:
@@ -1325,7 +1165,7 @@ if __name__ == '__main__':
     _catalog = SemanticCatalog()
     _session = {'username': 'cli', 'history': []}
 
-    print("\n=== MTP Healthcare Chatbot (CLI) ===")
+    print("\n=== GPDM Healthcare Chatbot (CLI) ===")
     print("Type 'quit' to exit.\n")
 
     while True:

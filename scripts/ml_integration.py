@@ -1,30 +1,12 @@
-"""
-ML Integration Layer — Wires all from-scratch ML/AI models into the chatbot pipeline.
-
-This module connects:
-  ml_models.py         → Naive Bayes, HMM, Similarity Scorer, Feedback Learner
-  advanced_ml_models.py → TF-IDF, KNN, Decision Tree, Random Forest, K-Means,
-                          Word2Vec, Neural Network, Logistic Regression, PCA
-  scratch_llm.py       → DeepSeek Transformer LLM (MoE + MLA + BPE)
-
-Integration points:
-  1. IntentPipeline        — Ensemble intent classification (NB + NN + RF vote)
-  2. SmartColumnResolver   — Word2Vec + TF-IDF similarity for fuzzy column matching
-  3. MLChartSelector       — Decision Tree trained on data-shape features
-  4. QueryClusterer        — K-Means for query grouping & anomaly detection
-  5. NLToSQLTransformer    — DeepSeek LLM for complex NL-to-SQL translation
-  6. EmbeddingSearch       — Word2Vec nearest-neighbor for semantic column lookup
-
-Zero external dependencies. All models trained on healthcare domain data.
-"""
-
 import math
 import re
 import time
+import logging
 from collections import Counter
 from typing import Dict, List, Tuple, Optional, Any
 
-# ── Graceful imports ────────────────────────────────────────────────
+logger = logging.getLogger(__name__)
+
 try:
     from ml_models import (IntentClassifier, EntityExtractor,
                            SimilarityScorer, FeedbackLearner,
@@ -37,7 +19,7 @@ try:
     from advanced_ml_models import (TFIDFVectorizer, KNNClassifier, DecisionTree,
                                     RandomForest, KMeans, Word2Vec, NeuralNetwork,
                                     LogisticRegression, PCA,
-                                    get_healthcare_training_data, cosine_sim)
+                                    get_healthcare_training_data, cosine_sim, euclidean_dist)
     _HAS_ADV = True
 except ImportError:
     _HAS_ADV = False
@@ -49,27 +31,19 @@ except ImportError:
     _HAS_LLM = False
 
 
-# =============================================================================
-# 1. INTENT PIPELINE — Ensemble Classification
-# =============================================================================
+ML_CONFIG = {
+    'tfidf_max_features': 150,
+    'word2vec': {'embed_dim': 32, 'window': 3, 'n_negative': 5, 'lr': 0.025, 'epochs': 5},
+    'neural_net': {'hidden_sizes': [32, 16], 'lr': 0.005, 'momentum': 0.9, 'epochs': 80},
+    'random_forest': {'n_trees': 10, 'max_depth': 6},
+    'ensemble_weights': {'pattern': 1.0, 'neural': 1.5, 'forest': 1.2},
+    'column_resolver_weights': {'tfidf': 0.4, 'w2v': 0.35, 'pattern': 0.25, 'name': 0.3},
+    'anomaly_threshold': 2.0,
+}
+
 
 class IntentPipeline:
-    """
-    Ensemble intent classifier combining:
-      - Naive Bayes (fast, probabilistic baseline)
-      - Neural Network (learns non-linear decision boundaries)
-      - Random Forest (ensemble of decision trees, handles feature interactions)
 
-    Final prediction: weighted majority vote with confidence scores.
-    Falls back to regex if ML models unavailable.
-
-    Why ensemble? Each model has different strengths:
-      - NB is good with small data, interpretable priors
-      - NN captures complex feature interactions
-      - RF handles noisy features, resistant to overfitting
-    """
-
-    # Regex fallback patterns
     INTENT_PATTERNS = {
         'count':     r'\bhow many\b|\bcount\b|\bnumber of\b|\btotal\s+\w+s\b',
         'aggregate': r'\btotal\b|\bsum\b|\baverage\b|\bavg\b|\bmax\b|\bmin\b|\bmean\b',
@@ -80,28 +54,25 @@ class IntentPipeline:
     }
 
     def __init__(self):
-        self.nb_classifier = None       # Naive Bayes
-        self.nn_classifier = None       # Neural Network
-        self.rf_classifier = None       # Random Forest
-        self.tfidf = None               # TF-IDF vectorizer (shared feature extractor)
-        self.feedback = None            # Feedback learner
+        self.nb_classifier = None
+        self.nn_classifier = None
+        self.rf_classifier = None
+        self.tfidf = None
+        self.feedback = None
         self.label_map = {}
         self.reverse_label_map = {}
         self._trained = False
 
     def train(self) -> Dict[str, Any]:
-        """Train all ensemble models on healthcare intent data."""
         stats = {'models_trained': [], 'errors': []}
 
         if not _HAS_ML or not _HAS_ADV:
             stats['errors'].append('ML modules not available')
             return stats
 
-        # Get training data
         nb_examples = get_intent_training_examples()
         intent_data, w2v_corpus = get_healthcare_training_data()
 
-        # ── Naive Bayes ────────────────────────────────────────
         try:
             self.nb_classifier = IntentClassifier()
             self.nb_classifier.train(nb_examples)
@@ -109,16 +80,14 @@ class IntentPipeline:
         except Exception as e:
             stats['errors'].append(f'NB: {e}')
 
-        # ── TF-IDF (shared features) ──────────────────────────
         try:
             all_docs = [q for q, _ in nb_examples] + [q for q, _, _ in intent_data] + w2v_corpus
-            self.tfidf = TFIDFVectorizer(max_features=150)
+            self.tfidf = TFIDFVectorizer(max_features=ML_CONFIG['tfidf_max_features'])
             self.tfidf.fit(all_docs)
             stats['models_trained'].append('TF-IDF')
         except Exception as e:
             stats['errors'].append(f'TF-IDF: {e}')
 
-        # Build feature vectors for structured models
         feature_keys = ["has_count_word", "has_agg_word", "has_group_word",
                         "has_filter_word", "has_top_word", "has_trend_word",
                         "word_count", "has_number"]
@@ -136,28 +105,27 @@ class IntentPipeline:
         self.reverse_label_map = {i: l for l, i in self.label_map.items()}
         y_idx = [self.label_map[l] for l in labels]
 
-        # ── Neural Network ─────────────────────────────────────
         try:
             input_dim = len(X[0])
             n_classes = len(unique_labels)
+            nn_config = ML_CONFIG['neural_net']
             self.nn_classifier = NeuralNetwork(
-                layer_sizes=[input_dim, 32, 16, n_classes],
-                activation='relu', lr=0.005, momentum=0.9
+                layer_sizes=[input_dim] + nn_config['hidden_sizes'] + [n_classes],
+                activation='relu', lr=nn_config['lr'], momentum=nn_config['momentum']
             )
-            self.nn_classifier.fit(X, y_idx, epochs=80)
+            self.nn_classifier.fit(X, y_idx, epochs=nn_config['epochs'])
             stats['models_trained'].append('NeuralNetwork')
         except Exception as e:
             stats['errors'].append(f'NN: {e}')
 
-        # ── Random Forest ──────────────────────────────────────
         try:
-            self.rf_classifier = RandomForest(n_trees=10, max_depth=6)
+            rf_config = ML_CONFIG['random_forest']
+            self.rf_classifier = RandomForest(n_trees=rf_config['n_trees'], max_depth=rf_config['max_depth'])
             self.rf_classifier.fit(X, labels)
             stats['models_trained'].append('RandomForest')
         except Exception as e:
             stats['errors'].append(f'RF: {e}')
 
-        # ── Feedback Learner ───────────────────────────────────
         if self.nb_classifier:
             self.feedback = FeedbackLearner(self.nb_classifier)
             stats['models_trained'].append('FeedbackLearner')
@@ -166,7 +134,6 @@ class IntentPipeline:
         return stats
 
     def _extract_features(self, question: str) -> List[float]:
-        """Extract structured + TF-IDF features from a question."""
         q = question.lower()
         structured = [
             1.0 if re.search(r'\bhow many\b|\bcount\b|\bnumber of\b', q) else 0.0,
@@ -182,52 +149,42 @@ class IntentPipeline:
         return structured + tfidf_vec
 
     def predict(self, question: str) -> Tuple[str, float, Dict[str, Any]]:
-        """
-        Ensemble prediction with weighted voting.
-
-        Returns: (intent, confidence, details)
-        """
         details = {'models': {}}
 
         if not self._trained:
-            # Regex fallback
             return self._regex_fallback(question), 0.5, {'method': 'regex_fallback'}
 
         features = self._extract_features(question)
         votes = []
 
-        # Naive Bayes vote (weight 1.0)
         if self.nb_classifier:
             try:
                 nb_intent, nb_conf = self.nb_classifier.predict(question)
                 votes.append((nb_intent, nb_conf, 1.0))
                 details['models']['naive_bayes'] = {'intent': nb_intent, 'confidence': nb_conf}
-            except:
-                pass
+            except (ValueError, RuntimeError) as e:
+                logger.debug(f"Naive Bayes prediction failed: {e}")
 
-        # Neural Network vote (weight 1.5 — stronger learner)
         if self.nn_classifier:
             try:
                 nn_idx, nn_conf = self.nn_classifier.predict(features)
                 nn_intent = self.reverse_label_map.get(nn_idx, 'count')
                 votes.append((nn_intent, nn_conf, 1.5))
                 details['models']['neural_network'] = {'intent': nn_intent, 'confidence': nn_conf}
-            except:
-                pass
+            except (ValueError, RuntimeError) as e:
+                logger.debug(f"Neural Network prediction failed: {e}")
 
-        # Random Forest vote (weight 1.2)
         if self.rf_classifier:
             try:
                 rf_intent, rf_conf = self.rf_classifier.predict(features)
                 votes.append((rf_intent, rf_conf, 1.2))
                 details['models']['random_forest'] = {'intent': rf_intent, 'confidence': rf_conf}
-            except:
-                pass
+            except (ValueError, RuntimeError) as e:
+                logger.debug(f"Random Forest prediction failed: {e}")
 
         if not votes:
             return self._regex_fallback(question), 0.5, {'method': 'regex_fallback'}
 
-        # Weighted majority vote
         weighted_votes = {}
         for intent, conf, weight in votes:
             if intent not in weighted_votes:
@@ -250,21 +207,7 @@ class IntentPipeline:
         return 'lookup'
 
 
-# =============================================================================
-# 2. SMART COLUMN RESOLVER — Word2Vec + TF-IDF semantic matching
-# =============================================================================
-
 class SmartColumnResolver:
-    """
-    Uses Word2Vec embeddings + TF-IDF cosine similarity for fuzzy column matching.
-
-    When the user says "cost" and we need to find "billed_amount":
-    1. Word2Vec: is 'cost' semantically near 'billed', 'amount', 'paid'?
-    2. TF-IDF: does the query vector align with column description vectors?
-    3. Character n-gram: does 'cost' fuzzy-match column name substrings?
-
-    Combines all three signals with learned weights.
-    """
 
     def __init__(self):
         self.w2v = None
@@ -275,17 +218,14 @@ class SmartColumnResolver:
 
     def train(self, column_names: List[str], descriptions: Dict[str, str] = None,
               corpus: List[str] = None) -> None:
-        """Train embedding models on healthcare column vocabulary."""
         self.column_names = column_names
         self.column_descriptions = descriptions or {}
 
         if not _HAS_ADV:
             return
 
-        # Build corpus from column names, descriptions, and optional extra text
         train_corpus = []
         for col in column_names:
-            # "billed_amount" → "billed amount"
             natural = col.replace('_', ' ').lower()
             train_corpus.append(natural)
             if col in self.column_descriptions:
@@ -294,25 +234,19 @@ class SmartColumnResolver:
         if corpus:
             train_corpus.extend(corpus)
 
-        # Train Word2Vec
-        self.w2v = Word2Vec(embed_dim=32, window=3, n_negative=5, lr=0.025, epochs=5)
+        w2v_cfg = ML_CONFIG['word2vec']
+        self.w2v = Word2Vec(embed_dim=w2v_cfg['embed_dim'], window=w2v_cfg['window'],
+                           n_negative=w2v_cfg['n_negative'], lr=w2v_cfg['lr'], epochs=w2v_cfg['epochs'])
         self.w2v.fit(train_corpus)
 
-        # Train TF-IDF on column natural names
         col_docs = [col.replace('_', ' ').lower() for col in column_names]
-        self.tfidf = TFIDFVectorizer(max_features=100)
+        self.tfidf = TFIDFVectorizer(max_features=ML_CONFIG['tfidf_max_features'])
         self.tfidf.fit(col_docs + train_corpus)
 
         self._ready = True
 
     def resolve(self, query_term: str, top_n: int = 3) -> List[Tuple[str, float]]:
-        """
-        Find best matching column names for a query term.
-
-        Returns list of (column_name, similarity_score) sorted by relevance.
-        """
         if not self._ready:
-            # Basic substring fallback
             q = query_term.lower()
             matches = [(c, 1.0) for c in self.column_names if q in c.lower() or c.lower() in q]
             return matches[:top_n] if matches else [(self.column_names[0], 0.1)] if self.column_names else []
@@ -320,11 +254,11 @@ class SmartColumnResolver:
         q = query_term.lower()
         scores = []
 
+        weights = ML_CONFIG['column_resolver_weights']
         for col in self.column_names:
             col_natural = col.replace('_', ' ').lower()
             score = 0.0
 
-            # Signal 1: Word2Vec semantic similarity (weight 0.4)
             if self.w2v:
                 q_words = q.split()
                 c_words = col_natural.split()
@@ -337,26 +271,22 @@ class SmartColumnResolver:
                             if cvec:
                                 w2v_sims.append(cosine_sim(qvec, cvec))
                 if w2v_sims:
-                    score += 0.4 * max(w2v_sims)
+                    score += weights['w2v'] * max(w2v_sims)
 
-            # Signal 2: TF-IDF cosine similarity (weight 0.35)
             if self.tfidf:
                 q_vec = self.tfidf.transform(q)
                 c_vec = self.tfidf.transform(col_natural)
                 sim = cosine_sim(q_vec, c_vec)
-                score += 0.35 * sim
+                score += weights['tfidf'] * sim
 
-            # Signal 3: Character overlap / substring match (weight 0.25)
-            # Jaccard on character trigrams
             q_trigrams = set(q[i:i+3] for i in range(len(q) - 2))
             c_trigrams = set(col_natural[i:i+3] for i in range(len(col_natural) - 2))
             if q_trigrams and c_trigrams:
                 jaccard = len(q_trigrams & c_trigrams) / len(q_trigrams | c_trigrams)
-                score += 0.25 * jaccard
+                score += weights['pattern'] * jaccard
 
-            # Exact substring bonus
             if q in col_natural or col_natural in q:
-                score += 0.3
+                score += weights['name']
 
             scores.append((col, score))
 
@@ -364,21 +294,7 @@ class SmartColumnResolver:
         return scores[:top_n]
 
 
-# =============================================================================
-# 3. ML CHART SELECTOR — Decision Tree trained on data-shape features
-# =============================================================================
-
 class MLChartSelector:
-    """
-    Decision Tree + rule hybrid for chart type selection.
-
-    Features extracted from query result shape:
-      - n_rows, n_numeric_cols, n_categorical_cols, n_date_cols
-      - has_status, has_percentage, max_cardinality, is_single_row
-
-    Trained on labeled examples of (data_shape → best_chart_type).
-    Falls back to rule-based selection if DT not confident enough.
-    """
 
     CHART_TYPES = ['big_number', 'donut', 'bar', 'grouped_bar', 'line', 'gauges', 'table']
 
@@ -389,40 +305,31 @@ class MLChartSelector:
         self._trained = False
 
     def train(self) -> None:
-        """Train on synthetic data-shape → chart-type examples."""
         if not _HAS_ADV:
             return
 
-        # Training data: [n_rows, n_numeric, n_cat, n_date, has_status, has_pct, max_card, is_single]
         examples = [
-            # big_number: 1 row, numeric
             ([1, 1, 0, 0, 0, 0, 1, 1], 'big_number'),
             ([1, 2, 0, 0, 0, 0, 1, 1], 'big_number'),
             ([1, 3, 0, 0, 0, 0, 1, 1], 'big_number'),
-            # donut: has status column
             ([5, 1, 1, 0, 1, 0, 5, 0], 'donut'),
             ([8, 1, 1, 0, 1, 0, 8, 0], 'donut'),
             ([4, 1, 1, 0, 1, 0, 4, 0], 'donut'),
             ([6, 2, 1, 0, 1, 0, 6, 0], 'donut'),
-            # bar: 1 cat + 1 numeric, <=12 rows
             ([8, 1, 1, 0, 0, 0, 8, 0], 'bar'),
             ([10, 1, 1, 0, 0, 0, 10, 0], 'bar'),
             ([5, 1, 1, 0, 0, 0, 5, 0], 'bar'),
             ([12, 1, 1, 0, 0, 0, 12, 0], 'bar'),
-            # grouped_bar: 1 cat + 2+ numeric
             ([6, 2, 1, 0, 0, 0, 6, 0], 'grouped_bar'),
             ([8, 3, 1, 0, 0, 0, 8, 0], 'grouped_bar'),
             ([10, 2, 1, 0, 0, 0, 10, 0], 'grouped_bar'),
-            # line: has date + numeric
             ([12, 1, 0, 1, 0, 0, 12, 0], 'line'),
             ([24, 1, 0, 1, 0, 0, 24, 0], 'line'),
             ([30, 2, 0, 1, 0, 0, 30, 0], 'line'),
             ([6, 1, 1, 1, 0, 0, 6, 0], 'line'),
-            # gauges: percentage columns
             ([4, 0, 0, 0, 0, 1, 4, 0], 'gauges'),
             ([6, 1, 1, 0, 0, 1, 6, 0], 'gauges'),
             ([3, 0, 0, 0, 0, 1, 3, 0], 'gauges'),
-            # table: many rows, no clear pattern
             ([50, 3, 2, 0, 0, 0, 50, 0], 'table'),
             ([100, 5, 3, 0, 0, 0, 100, 0], 'table'),
             ([200, 4, 2, 1, 0, 0, 200, 0], 'table'),
@@ -431,7 +338,6 @@ class MLChartSelector:
         X = [e[0] for e in examples]
         y = [e[1] for e in examples]
 
-        # Normalize features
         X_float = [[float(v) for v in row] for row in X]
 
         self.tree = DecisionTree(max_depth=6, min_samples=2)
@@ -439,7 +345,6 @@ class MLChartSelector:
         self._trained = True
 
     def select(self, col_info: Dict, n_rows: int) -> str:
-        """Select chart type from data shape features."""
         features = [
             float(n_rows),
             float(len(col_info.get('numeric', []))),
@@ -447,17 +352,16 @@ class MLChartSelector:
             float(len(col_info.get('dates', []))),
             1.0 if col_info.get('status') else 0.0,
             1.0 if col_info.get('percentages') else 0.0,
-            float(n_rows),  # max_cardinality approximation
+            float(n_rows),
             1.0 if n_rows == 1 else 0.0,
         ]
 
         if self._trained and self.tree:
             try:
                 return self.tree.predict(features)
-            except:
-                pass
+            except (ValueError, RuntimeError) as e:
+                logger.debug(f"Decision tree prediction failed: {e}")
 
-        # Rule-based fallback
         return self._rule_fallback(col_info, n_rows)
 
     def _rule_fallback(self, col_info, n_rows):
@@ -482,19 +386,7 @@ class MLChartSelector:
         return 'table'
 
 
-# =============================================================================
-# 4. QUERY CLUSTERER — K-Means for grouping & anomaly detection
-# =============================================================================
-
 class QueryClusterer:
-    """
-    Clusters incoming queries using K-Means on TF-IDF vectors.
-
-    Use cases:
-      - Group similar queries → suggest common queries
-      - Detect anomalous queries (far from all centroids) → flag for review
-      - Track query distribution shift over time
-    """
 
     def __init__(self, n_clusters: int = 5):
         self.n_clusters = n_clusters
@@ -504,7 +396,6 @@ class QueryClusterer:
         self._trained = False
 
     def train(self, queries: List[str]) -> Dict[str, Any]:
-        """Train clusterer on a set of queries."""
         if not _HAS_ADV or len(queries) < self.n_clusters:
             return {'error': 'Not enough queries or modules unavailable'}
 
@@ -516,7 +407,6 @@ class QueryClusterer:
         self.kmeans.fit(X)
         self._trained = True
 
-        # Analyze clusters
         cluster_queries = {i: [] for i in range(self.n_clusters)}
         for i, label in enumerate(self.kmeans.labels):
             cluster_queries[label].append(queries[i])
@@ -529,44 +419,29 @@ class QueryClusterer:
         }
 
     def classify(self, query: str) -> Tuple[int, float]:
-        """Assign query to cluster. Returns (cluster_id, distance_to_centroid)."""
         if not self._trained:
             return 0, 0.0
 
         vec = self.tfidf.transform(query)
         cluster_id = self.kmeans.predict(vec)
-        from advanced_ml_models import euclidean_dist
         dist = euclidean_dist(vec, self.kmeans.centroids[cluster_id])
         return cluster_id, dist
 
-    def is_anomaly(self, query: str, threshold: float = 2.0) -> Tuple[bool, float]:
-        """Detect if query is anomalous (far from all centroids)."""
+    def is_anomaly(self, query: str, threshold: float = None) -> Tuple[bool, float]:
         if not self._trained:
             return False, 0.0
 
+        if threshold is None:
+            threshold = ML_CONFIG['anomaly_threshold']
+
         vec = self.tfidf.transform(query)
-        from advanced_ml_models import euclidean_dist
         min_dist = min(euclidean_dist(vec, c) for c in self.kmeans.centroids)
 
-        # Compare to average inertia per point
         avg_dist = math.sqrt(self.kmeans.inertia / len(self.query_history)) if self.query_history else 1.0
         return min_dist > threshold * avg_dist, min_dist
 
 
-# =============================================================================
-# 5. NL-TO-SQL TRANSFORMER — DeepSeek LLM integration
-# =============================================================================
-
 class NLToSQLTransformer:
-    """
-    Wraps the from-scratch DeepSeek Transformer for NL-to-SQL translation.
-
-    Used as a secondary engine when the rule-based DynamicSQLEngine
-    can't confidently resolve a query. The transformer was trained on
-    healthcare question→SQL pairs.
-
-    Architecture: MoE (1 shared + 4 routed experts, top-2) + MLA (KV compression)
-    """
 
     def __init__(self):
         self.model = None
@@ -575,7 +450,6 @@ class NLToSQLTransformer:
 
     def initialize(self, vocab_size: int = 2000, embed_dim: int = 64,
                    num_heads: int = 4, num_layers: int = 2) -> Dict[str, Any]:
-        """Initialize the transformer model."""
         if not _HAS_LLM:
             return {'error': 'scratch_llm not available'}
 
@@ -604,17 +478,14 @@ class NLToSQLTransformer:
         }
 
     def translate(self, question: str, max_tokens: int = 50) -> Optional[str]:
-        """Translate natural language question to SQL."""
         if not self._ready:
             return None
 
         try:
             input_ids = self.tokenizer.encode(question)
-            # Autoregressive generation
             generated = input_ids[:]
             for _ in range(max_tokens):
                 logits = self.model.forward(generated, training=False)
-                # Greedy: pick highest logit for last position
                 last_logits = logits.data[-1]
                 next_token = last_logits.index(max(last_logits))
 
@@ -628,28 +499,7 @@ class NLToSQLTransformer:
             return None
 
 
-# =============================================================================
-# 6. MASTER ML ENGINE — Orchestrates all models
-# =============================================================================
-
 class MLEngine:
-    """
-    Master orchestrator for all ML models in the healthcare chatbot.
-
-    Initializes, trains, and provides a unified API for:
-      - Intent classification (ensemble)
-      - Column resolution (embeddings)
-      - Chart selection (decision tree)
-      - Query clustering (K-Means)
-      - NL-to-SQL (transformer) [optional, heavy]
-
-    Usage:
-        engine = MLEngine()
-        stats = engine.initialize()
-        intent, conf, details = engine.classify_intent("how many denied claims")
-        columns = engine.resolve_column("cost", all_columns)
-        chart = engine.select_chart(col_info, n_rows)
-    """
 
     def __init__(self):
         self.intent_pipeline = IntentPipeline()
@@ -662,34 +512,19 @@ class MLEngine:
     def initialize(self, column_names: List[str] = None,
                    column_descriptions: Dict[str, str] = None,
                    enable_llm: bool = False) -> Dict[str, Any]:
-        """
-        Initialize and train all ML models.
-
-        Args:
-            column_names: List of column names from the semantic catalog
-            column_descriptions: Optional dict of column→description
-            enable_llm: Whether to initialize the heavy transformer model
-
-        Returns:
-            Dict with training stats per model
-        """
         stats = {'total_time': 0}
         t0 = time.time()
 
-        # 1. Intent Pipeline
         intent_stats = self.intent_pipeline.train()
         stats['intent_pipeline'] = intent_stats
 
-        # 2. Column Resolver
         if column_names:
             self.column_resolver.train(column_names, column_descriptions)
             stats['column_resolver'] = {'columns': len(column_names), 'status': 'trained'}
 
-        # 3. Chart Selector
         self.chart_selector.train()
         stats['chart_selector'] = {'status': 'trained' if self.chart_selector._trained else 'fallback'}
 
-        # 4. Query Clusterer (train with sample queries)
         sample_queries = [
             "how many claims denied", "total billed amount", "claims by region",
             "top 10 providers", "claim trend over time", "denied claims in california",
@@ -699,7 +534,6 @@ class MLEngine:
         cluster_stats = self.query_clusterer.train(sample_queries)
         stats['query_clusterer'] = cluster_stats
 
-        # 5. LLM (optional — heavy)
         if enable_llm:
             llm_stats = self.nl_to_sql.initialize()
             stats['nl_to_sql'] = llm_stats
@@ -727,7 +561,6 @@ class MLEngine:
         return self.query_clusterer.is_anomaly(query)
 
     def get_model_inventory(self) -> Dict[str, Any]:
-        """Return full inventory of models and their status."""
         return {
             'intent_pipeline': {
                 'naive_bayes': self.intent_pipeline.nb_classifier is not None,
@@ -756,16 +589,11 @@ class MLEngine:
         }
 
 
-# =============================================================================
-# MAIN — DEMO
-# =============================================================================
-
 if __name__ == '__main__':
     print("=" * 70)
     print("ML INTEGRATION LAYER — FULL PIPELINE DEMO")
     print("=" * 70)
 
-    # Initialize
     engine = MLEngine()
     print("\n[1] Initializing all models...")
     stats = engine.initialize(
@@ -776,12 +604,11 @@ if __name__ == '__main__':
             'encounter_id', 'diagnosis_id', 'prescription_id', 'referral_status',
             'medication_name', 'specialty', 'department',
         ],
-        enable_llm=False  # Skip LLM for speed
+        enable_llm=False
     )
     print(f"  Trained in {stats['total_time']:.1f}s")
     print(f"  Models: {stats['intent_pipeline'].get('models_trained', [])}")
 
-    # Test intent classification
     print("\n[2] Intent Classification (Ensemble):")
     test_qs = [
         "how many claims were denied",
@@ -795,13 +622,11 @@ if __name__ == '__main__':
         models = list(details.get('models', {}).keys())
         print(f"  '{q}' → {intent} ({conf:.2f}) [{', '.join(models)}]")
 
-    # Test column resolution
     print("\n[3] Column Resolution (Word2Vec + TF-IDF):")
     for term in ['cost', 'doctor', 'date', 'status', 'diagnosis']:
         matches = engine.resolve_column(term)
         print(f"  '{term}' → {[(m, f'{s:.3f}') for m, s in matches[:3]]}")
 
-    # Test chart selection
     print("\n[4] Chart Selection (Decision Tree):")
     test_shapes = [
         ({'numeric': ['x'], 'categorical': [], 'dates': [], 'status': [], 'percentages': []}, 1),
@@ -813,14 +638,12 @@ if __name__ == '__main__':
         chart = engine.select_chart(col_info, n_rows)
         print(f"  {n_rows} rows, {len(col_info['numeric'])}n/{len(col_info['categorical'])}c/{len(col_info['dates'])}d → {chart}")
 
-    # Test query clustering
     print("\n[5] Query Clustering (K-Means):")
     for q in ["claims denied this month", "show me something weird", "total revenue"]:
         cluster, dist = engine.classify_query_cluster(q)
         is_anomaly, _ = engine.detect_anomaly(q)
         print(f"  '{q}' → cluster {cluster} (dist={dist:.3f}) {'⚠ ANOMALY' if is_anomaly else ''}")
 
-    # Model inventory
     print("\n[6] Model Inventory:")
     inv = engine.get_model_inventory()
     for component, models in inv.items():
