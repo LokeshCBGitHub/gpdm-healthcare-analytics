@@ -77,9 +77,18 @@ class IntelligentPipeline:
         from model_selector import MetaModelSelector
         self.model_selector = MetaModelSelector(db_path=self.state_db)
 
-        from cms_data_loader import CMSKnowledgeBase
-        self.cms = CMSKnowledgeBase(os.path.join(self.data_dir, 'cms_knowledge.db'))
-        self.cms.load_all()
+        try:
+            from cms_data_loader import CMSKnowledgeBase
+            _cms_path = os.path.join(self.data_dir, 'cms_knowledge.db')
+            if os.path.exists(_cms_path) and os.path.getsize(_cms_path) > 1000:
+                self.cms = CMSKnowledgeBase(_cms_path)
+                self.cms.load_all()
+            else:
+                self.cms = None
+                logger.warning("cms_knowledge.db missing or corrupt (size too small), skipping CMS knowledge")
+        except Exception as _cms_err:
+            self.cms = None
+            logger.warning("CMS knowledge base init failed (non-fatal): %s", _cms_err)
 
         try:
             from reasoning_chain import ReasoningChain

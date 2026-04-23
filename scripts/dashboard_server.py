@@ -8357,7 +8357,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     response = json.dumps({'success': False, 'message': 'Not authenticated'})
                 else:
                     from healthcare_forecasting import HealthcareForecaster, FORECAST_METRICS
-                    db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'healthcare_production.db')
+                    db_path = self.__class__._db_path or os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'healthcare_demo_71k_backup.db')
                     forecaster = HealthcareForecaster(db_path)
                     metric_key = data.get('metric', None)
                     periods = int(data.get('periods', 6))
@@ -8507,14 +8507,49 @@ def launch_dashboard(cfg=None, port=8787, host='0.0.0.0', force_http=False):
     DashboardHandler.kpi_data = kpi_data
     DashboardHandler.dashboard_html = dashboard_html
 
+    def _is_real_sqlite(path):
+        try:
+            if not os.path.exists(path):
+                return False
+            sz = os.path.getsize(path)
+            if sz < 100:
+                return False
+            with open(path, 'rb') as f:
+                header = f.read(16)
+            if header[:15] == b'SQLite format 3':
+                return True
+            if b'git-lfs' in header or b'version https' in header:
+                print(f"  [LFS POINTER] {os.path.basename(path)} is a Git LFS pointer, not a real database.")
+                print(f"                Run 'git lfs pull' in the repo folder to download actual database files.")
+                _logger.warning("LFS pointer detected: %s -- run 'git lfs pull' to download real databases", os.path.basename(path))
+                return False
+            return False
+        except Exception:
+            return False
+
     _cfg_db = cfg.get('db_path', '')
     if not _cfg_db:
         _script_dir = os.path.dirname(os.path.abspath(__file__))
-        for candidate in ['healthcare_production.db', 'healthcare_demo.db']:
+        _lfs_detected = False
+        for candidate in ['healthcare_demo_71k_backup.db', 'healthcare_production.db', 'healthcare_demo.db']:
             _p = os.path.join(os.path.dirname(_script_dir), 'data', candidate)
             if os.path.exists(_p):
-                _cfg_db = _p
-                break
+                if _is_real_sqlite(_p):
+                    _cfg_db = _p
+                    break
+                else:
+                    _lfs_detected = True
+        if not _cfg_db and _lfs_detected:
+            print("\n  *** NO VALID DATABASE FOUND ***")
+            print("  All .db files appear to be Git LFS pointers (small text files).")
+            print("  The actual database files were not downloaded during git clone.")
+            print("")
+            print("  TO FIX: Open PowerShell in this repo folder and run:")
+            print("    git lfs install")
+            print("    git lfs pull")
+            print("")
+            print("  This will download the real database files (may take a few minutes).")
+            print("  Then restart the server with: python start.py\n")
     DashboardHandler._db_path = _cfg_db
 
     if _cfg_db:
@@ -8534,7 +8569,7 @@ def launch_dashboard(cfg=None, port=8787, host='0.0.0.0', force_http=False):
         '71k': os.path.join(_data_dir_init, 'healthcare_demo_71k_backup.db'),
         '4m': os.path.join(_data_dir_init, 'healthcare_4m.db'),
     }
-    _bg_dbs = {k: v for k, v in _bg_dbs.items() if os.path.exists(v) and os.path.getsize(v) > 0 and v != _cfg_db}
+    _bg_dbs = {k: v for k, v in _bg_dbs.items() if _is_real_sqlite(v) and v != _cfg_db}
 
     def _init_bg_pipelines(_dbs):
         import threading

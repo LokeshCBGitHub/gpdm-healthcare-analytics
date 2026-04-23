@@ -32,7 +32,13 @@ class KnowledgeGraph:
 
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
-        self.kg_conn = sqlite3.connect(kg_db_path)
+
+        _kg_valid = os.path.exists(kg_db_path) and os.path.getsize(kg_db_path) > 1000
+        if not _kg_valid:
+            self.kg_conn = sqlite3.connect(':memory:')
+            logger.warning("knowledge_graph.db missing or corrupt, using in-memory KG")
+        else:
+            self.kg_conn = sqlite3.connect(kg_db_path)
 
         self._init_kg_schema()
 
